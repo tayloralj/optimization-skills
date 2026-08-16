@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Linux perf"
+  short_description: "Profile Java with Linux perf and JIT symbols"
+  default_prompt: "Use $java-linux-perf to profile this Java workload with valid events and usable JIT symbols."

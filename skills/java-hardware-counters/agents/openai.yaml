@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Hardware Counters"
+  short_description: "Measure portable PMU evidence for Java"
+  default_prompt: "Use $java-hardware-counters to choose valid PMU events and interpret them against a baseline."

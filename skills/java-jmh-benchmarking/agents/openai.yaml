@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java JMH Benchmarking"
+  short_description: "Design trustworthy Java microbenchmarks"
+  default_prompt: "Use $java-jmh-benchmarking to verify this benchmark models production and produce reproducible results."

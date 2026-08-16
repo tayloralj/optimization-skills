@@ -1,0 +1,8 @@
+*.jfr
+*.html
+*.collapsed
+perf.data*
+*.log
+target/
+build/
+.idea/

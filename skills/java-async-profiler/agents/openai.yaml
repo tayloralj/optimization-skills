@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Async Profiler"
+  short_description: "Profile Java CPU, allocation, locks, and JFR"
+  default_prompt: "Use $java-async-profiler to capture and interpret a safe Java profile for this workload."

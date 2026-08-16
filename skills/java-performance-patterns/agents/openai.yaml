@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Performance Patterns"
+  short_description: "Apply evidence-backed Java optimizations"
+  default_prompt: "Use $java-performance-patterns to turn measured Java bottlenecks into a verified optimization."

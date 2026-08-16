@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Cache Efficiency"
+  short_description: "Diagnose Java cache and sharing costs"
+  default_prompt: "Use $java-cache-efficiency to investigate cache locality or false sharing with Java-aware evidence."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Profiling Readiness"
+  short_description: "Check Linux profiling permissions and tools"
+  default_prompt: "Use $profiling-readiness to check this host and explain any safe operator changes before profiling."

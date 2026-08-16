@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java VTune and uProf"
+  short_description: "Choose VTune or uProf for Java analysis"
+  default_prompt: "Use $java-vtune-uprof to select and run the correct vendor profiler for this Java workload."

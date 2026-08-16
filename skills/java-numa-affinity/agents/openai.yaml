@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java NUMA and Affinity"
+  short_description: "Test Java NUMA and CPU placement safely"
+  default_prompt: "Use $java-numa-affinity to design a topology-aware Java affinity or NUMA experiment."
