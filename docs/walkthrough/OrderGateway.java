@@ -44,7 +44,7 @@ public final class OrderGateway {
         }
     }
 
-    /** Same work without garbage: fixed-layout encoding into a reused buffer, primitive ring of recent orders. */
+    /** Alternative representation: binary encoding and primitive retention; not a drop-in map/string API. */
     public static final class ZeroAllocHandler implements Runnable {
         private final byte[] buffer = new byte[32];
         private final long[] recentIds = new long[RECENT];

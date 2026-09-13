@@ -1,0 +1,70 @@
+# Compatibility and validation
+
+Validation levels are separate: discovery means an agent can see a skill;
+execution means a helper ran; behavioral evaluation means the agent used the
+evidence correctly. None is interchangeable with another.
+
+## Supported scope and evidence
+
+| Component | Intended support | Verification |
+| --- | --- | --- |
+| Host | Linux, Bash 4+, GNU coreutils including `timeout`, Python 3.9+ | Fake proc/sys fixtures plus host-local checks |
+| JVM | HotSpot JDK 21 and 25 | CI matrix exercises both; local run details below |
+| Codex | Personal `~/.agents/skills`, repository `.agents/skills` | Installer lifecycle tested from an unrelated directory; agent discovery/behavior recorded separately |
+| Claude | Standalone skills and `optimization-skills` plugin | Manifest validation and installer tests; behavior recorded in evals |
+| async-profiler | Installed `asprof`, pinned by the operator | Version/event compatibility must be checked on target; not certified by JDK tests |
+| BCC / perf / vendor profilers | Installed version and supported host events | Stub/argument checks do not establish live profiling success |
+
+`CODEX_SKILLS_DIR` overrides the personal installer destination. Use it explicitly
+for legacy `~/.codex/skills` cleanup; installation does not delete legacy entries
+or modify agent configuration automatically. Do not install both standalone
+Claude skills and the plugin unless you intentionally want duplicate entries.
+
+Official discovery conventions: [Codex skills](https://learn.chatgpt.com/docs/build-skills)
+and [Claude plugins](https://code.claude.com/docs/en/plugins).
+
+## Capture guarantees
+
+| Helper | Scope and identity | Time and storage controls |
+| --- | --- | --- |
+| `jfr-capture.sh` | Same-user Java PID, start time, mount namespace; private directory | Recording duration up to 1 hour; each jcmd bounded to 10 seconds by default plus 2-second kill grace; retained JFR data capped, not an exact file-size limit; failed cleanup reported |
+| async-profiler `capture.sh` | Same-user Java PID and start time; private output | Profiler duration up to 1 hour; stack-storage memory limit is not a file-size limit; no independent attach deadline |
+| `rotating-jfr.sh` | Uses async-profiler capture checks | Retained-file count/bytes, free-space reserve, monitored per-capture budget; not a filesystem quota |
+| `bpf-capture.sh` | Operator-run PID-scoped or explicitly system-wide; does not enforce same-user Java identity | Duration argument or timeout up to 600 seconds; no byte ceiling or universal forced-kill deadline |
+| `native-memory-snapshot.sh` | Same-user Java PID and start time; private output | Multiple diagnostics; no global wall-time or byte ceiling |
+| Manual perf/vendor commands | Agent/operator must verify scope and identity | Budgets are instructions, not enforced by these skills |
+
+Read-only describes host-configuration policy: profiling still attaches to a
+process, adds runtime work, and writes artifacts. Treat instruction-level
+approval rules separately from mechanisms enforced by scripts or agent sandboxes.
+
+## Release evidence
+
+Before release, record the date, commit or worktree, OS, JDK vendor/build,
+agent CLI versions, command, result, and limitations. Require:
+
+1. Structural validation, ShellCheck, and script tests on JDK 21 and 25.
+2. Installation and resource execution from an unrelated directory.
+3. Claude and Codex behavioral cases covering routing, successful evidence use,
+   missing tools, failed capture, invalid measurements, and recovery.
+4. Actual artifacts or transcripts for claimed successes. A failed API call,
+   unavailable tool, or account limit is **unverified**, never a passing eval.
+
+See [behavioral evaluations](../evals/README.md) for cases and current results.
+The review fixes are not a new release; versions remain unchanged until release.
+
+## Local review-fix run, 2026-09-13
+
+Worktree validation on Linux 7.0.0-31-generic:
+
+| Check | Version / command | Result |
+| --- | --- | --- |
+| Script suite | Temurin 25.0.2, `WALKTHROUGH_TESTS=1 ./tests/run-tests.sh` | 94 passed, 0 failed |
+| Script suite | Azul 21.0.8, same command | 95 passed, 0 failed |
+| Structural + agent validators | `./scripts/validate-all.sh`; Claude 2.1.270 | Passed; root CLAUDE.md context warning |
+| ShellCheck | `--severity=warning` over repository shell scripts | Passed |
+| Installer lifecycle | Fresh temporary directories, link/copy/uninstall, resource execution outside checkout | Passed |
+| Agent behavior | Codex 0.153.4 / Claude 2.1.270 | Codex synthetic pass succeeded; Claude launch was blocked by monthly spend limit before model execution |
+
+No live perf, async-profiler, BCC, VTune, or uProf captures were performed during
+this validation. Live JVM tests attached only to their own temporary processes.

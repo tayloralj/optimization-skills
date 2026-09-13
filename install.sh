@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 export LC_ALL=C
+umask 077
 
 # Install skills into personal Codex and/or Claude Code skill directories.
 # Only creates or removes entries inside those directories; never touches an
@@ -13,7 +14,7 @@ usage() {
 Usage: ${0##*/} [--codex] [--claude] [--copy] [--uninstall] [--dry-run] [SKILL...]
 
 Targets (default: both):
-  --codex      \${CODEX_HOME:-\$HOME/.codex}/skills
+  --codex      \${CODEX_SKILLS_DIR:-\$HOME/.agents/skills}
   --claude     \${CLAUDE_CONFIG_DIR:-\$HOME/.claude}/skills
 Mode:
   (default)    symlink each skill to this checkout (updates with git pull)
@@ -22,7 +23,9 @@ Mode:
   --dry-run    print actions without changing anything
 
 With no SKILL arguments every skill is installed. profiling-readiness is always
-included because the specialised skills route through it.
+included because the specialised skills route through it. Subsets omit other
+workflow destinations: install the whole collection for complete investigations.
+Use CODEX_SKILLS_DIR to override the Codex directory (including legacy cleanup).
 
 Claude Code users may prefer the plugin instead:
   claude plugin marketplace add tayloralj/optimization-skills
@@ -54,6 +57,9 @@ if (( ${#requested[@]} )); then
       printf 'Unknown skill: %s\n' "$name" >&2; exit 2;
     }
   done
+  if (( ! uninstall )); then
+    printf 'Subset install: other referenced skills are omitted; install without SKILL arguments for complete workflows.\n' >&2
+  fi
   skills=("${requested[@]}")
   [[ " ${skills[*]} " == *" profiling-readiness "* ]] || skills=(profiling-readiness "${skills[@]}")
 else
@@ -64,7 +70,7 @@ else
 fi
 
 declare -a targets=()
-(( want_codex )) && targets+=("${CODEX_HOME:-$HOME/.codex}/skills")
+(( want_codex )) && targets+=("${CODEX_SKILLS_DIR:-$HOME/.agents/skills}")
 (( want_claude )) && targets+=("${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills")
 
 run() {

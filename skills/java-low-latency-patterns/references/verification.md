@@ -21,7 +21,8 @@
    ```
 
    It warms up (2 million operations by default), then measures the calling
-   thread's allocated bytes over several rounds. Use `--max-bytes-per-op` to set
+   thread's allocated bytes over several rounds. Every measured round must meet
+   the budget; increase warmup separately if compilation has not stabilised. Use `--max-bytes-per-op` to set
    a budget and wire it into CI.
 
 2. **JMH** with `-prof gc`: `gc.alloc.rate.norm` should be ≈ 0 bytes/op for the

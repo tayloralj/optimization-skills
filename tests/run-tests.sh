@@ -7,7 +7,8 @@ export LC_ALL=C
 # short-lived JVMs owned by the current user. Set LIVE_JDK_TESTS=0 to skip JVM runs.
 repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 work=$(mktemp -d "${TMPDIR:-/tmp}/skill-tests.XXXXXX")
-trap 'chmod -R u+w "$work" 2>/dev/null; rm -rf -- "$work"' EXIT
+jvm=
+trap '[[ -z "$jvm" ]] || kill "$jvm" 2>/dev/null; chmod -R u+w "$work" 2>/dev/null; rm -rf -- "$work"' EXIT
 passed=0; failed=0
 
 ok() { passed=$((passed + 1)); printf 'ok   %s\n' "$1"; }
@@ -15,7 +16,7 @@ fail() { failed=$((failed + 1)); printf 'FAIL %s\n' "$1"; [[ -z "${2:-}" ]] || p
 expect_rc() { # name expected_rc command...
   local name=$1 expected=$2 out rc
   shift 2
-  out=$("$@" 2>&1); rc=$?
+  out=$(timeout --kill-after=2s 90s "$@" 2>&1); rc=$?
   if [[ "$rc" == "$expected" ]]; then ok "$name"; else fail "$name (rc=$rc want $expected)" "$out"; fi
   LAST_OUT=$out
 }
@@ -24,7 +25,7 @@ expect_contains() { # name needle haystack
 }
 
 printf '== python unit tests\n'
-if python3 "$repo/tests/test_scripts.py" >"$work/py.log" 2>&1; then ok "python unittest"; else fail "python unittest" "$(tail -30 "$work/py.log")"; fi
+if python3 -m unittest discover -s "$repo/tests" -p 'test_*.py' >"$work/py.log" 2>&1; then ok "python unittest"; else fail "python unittest" "$(tail -30 "$work/py.log")"; fi
 
 printf '== lab-tune.sh (fake sysfs)\n'
 lab=$repo/skills/linux-low-latency-tuning/scripts/lab-tune.sh
@@ -152,7 +153,7 @@ fi
 
 printf '== install.sh\n'
 inst=$repo/install.sh
-export CODEX_HOME=$work/codex CLAUDE_CONFIG_DIR=$work/claude
+export CODEX_SKILLS_DIR=$work/codex/skills CLAUDE_CONFIG_DIR=$work/claude
 expect_rc "install subset" 0 "$inst" java-gc-tuning
 [[ -L "$work/codex/skills/java-gc-tuning" && -L "$work/claude/skills/profiling-readiness" ]] && ok "install links both agents plus readiness" || fail "install links both agents plus readiness"
 expect_rc "install idempotent" 0 "$inst" java-gc-tuning
@@ -164,7 +165,7 @@ expect_rc "install rejects unknown skill" 2 "$inst" nope
 expect_rc "uninstall" 0 "$inst" --uninstall java-gc-tuning java-jit-codegen
 [[ ! -e "$work/codex/skills/java-gc-tuning" && ! -e "$work/codex/skills/java-jit-codegen" && -d "$work/claude/skills/java-linux-perf" ]] \
   && ok "uninstall removes only owned entries" || fail "uninstall removes only owned entries"
-unset CODEX_HOME CLAUDE_CONFIG_DIR
+unset CODEX_SKILLS_DIR CLAUDE_CONFIG_DIR
 
 printf '== argument validation\n'
 nms=$repo/skills/java-native-memory/scripts/native-memory-snapshot.sh
@@ -201,19 +202,33 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
   expect_contains "jitter meter prints percentiles" "p99.99_us=" "$LAST_OUT"
   java -XX:NativeMemoryTracking=summary -cp "$work/classes" Churn 120 >/dev/null 2>&1 &
   jvm=$!
-  for _ in $(seq 1 50); do jcmd "$jvm" VM.version >/dev/null 2>&1 && break; sleep 0.2; done
+  attach_ready=0
+  for _ in $(seq 1 3); do timeout --kill-after=2s 5s jcmd "$jvm" VM.version >/dev/null 2>&1 && { attach_ready=1; break; }; sleep 0.2; done
+  if (( ! attach_ready )); then
+    fail "JVM attach unavailable; run live tests where attach is permitted"
+    kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
+    exit 1
+  fi
   expect_rc "native snapshot t0" 0 "$nms" "$jvm" "$work/nm0"
   expect_rc "native snapshot t1" 0 "$nms" "$jvm" "$work/nm1"
   expect_rc "nmt compare live snapshots" 0 python3 "$repo/skills/java-native-memory/scripts/nmt-compare.py" "$work/nm0" "$work/nm1"
   expect_contains "nmt compare sees heap" "nmt_committed_delta" "$LAST_OUT"
   [[ $(stat -c %a "$work/nm0") == 700 ]] && ok "snapshot dir is private" || fail "snapshot dir is private"
   kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
+  jvm=
 
   java -cp "$work/classes" Churn 60 >/dev/null 2>&1 &
   jvm=$!
-  for _ in $(seq 1 50); do jcmd "$jvm" VM.version >/dev/null 2>&1 && break; sleep 0.2; done
+  attach_ready=0
+  for _ in $(seq 1 3); do timeout --kill-after=2s 5s jcmd "$jvm" VM.version >/dev/null 2>&1 && { attach_ready=1; break; }; sleep 0.2; done
+  if (( ! attach_ready )); then
+    fail "JVM attach unavailable; run live tests where attach is permitted"
+    kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
+    exit 1
+  fi
   expect_rc "jfr capture on live JVM" 0 "$jfrcap" "$jvm" 3 "$work/out/live.jfr"
   kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
+  jvm=
   [[ $(stat -c %a "$work/out/live.jfr" 2>/dev/null) == 600 ]] && ok "jfr recording is private" || fail "jfr recording is private"
   expect_rc "jfr report on live recording" 0 "$jfrrep" "$work/out/live.jfr" "$work/jfr-report" --focus latency
   [[ -s "$work/jfr-report/INDEX.txt" && -s "$work/jfr-report/01-gc-pauses.txt" ]] && ok "jfr report wrote views" || fail "jfr report wrote views" "$LAST_OUT"
@@ -223,6 +238,8 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
     && ok "compile allocation fixtures" || fail "compile allocation fixtures" "$(cat "$work/javac-alloc.log")"
   expect_rc "allocation probe passes allocation-free class" 0 java -cp "$work/alloc" "$probe" NoAlloc --warmup-ops 500000 --ops 200000 --rounds 3
   expect_rc "allocation probe fails allocating class" 1 java -cp "$work/alloc" "$probe" Allocates --warmup-ops 500000 --ops 200000 --rounds 3
+  expect_rc "allocation probe rejects periodic allocation despite zero final round" 1 java -cp "$work/alloc" "$probe" Periodic --warmup-ops 4000000 --ops 1000000 --rounds 3
+  expect_rc "allocation probe rejects non-finite threshold" 2 java -cp "$work/alloc" "$probe" NoAlloc --max-bytes-per-op NaN
   expect_rc "allocation probe rejects non-Runnable" 2 java -cp "$work/alloc" "$probe" java.lang.String
 
   if [[ ${WALKTHROUGH_TESTS:-0} == 1 ]]; then

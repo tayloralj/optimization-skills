@@ -175,8 +175,14 @@ cmd_apply() {
 
   on_interrupt() {
     printf 'interrupted: rolling back applied entries\n' >&2
-    rollback_applied || true
-    printf 'status=rolled_back_after_interrupt\n' >> "$state_dir/meta.txt"
+    trap '' HUP INT TERM
+    if rollback_applied; then
+      printf 'status=rolled_back_after_interrupt\n' >> "$state_dir/meta.txt"
+    else
+      printf 'status=rollback_incomplete\n' >> "$state_dir/meta.txt"
+      printf 'Rollback incomplete; retry rollback with this state directory.\n' >&2
+      exit 7
+    fi
     exit 130
   }
   trap on_interrupt HUP INT TERM
@@ -222,7 +228,12 @@ load_state() {
 
 cmd_rollback() {
   require_lab_and_root
-  grep -q '^status=rolled_back' "$1/meta.txt" 2>/dev/null && die "state already rolled back: $1" 0
+  local latest_status
+  latest_status=$(grep '^status=' "$1/meta.txt" 2>/dev/null | tail -n 1 || true)
+  case "$latest_status" in
+    status=rolled_back|status=rolled_back_after_failure|status=rolled_back_after_interrupt)
+      die "state already rolled back: $1" 0 ;;
+  esac
   load_state "$1"
   if rollback_applied; then
     printf 'status=rolled_back\n' >> "$1/meta.txt"

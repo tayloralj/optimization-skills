@@ -32,7 +32,9 @@ measurement validity before any tuning skill uses the result.
 6. **Analyse.** For CSV timestamps run `scripts/latency-report.py run.csv
    [--baseline base.csv]`: response vs service time, queue delay, the p99
    response/service ratio (coordinated omission indicator), rate checks, and
-   per-block p99 spread for stability. Read `references/methodology.md` for
+   per-block p99 spread for stability. Input timestamps must be integer nanoseconds
+   with intended start <= actual start <= end. Invalid rows fail the report;
+   percentiles with fewer than 100 tail observations are labelled indicative. Read `references/methodology.md` for
    sample-size and comparison rules.
 7. **Correlate spikes** with JVM and OS timelines: GC/safepoint logs (the
    `java-gc-tuning` skill), JFR events, interrupts and run-queue delay (the

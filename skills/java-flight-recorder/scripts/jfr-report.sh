@@ -54,6 +54,8 @@ index=$out/INDEX.txt
   printf 'focus=%s\n' "$focus"
 } > "$index"
 n=1
+succeeded=0
+failed=0
 for view in "${views[@]}"; do
   if ! grep -qw -- "$view" <<< "$available"; then
     printf 'skipped_unavailable=%s\n' "$view" >> "$index"
@@ -61,12 +63,16 @@ for view in "${views[@]}"; do
   fi
   printf -v file '%02d-%s.txt' "$n" "$view"
   if jfr view --width 160 "$view" "$recording" > "$out/$file" 2>&1; then
+    succeeded=$((succeeded + 1))
     lines=$(grep -cvE '^\s*$' "$out/$file")
     printf 'view=%s file=%s lines=%s\n' "$view" "$file" "$lines" >> "$index"
   else
+    failed=$((failed + 1))
     printf 'failed=%s\n' "$view" >> "$index"
   fi
   n=$((n + 1))
 done
+printf 'views_succeeded=%s views_failed=%s\n' "$succeeded" "$failed" >> "$index"
 cat "$index"
 printf 'report_dir=%s\n' "$out"
+(( succeeded > 0 && failed == 0 )) || exit 5

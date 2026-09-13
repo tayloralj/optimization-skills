@@ -223,35 +223,24 @@ at native libraries or malloc arenas.
 
 `skills/java-latency-measurement/scripts/latency-report.py --baseline before.csv after.csv`
 
-```text
-response_time: n=200000 p50=57ns p90=74ns p99=97ns p99.9=3.276us p99.99=55.261us max=171.343us
-service_time : n=200000 p50=40ns p90=50ns p99=70ns p99.9=171ns p99.99=461ns max=7.023us
-response/service ratio: p99=1.39 p99.9=19.16 p99.99=119.87  <- queueing at p99.99: ...
-vs_baseline (response time, candidate/baseline):
-  p99.99: 2.184ms -> 55.261us (0.0253x)
-  p99 blocks above baseline block range: 0/10; below: 10/10
-```
+See the [real repeated reports](walkthrough/repeated-results.md), produced with
+identical flags and no sampling profiler on either implementation. The previous
+example compared a JFR baseline with an unprofiled candidate and has been removed.
 
 **Reading it:** the input CSV has intended start, actual start, and end per
-operation. A high response/service ratio at a percentile means operations
-waited in line there, which a closed-loop benchmark would not show. The block
-lines say whether a change is consistent across the run (all blocks moved) or
-episodic (one or two blocks). See the [walkthrough](walkthrough/README.md) for
-the full story behind these numbers.
+operation. Compare response and service distributions to expose queueing.
+Within-run blocks show episodic behavior but do not replace independent runs.
+The report labels percentiles with fewer than 100 tail samples as indicative.
 
 ## Allocation probe
 
 `java -cp build/walkthrough skills/java-low-latency-patterns/scripts/AllocationProbe.java 'OrderGateway$ZeroAllocHandler'`
 
-```text
-class=OrderGateway$ZeroAllocHandler
-warmup_ops=2000000 ops_per_round=1000000 rounds=5
-bytes_per_op_by_round=0.0000,0.0000,0.0000,0.0000,0.0000
-result=PASS (threshold 0.0000 bytes/op on the last round)
-```
-
-**Reading it:** exit code 0 means PASS and 1 means FAIL, so it can run in CI.
-The allocating handler reports `151.6000` bytes per operation and fails.
+The [walkthrough](walkthrough/README.md#5-check-allocation-directly) gives both
+invocations. Exit code 0 means every measured round met the budget; 1 means at
+least one exceeded it. Warmup is separate. Allocation during an earlier measured
+round must not be dismissed because the final round is zero. Empty JFR allocation
+samples cannot independently prove zero allocation.
 
 ## eBPF capture (dry run)
 
