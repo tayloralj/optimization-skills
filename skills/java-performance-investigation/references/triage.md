@@ -46,6 +46,9 @@ a GC and safepoint log summariser.
 | Network latency, UDP loss, retransmits | `linux-ebpf-io-network` | Drops, buffer overflow, interrupt coalescing, or application backlog? |
 | IPC low, cache/branch misses suspected | `java-hardware-counters`, `java-cache-efficiency` | Which PMU evidence supports a memory-bound hypothesis? |
 | Scaling stops beyond N threads | `java-numa-affinity`, `java-async-profiler` (lock) | Contention, SMT, cache domains, or GC/JIT thread starvation? |
+| No perf/eBPF/root access at all | `java-flight-recorder` | What do a `profile` recording's latency, CPU, and memory views show? |
+| Garbage or contention on a latency-critical hot path | `java-low-latency-patterns` | Which allocation or shared write does the evidence point to, and which pattern removes it? |
+| Periodic stalls in containers | `java-performance-investigation` (`references/containers.md`) | Is the CFS quota throttling the JVM? |
 | Micro-optimisation proposal | `java-jmh-benchmarking`, `java-performance-patterns` | Does a production-faithful benchmark show it, and does the service agree? |
 
 ## USE-style checklist for the host

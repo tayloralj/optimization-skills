@@ -1,3 +1,4 @@
+# Synthetic values for tests (the NMT summaries beside this file are real JDK 25 output).
 VmRSS:	  360000 kB
 RssAnon:	  340000 kB
 RssFile:	   20000 kB

@@ -28,14 +28,45 @@ irreversible values (`smt/control=forceoff`, `ksm/run=2`), current values it
 could not restore, existing state directories, and missing hostname
 acknowledgement.
 
+## Why root and a hostname acknowledgement
+
+- **Root**: every allowlisted knob is a root-owned kernel file. The script never
+  escalates by itself, so a person consciously runs `sudo`.
+- **`LAB_HOST_ACK=$(hostname)`**: plans are host-specific (CPU numbers, IRQ
+  numbers, current values). The acknowledgement stops a copied command from
+  being run on the wrong machine, for example over SSH on a production host.
+
+## Plan templates
+
+Generate a plan from this host's current values instead of writing paths by hand:
+
+```bash
+scripts/make-lab-plan.py benchmark-host --cpus 4-5,16-17 > bench.plan
+scripts/make-lab-plan.py irq-isolation  --cpus 4-5,16-17 --housekeeping 0-1,12-13 > irq.plan
+scripts/make-lab-plan.py quiet-watchdogs --cpus 4-5,16-17 --housekeeping 0-1,12-13 > wd.plan
+```
+
+| Profile | Changes (only where the value differs) |
+| --- | --- |
+| `benchmark-host` | `performance` governor and idle states with ≥50 µs exit latency disabled on hot CPUs; THP `madvise`; NUMA balancing, KSM, and timer migration off; `vm.stat_interval` 10 |
+| `irq-isolation` | Every IRQ whose affinity touches a hot CPU moved to housekeeping CPUs; unbound workqueue mask and softlockup watchdog on housekeeping CPUs |
+| `quiet-watchdogs` | NMI watchdog off; softlockup watchdog on housekeeping CPUs |
+
+Each emitted line has a comment with the reason and the current value, and
+the footer lists what was skipped. Energy performance preference is not
+planned: under the `performance` governor, `amd-pstate-epp` and
+`intel_pstate` force it and reject other values. After rollback, re-run the
+audit and check EPP, because some drivers reset it to the default rather than
+the previous value.
+
+Kernel-managed IRQs (NVMe queues, multiqueue NICs) refuse affinity changes;
+`apply` reports them as `skipped`, leaves them out of the rollback record, and
+continues.
+
 ## Procedure
 
 ```bash
-cat > plan.txt <<'EOF'
-set /sys/kernel/mm/transparent_hugepage/defrag defer+madvise
-set /proc/sys/kernel/timer_migration 0
-set /proc/irq/123/smp_affinity_list 0-1
-EOF
+scripts/make-lab-plan.py benchmark-host --cpus 4-5,16-17 > plan.txt   # agent, read-only
 scripts/lab-tune.sh plan plan.txt                      # agent, read-only
 LAB_HOST_ACK=$(hostname) scripts/lab-tune.sh apply plan.txt ./lab-state-1   # operator, root
 scripts/lab-tune.sh status ./lab-state-1               # agent

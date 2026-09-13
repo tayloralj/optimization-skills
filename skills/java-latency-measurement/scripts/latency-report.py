@@ -88,8 +88,12 @@ def analyse(data: dict, n_blocks: int) -> dict:
             result["achieved_rate_per_s"] = (len(data["ends"]) - 1) / max(1e-9, (max(data["ends"]) - min(data["ends"])) / 1e9)
         negative = sum(1 for q in data["queue"] if q < 0)
         result["negative_queue_delay"] = negative
-        s99, r99 = result["service_ns"]["p99"], result["response_ns"]["p99"]
-        result["co_ratio_p99"] = r99 / s99 if s99 else float("nan")
+        ratios = {}
+        for key in ("p99", "p99.9", "p99.99"):
+            svc, resp = result["service_ns"][key], result["response_ns"][key]
+            ratios[key] = resp / svc if svc else float("nan")
+        result["co_ratios"] = ratios
+        result["co_ratio_p99"] = ratios["p99"]
     # Blocks follow arrival order (timestamps) or file order (single column).
     stable = blocks(data["response"], 99.0, n_blocks)
     if stable:
@@ -121,8 +125,11 @@ def print_text(r: dict, baseline: dict | None) -> None:
         print(line("queue_delay  ", r["queue_delay_ns"]))
         if "intended_rate_per_s" in r:
             print(f"intended_rate_per_s={r['intended_rate_per_s']:.1f} achieved_completion_rate_per_s={r['achieved_rate_per_s']:.1f}")
-        print(f"co_ratio_p99 (response/service)={r['co_ratio_p99']:.2f}"
-              + ("  <- queueing: service-time-only reporting would hide this" if r["co_ratio_p99"] > 1.5 else ""))
+        worst_key = max(r["co_ratios"], key=lambda k: r["co_ratios"][k] if not math.isnan(r["co_ratios"][k]) else 0)
+        parts = " ".join(f"{k}={v:.2f}" for k, v in r["co_ratios"].items())
+        flag = r["co_ratios"][worst_key] > 1.5
+        print(f"response/service ratio: {parts}"
+              + (f"  <- queueing at {worst_key}: service-time-only reporting would hide this" if flag else ""))
         if r["negative_queue_delay"]:
             print(f"WARNING: {r['negative_queue_delay']} operations started before their intended time: generator schedule or clocks are wrong")
         if r["response_ns"]["count"] and r["response_ns"]["count"] < 10000:
@@ -137,7 +144,7 @@ def print_text(r: dict, baseline: dict | None) -> None:
         for key in [f"p{p:g}" for p in PCTS] + ["max"]:
             base, cand = baseline["response_ns"][key], r["response_ns"][key]
             ratio = cand / base if base else float("nan")
-            print(f"  {key}: {fmt(base)} -> {fmt(cand)} ({ratio:.3f}x)")
+            print(f"  {key}: {fmt(base)} -> {fmt(cand)} ({ratio:.3g}x)")
         bb, cb = baseline.get("p99_block_spread_ns"), r.get("p99_block_spread_ns")
         if bb and cb:
             above = sum(1 for v in cb["values"] if v > bb["max"])

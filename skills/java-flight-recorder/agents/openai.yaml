@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Flight Recorder"
+  short_description: "Record and read JFR evidence without root"
+  default_prompt: "Use $java-flight-recorder to record this JVM with JFR and explain what the recording shows."

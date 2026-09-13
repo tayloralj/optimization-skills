@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import re
 import shutil
 import subprocess
 import sys
@@ -19,6 +20,7 @@ JIT = REPO / "skills/java-jit-codegen/scripts/jit-log-summary.py"
 NMT = REPO / "skills/java-native-memory/scripts/nmt-compare.py"
 LAT = REPO / "skills/java-latency-measurement/scripts/latency-report.py"
 VALIDATOR = REPO / "scripts/validate_skills.py"
+PLAN = REPO / "skills/linux-low-latency-tuning/scripts/make-lab-plan.py"
 
 
 def run(*args: object, check: bool = True) -> subprocess.CompletedProcess:
@@ -71,6 +73,19 @@ class GcLogSummaryTest(unittest.TestCase):
         for alarm in ("allocation_stall", "full_gc", "system_gc", "humongous_allocation", "degenerated_gc"):
             self.assertEqual(s["alarms"].get(alarm), 1, alarm)
         self.assertAlmostEqual(s["safepoints"]["time_to_safepoint_ms"]["max"], 2.5)
+
+    def test_uptime_window_excludes_warmup(self):
+        s = run_json(GC, FIXTURES / "g1-jdk25.log", "--from-uptime", "0.5")
+        self.assertLess(s["pause_count"], 26)
+        self.assertTrue(all(p["uptime_s"] >= 0.5 for p in s["worst_pauses"]))
+
+    def test_zero_pauses_is_success(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".log") as handle:
+            handle.write("[0.003s][info][gc] Using G1\n[0.004s][info][gc,init] Version: 25\n")
+            handle.flush()
+            result = run(GC, handle.name, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("no pauses in this window", result.stdout)
 
     def test_unrecognised_input_fails(self):
         with tempfile.NamedTemporaryFile("w", suffix=".log") as handle:
@@ -148,6 +163,7 @@ class LatencyReportTest(unittest.TestCase):
         self.assertLess(cand["service_ns"]["p99"], 300_000)
         self.assertGreater(cand["response_ns"]["p99"], 10_000_000)
         self.assertGreater(cand["co_ratio_p99"], 10)
+        self.assertEqual(set(cand["co_ratios"]), {"p99", "p99.9", "p99.99"})
         self.assertAlmostEqual(cand["intended_rate_per_s"], 1000.0, delta=1)
         self.assertLess(report["baseline"]["co_ratio_p99"], 1.5)
         self.assertIn("episodic stall", text)
@@ -158,6 +174,94 @@ class LatencyReportTest(unittest.TestCase):
             handle.flush()
             out = run(LAT, handle.name).stdout
         self.assertIn("cannot reveal coordinated omission", out)
+
+
+class MakeLabPlanTest(unittest.TestCase):
+    def fake_host(self, tmp: str) -> Path:
+        root = Path(tmp)
+        files = {
+            "sys/devices/system/cpu/online": "0-7",
+            "sys/devices/system/cpu/cpu2/cpufreq/scaling_governor": "powersave",
+            "sys/devices/system/cpu/cpu3/cpufreq/scaling_governor": "performance",
+            "sys/devices/system/cpu/cpu2/cpuidle/state1/latency": "2",
+            "sys/devices/system/cpu/cpu2/cpuidle/state1/disable": "0",
+            "sys/devices/system/cpu/cpu2/cpuidle/state3/latency": "350",
+            "sys/devices/system/cpu/cpu2/cpuidle/state3/name": "C3",
+            "sys/devices/system/cpu/cpu2/cpuidle/state3/disable": "0",
+            "sys/kernel/mm/transparent_hugepage/enabled": "[always] madvise never",
+            "sys/kernel/mm/transparent_hugepage/defrag": "always defer [madvise] never",
+            "proc/sys/kernel/numa_balancing": "1",
+            "proc/sys/kernel/timer_migration": "0",
+            "proc/sys/vm/stat_interval": "1",
+            "proc/irq/9/smp_affinity_list": "0-7",
+            "proc/irq/10/smp_affinity_list": "0-1",
+            "sys/devices/virtual/workqueue/cpumask": "ff",
+            "proc/sys/kernel/watchdog_cpumask": "0-7",
+            "proc/sys/kernel/nmi_watchdog": "1",
+        }
+        for rel, value in files.items():
+            path = root / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(value + "\n")
+        return root
+
+    def plan(self, root: Path, *args: str) -> subprocess.CompletedProcess:
+        return subprocess.run([sys.executable, str(PLAN), *args], capture_output=True, text=True,
+                              env={**os.environ, "HOST_ROOT": str(root)})
+
+    def test_benchmark_host_emits_only_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.plan(self.fake_host(tmp), "benchmark-host", "--cpus", "2-3").stdout
+        sets = [line for line in out.splitlines() if line.startswith("set ")]
+        self.assertIn("set /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor performance", sets)
+        self.assertIn("set /sys/devices/system/cpu/cpu2/cpuidle/state3/disable 1", sets)
+        self.assertIn("set /sys/kernel/mm/transparent_hugepage/enabled madvise", sets)
+        self.assertIn("set /proc/sys/kernel/numa_balancing 0", sets)
+        self.assertIn("set /proc/sys/vm/stat_interval 10", sets)
+        joined = "\n".join(sets)
+        self.assertNotIn("cpu3/cpufreq/scaling_governor", joined)   # already performance
+        self.assertNotIn("state1/disable", joined)                  # shallow state kept
+        self.assertNotIn("energy_performance_preference", joined)   # EPP never planned
+        self.assertNotIn("transparent_hugepage/defrag", joined)     # already madvise
+        self.assertNotIn("timer_migration", joined)                 # already 0
+
+    def test_irq_isolation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.plan(self.fake_host(tmp), "irq-isolation", "--cpus", "2-7", "--housekeeping", "0-1").stdout
+        self.assertIn("set /proc/irq/9/smp_affinity_list 0-1", out)
+        self.assertNotIn("/proc/irq/10/", out.replace("#   skipped", ""))
+        self.assertIn("set /sys/devices/virtual/workqueue/cpumask 3", out)
+        self.assertIn("set /proc/sys/kernel/watchdog_cpumask 0-1", out)
+
+    def test_rejects_bad_input(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self.fake_host(tmp)
+            self.assertNotEqual(self.plan(root, "irq-isolation", "--cpus", "2-3").returncode, 0)
+            self.assertNotEqual(self.plan(root, "benchmark-host", "--cpus", "2-3", "--housekeeping", "3").returncode, 0)
+            self.assertNotEqual(self.plan(root, "benchmark-host", "--cpus", "12").returncode, 0)
+            self.assertNotEqual(self.plan(root, "benchmark-host", "--cpus", "2;rm").returncode, 0)
+
+    def test_plans_pass_lab_tune_validation(self):
+        lab = REPO / "skills/linux-low-latency-tuning/scripts/lab-tune.sh"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self.fake_host(tmp)
+            for args in (["benchmark-host", "--cpus", "2-3"], ["irq-isolation", "--cpus", "2-7", "--housekeeping", "0-1"],
+                         ["quiet-watchdogs", "--cpus", "2-7", "--housekeeping", "0-1"]):
+                plan_file = Path(tmp) / "plan.txt"
+                plan_file.write_text(self.plan(root, *args).stdout)
+                result = subprocess.run([str(lab), "plan", str(plan_file)], capture_output=True, text=True,
+                                        env={**os.environ, "LAB_TUNE_TEST_ROOT": str(root)})
+                self.assertEqual(result.returncode, 0, f"{args}: {result.stderr}")
+
+    def test_hexmask(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("make_lab_plan", PLAN)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.assertEqual(module.hexmask([0, 1, 12, 13]), "3003")
+        self.assertEqual(module.hexmask(list(range(40))), "ff,ffffffff")
+        self.assertEqual(module.hexmask([33]), "2,00000000")
+        self.assertEqual(module.compact([0, 1, 2, 5, 7, 8]), "0-2,5,7-8")
 
 
 class ValidatorTest(unittest.TestCase):
@@ -181,6 +285,23 @@ class ValidatorTest(unittest.TestCase):
         self.assertIn("agent-neutral wording", result.stdout)
         self.assertIn("must be hyphen-case", result.stdout)
         self.assertIn("orphan.md is not referenced", result.stdout)
+
+    def test_rejects_invalid_yaml_description(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = self.copy_repo(tmp)
+            skill = repo / "skills/java-gc-tuning/SKILL.md"
+            skill.write_text(re.sub(r"^description: ", "description: Tuning: ", skill.read_text(), count=1, flags=re.M))
+            result = run(VALIDATOR, repo, check=False)
+        self.assertIn("not valid YAML", result.stdout)
+
+    def test_rejects_broken_doc_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = self.copy_repo(tmp)
+            readme = repo / "README.md"
+            readme.write_text(readme.read_text() + "\n[gone](docs/missing.md) [bad anchor](docs/examples.md#no-such-heading)\n")
+            result = run(VALIDATOR, repo, check=False)
+        self.assertIn("broken link docs/missing.md", result.stdout)
+        self.assertIn("broken anchor docs/examples.md#no-such-heading", result.stdout)
 
     def test_rejects_missing_symlink_and_version_drift(self):
         with tempfile.TemporaryDirectory() as tmp:

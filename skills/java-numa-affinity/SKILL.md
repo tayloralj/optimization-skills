@@ -1,6 +1,6 @@
 ---
 name: java-numa-affinity
-description: Design safe Java NUMA, CPU-affinity, first-touch, SMT, and LLC or AMD CCD placement experiments. Use when testing thread pinning, numactl, UseNUMA, GC placement, remote-memory hypotheses, queue hand-offs, or scaling across CPUs, including single-NUMA-node machines where classic remote NUMA is impossible but cache-domain placement may still matter.
+description: Design safe NUMA, CPU-pinning, SMT, and cache-domain placement experiments for Java. Use when testing thread pinning, numactl, UseNUMA, or scaling across cores, including single-socket AMD machines with several cache domains.
 ---
 
 # Java NUMA and Affinity

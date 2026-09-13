@@ -26,7 +26,7 @@ included because the specialised skills route through it.
 
 Claude Code users may prefer the plugin instead:
   claude plugin marketplace add tayloralj/optimization-skills
-  claude plugin install java-optimization-skills@optimization-skills
+  claude plugin install optimization-skills@optimization-skills
 EOF
 }
 

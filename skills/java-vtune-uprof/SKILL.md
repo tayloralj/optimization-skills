@@ -1,6 +1,6 @@
 ---
 name: java-vtune-uprof
-description: Vendor-aware Java profiling with Intel VTune or AMD uProf, including tool and permission preflight, JVM warmup, JIT symbols, GC and safepoint context, bounded collection, and portable interpretation. Use when a JVM workload needs vendor profiler evidence and CPU-specific analysis names, top-down thresholds, roofline assumptions, or download commands must not be copied across Intel and AMD systems.
+description: Profile Java with Intel VTune or AMD uProf, choosing the right tool for the CPU and keeping JIT symbols and GC context. Use when vendor-profiler evidence is wanted on an Intel or AMD host.
 ---
 
 # Java VTune and uProf

@@ -77,6 +77,19 @@ for bad in 'set /etc/shadow x' 'set /sys/devices/system/cpu/smt/control forceoff
   printf '%s\n' "$bad" > "$work/bad.txt"
   expect_rc "lab rejects: $bad" 2 "$lab" plan "$work/bad.txt"
 done
+mkdir -p "$root/proc/irq/43"
+printf '0-23\n' > "$root/proc/irq/43/smp_affinity_list"
+chmod 444 "$root/proc/irq/43/smp_affinity_list"
+printf 'set /proc/irq/42/smp_affinity_list 0\nset /proc/irq/43/smp_affinity_list 0\nset /proc/sys/kernel/numa_balancing 0\n' > "$work/irq.txt"
+if [[ ! -w "$root/proc/irq/43/smp_affinity_list" ]]; then
+  expect_rc "lab skips refused IRQ affinity write" 0 env LAB_HOST_ACK="$host" "$lab" apply "$work/irq.txt" "$work/state3"
+  expect_contains "lab reports skipped IRQ" "skipped /proc/irq/43/smp_affinity_list" "$LAST_OUT"
+  grep -q '/proc/irq/43' "$work/state3/rollback.tsv" && fail "skipped IRQ excluded from rollback record" || ok "skipped IRQ excluded from rollback record"
+  expect_rc "lab rollback after IRQ skip" 0 env LAB_HOST_ACK="$host" "$lab" rollback "$work/state3"
+  [[ $(<"$root/proc/irq/42/smp_affinity_list") == 0-23 && $(<"$root/proc/sys/kernel/numa_balancing") == 1 ]] \
+    && ok "lab rollback after IRQ skip restored values" || fail "lab rollback after IRQ skip restored values"
+fi
+chmod 644 "$root/proc/irq/43/smp_affinity_list"
 printf 'set /proc/sys/vm/swappiness 10\n' > "$work/missing.txt"
 expect_rc "lab rejects path absent on host" 3 "$lab" plan "$work/missing.txt"
 unset LAB_TUNE_TEST_ROOT
@@ -157,6 +170,12 @@ printf '== argument validation\n'
 nms=$repo/skills/java-native-memory/scripts/native-memory-snapshot.sh
 expect_rc "snapshot rejects bad pid" 2 "$nms" abc "$work/nm"
 expect_rc "snapshot rejects existing dir" 2 "$nms" $$ "$work/out"
+jfrcap=$repo/skills/java-flight-recorder/scripts/jfr-capture.sh
+jfrrep=$repo/skills/java-flight-recorder/scripts/jfr-report.sh
+expect_rc "jfr capture rejects bad duration" 2 "$jfrcap" $$ 0 "$work/out/x.jfr"
+expect_rc "jfr capture rejects non-jfr output" 2 "$jfrcap" $$ 5 "$work/out/x.txt"
+expect_rc "jfr capture rejects non-java target" 4 "$jfrcap" $$ 5 "$work/out/x.jfr"
+expect_rc "jfr report rejects bad focus" 2 "$jfrrep" "$repo/README.md" "$work/rep" --focus everything
 
 if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v javac >/dev/null; then
   printf '== live JDK tests (%s)\n' "$(java -version 2>&1 | head -1)"
@@ -189,6 +208,35 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
   expect_contains "nmt compare sees heap" "nmt_committed_delta" "$LAST_OUT"
   [[ $(stat -c %a "$work/nm0") == 700 ]] && ok "snapshot dir is private" || fail "snapshot dir is private"
   kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
+
+  java -cp "$work/classes" Churn 60 >/dev/null 2>&1 &
+  jvm=$!
+  for _ in $(seq 1 50); do jcmd "$jvm" VM.version >/dev/null 2>&1 && break; sleep 0.2; done
+  expect_rc "jfr capture on live JVM" 0 "$jfrcap" "$jvm" 3 "$work/out/live.jfr"
+  kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
+  [[ $(stat -c %a "$work/out/live.jfr" 2>/dev/null) == 600 ]] && ok "jfr recording is private" || fail "jfr recording is private"
+  expect_rc "jfr report on live recording" 0 "$jfrrep" "$work/out/live.jfr" "$work/jfr-report" --focus latency
+  [[ -s "$work/jfr-report/INDEX.txt" && -s "$work/jfr-report/01-gc-pauses.txt" ]] && ok "jfr report wrote views" || fail "jfr report wrote views" "$LAST_OUT"
+
+  probe=$repo/skills/java-low-latency-patterns/scripts/AllocationProbe.java
+  javac -d "$work/alloc" "$repo"/tests/fixtures/alloc/*.java 2>"$work/javac-alloc.log" \
+    && ok "compile allocation fixtures" || fail "compile allocation fixtures" "$(cat "$work/javac-alloc.log")"
+  expect_rc "allocation probe passes allocation-free class" 0 java -cp "$work/alloc" "$probe" NoAlloc --warmup-ops 500000 --ops 200000 --rounds 3
+  expect_rc "allocation probe fails allocating class" 1 java -cp "$work/alloc" "$probe" Allocates --warmup-ops 500000 --ops 200000 --rounds 3
+  expect_rc "allocation probe rejects non-Runnable" 2 java -cp "$work/alloc" "$probe" java.lang.String
+
+  if [[ ${WALKTHROUGH_TESTS:-0} == 1 ]]; then
+    wt=$work/walk
+    mkdir -p "$wt"
+    javac -d "$wt" "$repo/docs/walkthrough/OrderGateway.java" && ok "walkthrough compiles" || fail "walkthrough compiles"
+    for mode in allocating zero-alloc; do
+      java -Xms64m -Xmx64m -XX:+UseG1GC "-Xlog:gc*,safepoint:file=$wt/$mode-gc.log:time,uptime,level,tags" \
+        -cp "$wt" OrderGateway "$mode" 3 5000 "$wt/$mode.csv" >/dev/null 2>&1
+    done
+    expect_rc "walkthrough latency report" 0 python3 "$repo/skills/java-latency-measurement/scripts/latency-report.py" --baseline "$wt/allocating.csv" "$wt/zero-alloc.csv"
+    expect_rc "walkthrough gc summary" 0 python3 "$repo/skills/java-gc-tuning/scripts/gc-log-summary.py" --from-uptime 1 "$wt/zero-alloc-gc.log"
+    expect_rc "walkthrough probe zero-alloc handler" 0 java -cp "$wt" "$probe" 'OrderGateway$ZeroAllocHandler' --rounds 2
+  fi
 else
   printf '== live JDK tests skipped\n'
 fi

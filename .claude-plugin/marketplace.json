@@ -1,15 +1,15 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "optimization-skills",
-  "description": "Java and Linux performance-engineering skills for Claude Code (also installable into Codex).",
+  "description": "Java performance skills for Linux, usable from Claude Code and OpenAI Codex.",
   "owner": {
     "name": "tayloralj"
   },
   "plugins": [
     {
-      "name": "java-optimization-skills",
-      "description": "Evidence-first Java/JVM performance skills for Linux, low-latency first.",
-      "version": "0.2.0",
+      "name": "optimization-skills",
+      "description": "Find and fix Java performance problems on Linux, low-latency first.",
+      "version": "0.3.0",
       "source": "./",
       "category": "development",
       "homepage": "https://github.com/tayloralj/optimization-skills"

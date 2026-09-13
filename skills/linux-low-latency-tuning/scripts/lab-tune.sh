@@ -188,10 +188,17 @@ cmd_apply() {
     applied_paths+=("${plan_paths[$i]}"); applied_originals+=("$original")
     if ! write_value "${plan_paths[$i]}" "${plan_values[$i]}" 2>"$state_dir/last-error.txt" || \
        ! verify_value "${plan_paths[$i]}" "${plan_values[$i]}"; then
-      printf 'apply failed at %s: %s\n' "${plan_paths[$i]}" "$(tr '\n' ' ' < "$state_dir/last-error.txt")" >&2
       if [[ "$(read_value "${plan_paths[$i]}" 2>/dev/null)" == "$original" ]]; then
         unset 'applied_paths[-1]' 'applied_originals[-1]'
+        # Managed IRQs (NVMe, multiqueue NICs) refuse affinity changes by design: skip, do not abort.
+        if [[ "${plan_paths[$i]}" =~ ^/proc/irq/[0-9]+/smp_affinity_list$ ]]; then
+          printf 'skipped %s: kernel refused the write (managed IRQ?); value unchanged\n' "${plan_paths[$i]}"
+          printf 'skipped\t%s\n' "${plan_paths[$i]}" >> "$state_dir/skipped.tsv"
+          sed -i '$d' "$state_dir/rollback.tsv"
+          continue
+        fi
       fi
+      printf 'apply failed at %s: %s\n' "${plan_paths[$i]}" "$(tr '\n' ' ' < "$state_dir/last-error.txt")" >&2
       rollback_applied || { printf 'status=partial_rollback_failure\n' >> "$state_dir/meta.txt"; exit 7; }
       printf 'status=rolled_back_after_failure\n' >> "$state_dir/meta.txt"
       exit 6

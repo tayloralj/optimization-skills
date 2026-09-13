@@ -1,6 +1,6 @@
 ---
 name: profiling-readiness
-description: Read-only Linux and JVM profiling preflight for permissions, perf events, CPU topology, Java tools, and safe operator remediation. Use before async-profiler, Linux perf, PMU counters, eBPF/BCC/bpftrace, VTune, uProf, NUMA, affinity, or production profiling, especially when perf_event_paranoid, containers, missing symbols, or unavailable tools may block trustworthy data.
+description: Read-only check of what a Linux host can measure before profiling Java - perf permissions, JFR, async-profiler, eBPF tools, and CPU and cache topology. Use before any profiling or tuning task, or when perf_event_paranoid, containers, or missing tools block data.
 ---
 
 # Profiling Readiness

@@ -74,7 +74,7 @@ def distribution(values: list[float]) -> dict[str, float]:
     }
 
 
-def parse(paths: list[str]) -> dict:
+def parse(paths: list[str], from_uptime: float | None = None, to_uptime: float | None = None) -> dict:
     pauses: dict[tuple, dict] = {}
     collections: Counter = Counter()
     safepoints: list[dict] = []
@@ -91,11 +91,14 @@ def parse(paths: list[str]) -> dict:
                 decorators, message = match.group(1), line[match.end():]
                 uptime_match = UPTIME_RE.search(decorators)
                 uptime = float(uptime_match.group(1)) if uptime_match else None
+                if message.startswith("Using "):
+                    collectors.add(message[len("Using "):].strip())
+                if uptime is not None and ((from_uptime is not None and uptime < from_uptime)
+                                           or (to_uptime is not None and uptime > to_uptime)):
+                    continue
                 if uptime is not None:
                     first_uptime = uptime if first_uptime is None else min(first_uptime, uptime)
                     last_uptime = uptime if last_uptime is None else max(last_uptime, uptime)
-                if message.startswith("Using "):
-                    collectors.add(message[len("Using "):].strip())
 
                 pause = PAUSE_RE.search(message)
                 if pause:
@@ -202,7 +205,9 @@ def print_text(s: dict) -> None:
     print(f"collectors: {', '.join(s['collectors']) or 'unknown (no gc,init lines)'}")
     if s["elapsed_s"] is not None:
         print(f"log_span_s: {s['elapsed_s']:.3f}")
-    print(f"pauses_ms: {fmt_dist(s['pause_ms'])}")
+    if any(v is not None for v in s.get("window_uptime_s", [])):
+        print(f"window_uptime_s: from={s['window_uptime_s'][0]} to={s['window_uptime_s'][1]}")
+    print(f"pauses_ms: {fmt_dist(s['pause_ms'])}" + ("  (no pauses in this window)" if not s["pause_count"] else ""))
     if s["pause_fraction"] is not None:
         print(f"pause_fraction: {s['pause_fraction'] * 100:.3f}% of wall time")
     if s["approx_allocation_mib_per_s"] is not None:
@@ -229,7 +234,7 @@ def print_text(s: dict) -> None:
         for w in sp["worst_ttsp"]:
             print(f"  {w['ms']:.3f} ms {w['op']} uptime={w['uptime_s']}")
     else:
-        print("safepoints: none found (add 'safepoint' to -Xlog tags)")
+        print("safepoints: none recorded (if unexpected, check that 'safepoint' is in the -Xlog tags)")
     print("alarms:" + ("" if s["alarms"] else " none"))
     for name, count in sorted(s["alarms"].items()):
         print(f"  {name}: {count}")
@@ -240,15 +245,18 @@ def main(argv: list[str]) -> int:
     parser.add_argument("logs", nargs="+", help="unified logging files (pass rotated files too)")
     parser.add_argument("--json", action="store_true", help="emit JSON")
     parser.add_argument("--top", type=int, default=5, help="worst entries to list (default 5)")
+    parser.add_argument("--from-uptime", type=float, metavar="S", help="ignore events before this JVM uptime (exclude warmup)")
+    parser.add_argument("--to-uptime", type=float, metavar="S", help="ignore events after this JVM uptime")
     args = parser.parse_args(argv)
     try:
-        summary = summarise(parse(args.logs), args.top)
+        summary = summarise(parse(args.logs, args.from_uptime, args.to_uptime), args.top)
     except OSError as exc:
         print(f"cannot read log: {exc}", file=sys.stderr)
         return 3
-    if summary["pause_count"] == 0 and not summary["safepoints"]:
-        print("no GC pauses or safepoints recognised; check -Xlog tags and decorators", file=sys.stderr)
+    if summary["pause_count"] == 0 and not summary["safepoints"] and not summary["collectors"]:
+        print("no GC pauses, safepoints, or collector lines recognised; check -Xlog tags and decorators", file=sys.stderr)
         return 4
+    summary["window_uptime_s"] = [args.from_uptime, args.to_uptime]
     if args.json:
         json.dump(summary, sys.stdout, indent=2, default=lambda v: None)
         print()

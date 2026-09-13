@@ -1,6 +1,6 @@
 ---
 name: java-performance-patterns
-description: Convert measured JVM bottlenecks into evidence-backed Java changes involving allocation, atomics, locks, queues, batching, data layout, clocks, copying, I/O, or locality. Use after profiling or a production-faithful benchmark identifies a bottleneck, especially when native C recipes, blanket lock replacements, per-CPU counters, or confident gain estimates would not fit Java thread ownership and GC semantics.
+description: Turn a measured JVM bottleneck into a verified code change involving allocation, locks, atomics, queues, batching, copying, clocks, or I/O. Use after profiling or a faithful benchmark has identified the hot spot.
 ---
 
 # Java Performance Patterns

@@ -1,6 +1,6 @@
 ---
 name: java-hardware-counters
-description: Design and interpret portable Java PMU and hardware-counter experiments across Intel and AMD Linux hosts. Use for cycles, instructions, cache, branch, stalled-cycle, memory, PEBS, IBS, perf, PCM, PAPI, or LIKWID questions where event availability, permissions, multiplexing, SMT, frequency, JIT attribution, and same-host baselines must be checked before drawing conclusions.
+description: Design and interpret CPU hardware-counter (PMU) experiments for Java on Intel and AMD - cycles, instructions, cache, branch, and stall events. Use when a question needs IPC, cache-miss, or branch-miss evidence and event portability must be checked.
 ---
 
 # Java Hardware Counters
