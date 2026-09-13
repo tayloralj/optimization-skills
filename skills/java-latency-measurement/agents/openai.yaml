@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Latency Measurement"
+  short_description: "Measure Java tail latency without CO errors"
+  default_prompt: "Use $java-latency-measurement to check this latency test for coordinated omission and report valid percentiles."

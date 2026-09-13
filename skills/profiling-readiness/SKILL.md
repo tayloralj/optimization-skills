@@ -1,6 +1,6 @@
 ---
 name: profiling-readiness
-description: Read-only Linux and JVM profiling preflight for permissions, perf events, CPU topology, Java tools, and safe operator remediation. Use before async-profiler, Linux perf, PMU counters, VTune, uProf, NUMA, affinity, or production profiling, especially when perf_event_paranoid, containers, missing symbols, or unavailable tools may block trustworthy data.
+description: Read-only Linux and JVM profiling preflight for permissions, perf events, CPU topology, Java tools, and safe operator remediation. Use before async-profiler, Linux perf, PMU counters, eBPF/BCC/bpftrace, VTune, uProf, NUMA, affinity, or production profiling, especially when perf_event_paranoid, containers, missing symbols, or unavailable tools may block trustworthy data.
 ---
 
 # Profiling Readiness
@@ -38,6 +38,9 @@ access from a sysctl value alone and never change the host during preflight.
 - `TOOLS_PRESENT_NOT_TESTED`: smoke tests were disabled; do not infer readiness.
 - `BLOCKED_PERMISSION_OR_TOOLING`: neither tested perf collection nor the safe
   Java fallback is available. Do not invent results; report the blocker.
+- `bpftrace`/`bcc_tools` report presence only; eBPF collection needs root or
+  `CAP_BPF` plus `CAP_PERFMON` and is operator-run (see the
+  `linux-ebpf-io-network` skill).
 - One NUMA node does not imply uniform cache access. Use the reported LLC count
   and CPU lists before affinity experiments.
 

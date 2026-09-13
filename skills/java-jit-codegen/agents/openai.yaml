@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java JIT and Codegen"
+  short_description: "Diagnose inlining, deopt, and JIT warmup"
+  default_prompt: "Use $java-jit-codegen to explain what the JIT is doing to this hot Java code and verify one change."

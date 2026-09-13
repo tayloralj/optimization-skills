@@ -40,6 +40,12 @@ requires a node ID, for example `--membind=0`. Query `numactl --hardware` and th
 installed help before composing a command. Read `references/java-numa.md` for
 first touch and JVM caveats.
 
+## Related skills
+
+CPU isolation, IRQ placement, idle states, and the jitter audit live in the
+`linux-low-latency-tuning` skill; measure placement effects with the
+`java-latency-measurement` skill.
+
 ## Guardrails
 
 - Do not quote a universal remote-memory penalty; measure this CPU and workload.

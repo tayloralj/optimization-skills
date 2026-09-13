@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+"""Coordinated-omission-aware latency report from per-operation timestamps.
+
+Read-only. Input CSV (header optional), nanoseconds on one monotonic clock:
+  intended_start_ns,actual_start_ns,end_ns     -> service time, queue delay, response time
+  latency_ns                                   -> single column; no CO analysis possible
+Compare two runs with --baseline. Stability is shown by splitting the run into
+equal-count blocks and reporting the spread of each block's percentile.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import sys
+
+PCTS = (50.0, 90.0, 99.0, 99.9, 99.99)
+
+
+def percentile(ordered: list[int], pct: float) -> float:
+    if not ordered:
+        return float("nan")
+    return ordered[max(1, math.ceil(pct / 100.0 * len(ordered))) - 1]
+
+
+def load(path: str) -> dict:
+    intended, starts, ends, single = [], [], [], []
+    with open(path, newline="", encoding="utf-8") as handle:
+        for row_no, row in enumerate(csv.reader(handle), 1):
+            if not row or row[0].strip().startswith("#"):
+                continue
+            try:
+                values = [int(float(cell)) for cell in row]
+            except ValueError:
+                if row_no == 1:
+                    continue  # header
+                raise SystemExit(f"{path}:{row_no}: non-numeric row")
+            if len(values) >= 3:
+                intended.append(values[0]); starts.append(values[1]); ends.append(values[2])
+            elif len(values) == 1:
+                single.append(values[0])
+            else:
+                raise SystemExit(f"{path}:{row_no}: expected 1 or 3 columns")
+    if intended and single:
+        raise SystemExit(f"{path}: mixes 1- and 3-column rows")
+    if intended:
+        order = sorted(range(len(intended)), key=intended.__getitem__)
+        intended = [intended[i] for i in order]; starts = [starts[i] for i in order]; ends = [ends[i] for i in order]
+        return {
+            "kind": "timestamps",
+            "response": [e - i for i, e in zip(intended, ends)],
+            "service": [e - s for s, e in zip(starts, ends)],
+            "queue": [s - i for i, s in zip(intended, starts)],
+            "intended": intended,
+            "ends": ends,
+        }
+    return {"kind": "latency", "response": single}
+
+
+def dist(values: list[int]) -> dict:
+    ordered = sorted(values)
+    out = {"count": len(ordered)}
+    for p in PCTS:
+        out[f"p{p:g}"] = percentile(ordered, p)
+    out["max"] = ordered[-1] if ordered else float("nan")
+    out["mean"] = sum(ordered) / len(ordered) if ordered else float("nan")
+    return out
+
+
+def blocks(values: list[int], pct: float, n_blocks: int) -> dict | None:
+    size = len(values) // n_blocks
+    if size < 100:
+        return None
+    per_block = [percentile(sorted(values[i * size:(i + 1) * size]), pct) for i in range(n_blocks)]
+    return {"pct": pct, "blocks": n_blocks, "min": min(per_block), "median": sorted(per_block)[n_blocks // 2],
+            "max": max(per_block), "values": per_block}
+
+
+def analyse(data: dict, n_blocks: int) -> dict:
+    result = {"kind": data["kind"], "response_ns": dist(data["response"])}
+    if data["kind"] == "timestamps":
+        result["service_ns"] = dist(data["service"])
+        result["queue_delay_ns"] = dist(data["queue"])
+        span_ns = data["intended"][-1] - data["intended"][0]
+        if span_ns > 0:
+            result["intended_rate_per_s"] = (len(data["intended"]) - 1) / (span_ns / 1e9)
+            result["achieved_rate_per_s"] = (len(data["ends"]) - 1) / max(1e-9, (max(data["ends"]) - min(data["ends"])) / 1e9)
+        negative = sum(1 for q in data["queue"] if q < 0)
+        result["negative_queue_delay"] = negative
+        s99, r99 = result["service_ns"]["p99"], result["response_ns"]["p99"]
+        result["co_ratio_p99"] = r99 / s99 if s99 else float("nan")
+    # Blocks follow arrival order (timestamps) or file order (single column).
+    stable = blocks(data["response"], 99.0, n_blocks)
+    if stable:
+        result["p99_block_spread_ns"] = stable
+    return result
+
+
+def fmt(ns: float) -> str:
+    if isinstance(ns, float) and math.isnan(ns):
+        return "nan"
+    if ns >= 1e9:
+        return f"{ns / 1e9:.3f}s"
+    if ns >= 1e6:
+        return f"{ns / 1e6:.3f}ms"
+    if ns >= 1e3:
+        return f"{ns / 1e3:.3f}us"
+    return f"{ns:.0f}ns"
+
+
+def line(name: str, d: dict) -> str:
+    parts = [f"n={d['count']}"] + [f"{k}={fmt(d[k])}" for k in [f"p{p:g}" for p in PCTS] + ["max"]]
+    return f"{name}: " + " ".join(parts)
+
+
+def print_text(r: dict, baseline: dict | None) -> None:
+    print(line("response_time", r["response_ns"]))
+    if r["kind"] == "timestamps":
+        print(line("service_time ", r["service_ns"]))
+        print(line("queue_delay  ", r["queue_delay_ns"]))
+        if "intended_rate_per_s" in r:
+            print(f"intended_rate_per_s={r['intended_rate_per_s']:.1f} achieved_completion_rate_per_s={r['achieved_rate_per_s']:.1f}")
+        print(f"co_ratio_p99 (response/service)={r['co_ratio_p99']:.2f}"
+              + ("  <- queueing: service-time-only reporting would hide this" if r["co_ratio_p99"] > 1.5 else ""))
+        if r["negative_queue_delay"]:
+            print(f"WARNING: {r['negative_queue_delay']} operations started before their intended time: generator schedule or clocks are wrong")
+        if r["response_ns"]["count"] and r["response_ns"]["count"] < 10000:
+            print("note: fewer than 10000 operations; p99.9 and above are not meaningful")
+    else:
+        print("note: single-column latencies cannot reveal coordinated omission; record intended start times")
+    if "p99_block_spread_ns" in r:
+        b = r["p99_block_spread_ns"]
+        print(f"p99_across_{b['blocks']}_blocks: min={fmt(b['min'])} median={fmt(b['median'])} max={fmt(b['max'])}")
+    if baseline:
+        print("vs_baseline (response time, candidate/baseline):")
+        for key in [f"p{p:g}" for p in PCTS] + ["max"]:
+            base, cand = baseline["response_ns"][key], r["response_ns"][key]
+            ratio = cand / base if base else float("nan")
+            print(f"  {key}: {fmt(base)} -> {fmt(cand)} ({ratio:.3f}x)")
+        bb, cb = baseline.get("p99_block_spread_ns"), r.get("p99_block_spread_ns")
+        if bb and cb:
+            above = sum(1 for v in cb["values"] if v > bb["max"])
+            below = sum(1 for v in cb["values"] if v < bb["min"])
+            print(f"  p99 blocks above baseline block range: {above}/{cb['blocks']}; below: {below}/{cb['blocks']}")
+            if 0 < above <= cb["blocks"] // 5:
+                print("  note: regression concentrated in few blocks -> episodic stall; align with GC/OS event timelines")
+            elif above == 0 and below == 0:
+                print("  note: every block p99 lies within the baseline range; difference may be run-to-run noise")
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("csv")
+    parser.add_argument("--baseline", help="baseline CSV in the same format")
+    parser.add_argument("--blocks", type=int, default=10)
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args(argv)
+    result = analyse(load(args.csv), args.blocks)
+    baseline = analyse(load(args.baseline), args.blocks) if args.baseline else None
+    if result["response_ns"]["count"] == 0:
+        print("no rows", file=sys.stderr)
+        return 4
+    if args.json:
+        json.dump({"candidate": result, "baseline": baseline}, sys.stdout, indent=2)
+        print()
+    else:
+        print_text(result, baseline)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

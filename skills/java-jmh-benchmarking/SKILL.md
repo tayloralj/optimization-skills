@@ -50,4 +50,8 @@ forks, warmup and measurement durations, parameters, units, raw JSON, variance,
 and known environmental limitations. Keep maximum-throughput tests separate
 from fixed-rate tail-latency tests.
 
+`SampleTime` mode is closed-loop per thread; service tail latency belongs to
+the `java-latency-measurement` skill. For inlining and generated-code questions
+(`-prof perfasm`) use the `java-jit-codegen` skill.
+
 Read `references/build-setup.md` when creating a new executable benchmark.

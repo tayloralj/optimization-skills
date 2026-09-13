@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java GC Tuning"
+  short_description: "Analyse GC and safepoint logs, tune collectors"
+  default_prompt: "Use $java-gc-tuning to analyse GC and safepoint evidence and propose one measured collector change."

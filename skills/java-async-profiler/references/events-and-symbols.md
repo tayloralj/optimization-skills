@@ -13,6 +13,10 @@
 - `lock` points to contention; validate whether the sampled locks matter at the
   service-level load and latency target.
 
+JDK 25 also offers experimental JFR CPU-time sampling on Linux
+(`jdk.CPUTimeSample`), a JVM-native alternative when attaching a profiler is
+not permitted; confirm with `jfr metadata` on the target JDK.
+
 Run `asprof list PID` or the installed release's help to confirm event support.
 Do not copy an event name from another CPU or profiler without checking it.
 

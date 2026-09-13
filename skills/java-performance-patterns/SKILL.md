@@ -22,6 +22,12 @@ appearance. Read `references/patterns.md` after identifying a hot operation.
 6. Retain a rollback and re-profile. If the original bottleneck does not move,
    revert or revise the hypothesis.
 
+## Related skills
+
+Route GC- and allocation-rate problems to the `java-gc-tuning` skill,
+inlining and deoptimization to `java-jit-codegen`, off-heap and RSS growth to
+`java-native-memory`, and latency verification to `java-latency-measurement`.
+
 ## Guardrails
 
 - `LongAdder` is useful for contended multi-writer statistics, not automatically
