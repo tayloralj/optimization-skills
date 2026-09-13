@@ -1,111 +1,120 @@
-# Java Optimization Skills
+# Optimization Skills
 
-Agent skills for measuring and improving Java/JVM performance on Linux, usable
-from both **OpenAI Codex** and **Claude Code**. Low-latency systems come first
-(single-writer pipelines, messaging, matching engines), and general service
-throughput is covered too. JDK 21 and 25 LTS are the baseline.
+**Help your AI coding agent find and fix Java performance problems on Linux.**
 
-The collection is deliberately evidence-first. It checks whether the host can
-collect trustworthy data, keeps fixed-rate latency tests separate from
-maximum-throughput tests, rejects latency numbers distorted by coordinated
-omission, and requires a production-fidelity check before trusting a
-microbenchmark.
+Optimization Skills is a set of skills (instructions plus small tools) that
+Claude Code and OpenAI Codex load when you ask about Java performance: slow
+requests, latency spikes, GC pauses, memory growth, jittery hosts, suspicious
+benchmarks. Instead of guessing at JVM flags, the agent follows an engineer's
+method. It checks what the machine can measure, collects evidence, changes one
+thing, and proves the result.
 
-## Skills
+> **Example.** "Our order gateway's p99.99 is 2 ms but the handler is fast."
+> The agent shows the time is spent *waiting*, not computing, and ties the wait
+> to GC pauses. It finds the allocating code with JDK Flight Recorder (no root
+> needed), rewrites it allocation-free, proves zero allocation, and re-runs the
+> same test: **p99.99 2.18 ms → 55 µs**. The full story, with real output, is in
+> [the walkthrough](docs/walkthrough/README.md).
 
-Start with `java-performance-investigation` when the cause is unknown; it routes
-to the others. Install `profiling-readiness` with every specialised skill.
+## Who it is for
 
-| Skill | Use it for |
-| --- | --- |
-| `java-performance-investigation` | Triage a symptom into an objective, workload class, and routed plan |
-| `profiling-readiness` | Read-only host, tool, permission, and topology checks; operator remediation guidance |
-| `java-latency-measurement` | Open-loop load, coordinated omission, HdrHistogram, jitter meter, latency comparison |
-| `java-gc-tuning` | G1/ZGC/Shenandoah choice and tuning; GC and safepoint log analysis; heap retention |
-| `java-jit-codegen` | Inlining, deoptimization, code cache, assembly, warmup, CDS and JDK 25 AOT cache |
-| `java-native-memory` | NMT ledger, RSS beyond heap, direct/mapped buffers, malloc arenas, cgroup OOM |
-| `linux-low-latency-tuning` | Host jitter audit, CPU isolation, IRQs, C-states, THP, thread pinning; opt-in lab mode |
-| `linux-ebpf-io-network` | Off-CPU, run-queue, syscall, storage, and network latency with bounded eBPF captures |
-| `java-async-profiler` | CPU, allocation, lock, wall-clock, and JFR profiling |
-| `java-jmh-benchmarking` | Production-faithful Java microbenchmarks and reproducible comparisons |
-| `java-linux-perf` | Linux `perf` with Java/JIT-aware symbolization and portable event selection |
-| `java-performance-patterns` | Evidence-backed Java optimization patterns |
-| `java-vtune-uprof` | Vendor-aware Intel VTune and AMD uProf workflows |
-| `java-hardware-counters` | Portable PMU experiment design and counter interpretation |
-| `java-cache-efficiency` | Java cache locality, object layout, and false-sharing analysis |
-| `java-numa-affinity` | NUMA, LLC/CCD topology, first-touch, and CPU-affinity experiments |
+- Java developers and SREs with JVM services or jobs **on Linux** (JDK 21 or 25).
+- Built latency-first (trading, messaging, real-time pipelines); most of it
+  applies to ordinary services too.
+- No profiling experience or root access needed to start.
+
+Not for macOS or Windows hosts, non-JVM code, or front-end performance.
 
 ## Install
 
-Requirements: Linux, Bash 4+, GNU userland, Python 3.9+ (standard library
-only), and a JDK 21+ for the Java helper. Profilers, BCC/bpftrace, and JOL are
-optional and detected at run time. Scripts were exercised on JDK 25, kernel 7.0,
-async-profiler 4.x, BCC (`bpfcc-tools`), and bpftrace 0.25.
+The GitHub repository is currently **private**; you need read access to it.
 
-### Claude Code (plugin)
+**Claude Code** (plugin):
 
 ```bash
-claude plugin marketplace add tayloralj/optimization-skills
-claude plugin install java-optimization-skills@optimization-skills
+claude plugin marketplace add git@github.com:tayloralj/optimization-skills.git
+claude plugin install optimization-skills@optimization-skills
 ```
 
-### Codex and/or Claude Code (personal skill directories)
+**Codex, or Claude Code without plugins:**
 
 ```bash
 git clone git@github.com:tayloralj/optimization-skills.git
 cd optimization-skills
-./install.sh                    # symlink every skill into ~/.codex/skills and ~/.claude/skills
-./install.sh --codex java-gc-tuning java-latency-measurement   # subset, Codex only
-./install.sh --claude --copy    # copy instead of link
-./install.sh --uninstall        # remove only entries this repository installed
+./install.sh                 # links every skill into ~/.codex/skills and ~/.claude/skills
+./install.sh --codex         # Codex only; --claude for Claude only; --copy to copy instead of link
+./install.sh --uninstall     # removes only what this installer created
 ```
 
-`CODEX_HOME` and `CLAUDE_CONFIG_DIR` are honoured. The installer never overwrites
-a skill directory it did not create. Restart the agent session afterwards.
+Restart the agent afterwards. Requirements: Linux, Bash 4+, Python 3.9+ (standard
+library only), and a JDK. Profilers, BCC/bpftrace, and JOL are optional and
+detected when needed.
 
-### Working inside this repository
+## Use it
 
-`.agents/skills/` (Codex) and `.claude/skills/` (Claude Code) contain symlinks to
-`skills/`, so both agents discover the skills when started in a checkout.
+Describe the problem in your own words. The matching skill loads automatically:
 
-### Invoking
+- "My service's p99 latency jumps every few minutes. Help me find out why."
+- "Summarise these GC logs and tell me whether pauses are a problem."
+- "This JVM's RSS keeps growing but the heap is flat."
+- "Review this hot path for allocation and contention."
+- "Is this machine ready for latency testing on CPUs 4-7?"
 
-- Codex: `$java-gc-tuning analyse these GC logs`, or let Codex select by description.
-- Claude Code: `/java-gc-tuning analyse these GC logs`, or let Claude select by description.
+Or name a skill directly: `/java-gc-tuning` in Claude Code, `$java-gc-tuning` in
+Codex. **New here?** Read [Getting started](docs/getting-started.md): what to
+ask, what the agent will and won't do, the no-root path, and a glossary.
 
-## Safety and evidence rules
+## What's included
 
-- Never change kernel settings, capabilities, CPU governors, affinity, or a
-  running service without explicit operator approval.
-- Host tuning is read-only by default. `linux-low-latency-tuning` has an opt-in
-  **lab mode** for hosts the user declares expendable: allowlisted runtime knobs
-  only, applied by the operator as root with a hostname acknowledgement, with
-  recorded and verified rollback. Boot parameters and persistent configuration
-  always stay operator-owned.
-- eBPF captures are bounded and PID-scoped where possible; the wrapper prints
-  the command for the operator instead of escalating privileges.
-- Smoke-test the actual event on the actual host. A numeric
-  `perf_event_paranoid` value alone is not proof that collection works.
-- Detect CPU vendor/model and select only events listed by the installed tool.
-- Treat profiles as observations, not proof of causality. Verify a change with
-  representative load, repetitions, variance, and a rollback path.
-- Measure latency from intended start times; report full distributions with
-  sample counts.
-- Confirm that benchmark setup and data structures still model production code.
-- Do not publish profiles, command lines, JFRs, heap dumps, or paths until they
-  have been checked for secrets and customer data.
+Start with **`java-performance-investigation`** if you don't know the cause; it
+routes to the rest.
 
-## Development
+| Area | Skill | Helps you |
+| --- | --- | --- |
+| Start | `java-performance-investigation` | Turn a symptom into a goal, workload type, and plan |
+| | `profiling-readiness` | Find out what this host lets you measure (read-only) |
+| Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
+| | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |
+| | `java-jmh-benchmarking` | Write and run microbenchmarks that model production |
+| Profile | `java-async-profiler` | CPU, allocation, lock, and wall-clock profiles |
+| | `java-linux-perf` | Linux `perf` with working Java symbols |
+| | `java-hardware-counters` | CPU counter experiments (cache, branch, IPC) |
+| | `java-vtune-uprof` | Intel VTune and AMD uProf |
+| | `linux-ebpf-io-network` | Where threads wait: scheduler, disk, network (eBPF) |
+| JVM | `java-gc-tuning` | Understand GC and safepoint pauses; choose and tune collectors |
+| | `java-jit-codegen` | Inlining, deoptimization, warmup, startup caches |
+| | `java-native-memory` | Memory outside the heap, container OOM kills |
+| Code | `java-low-latency-patterns` | Allocation-free hot paths, ring buffers, flyweights, off-heap |
+| | `java-performance-patterns` | Evidence-backed fixes for common bottlenecks |
+| | `java-cache-efficiency` | False sharing, object layout, cache locality |
+| Host | `linux-low-latency-tuning` | Audit host jitter; CPU isolation and pinning; opt-in lab mode |
+| | `java-numa-affinity` | NUMA, cache-domain, and thread-placement experiments |
 
-```bash
-./scripts/validate-all.sh   # bundled validator + Codex quick_validate + claude plugin validate (when installed)
-./tests/run-tests.sh        # script tests against real JDK log fixtures and fake /sys trees
-```
+See [real output from every tool](docs/examples.md) and how to read it.
 
-See [`AGENTS.md`](AGENTS.md) for the skill authoring contract shared by both
-agents. CI runs validation, ShellCheck, and tests on JDK 21 and 25. See
-[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for source inspirations.
+## Safety by design
 
-## Licence
+Profilers and kernel tweaks can hurt a live system, and performance numbers are
+easy to get wrong in convincing ways. So the skills are **read-only by default**:
 
-MIT. See [`LICENSE`](LICENSE).
+- No `sudo`, no kernel or service changes, and no production JVM restarts
+  without your explicit approval. When root is needed, the agent prints the
+  exact command for you to run.
+- Captures are time- and size-limited and target only processes you own.
+- **Lab mode** (`linux-low-latency-tuning`) is for machines you declare
+  expendable. It generates a host-specific plan of reversible runtime
+  settings, which you apply as root. Every original value is recorded, and
+  rollback is verified.
+- Results need evidence: a baseline, repetitions, and the same test before and
+  after. Profiles and recordings are treated as sensitive data.
+
+## Project
+
+- [CHANGELOG](CHANGELOG.md) · [Getting started](docs/getting-started.md) ·
+  [Walkthrough](docs/walkthrough/README.md) · [Examples](docs/examples.md)
+- Contributing and skill-authoring rules: [`AGENTS.md`](AGENTS.md)
+- Checks: `./scripts/validate-all.sh`, `./tests/run-tests.sh`, and evals in
+  [`evals/`](evals/README.md); CI runs on JDK 21 and 25
+- Names: the repository, Claude marketplace, and plugin are all
+  `optimization-skills`
+- Sources and credits: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) · Licence: MIT ([`LICENSE`](LICENSE))

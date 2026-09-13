@@ -1,6 +1,6 @@
 ---
 name: java-cache-efficiency
-description: Diagnose and verify Java cache locality, false sharing, object and array layout, queue placement, buffer copying, and LLC or CCD effects with JOL, JMH, perf c2c, PMU counters, and topology evidence. Use when a JVM workload appears memory-latency or coherence bound and C structs, compiler builtins, or native padding examples would not describe Java objects and GC behaviour.
+description: Diagnose Java cache misses, false sharing, and object layout with JOL, JMH, perf c2c, and topology evidence. Use when a JVM workload looks memory-latency bound or contended fields may share cache lines.
 ---
 
 # Java Cache Efficiency

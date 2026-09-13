@@ -1,6 +1,6 @@
 ---
 name: java-performance-investigation
-description: Entry point for a Java/JVM performance problem on Linux. Turns a vague symptom (slow, jittery, p99 spikes, low throughput, high CPU, memory growth, OOM kill, slow startup) into a stated objective, a workload classification, and a routed plan across the specialised skills in this collection. Use when the user does not yet know which profiler, benchmark, GC, JIT, OS, or latency skill applies, or when an investigation spans several of them.
+description: Start here for a Java performance problem on Linux. Turns a symptom (slow, jittery, p99 spikes, high CPU, memory growth, OOM kill, slow startup) into a goal, a workload type, and a plan naming the next skill. Use when the cause or the right tool is not yet known.
 ---
 
 # Java Performance Investigation
@@ -29,7 +29,8 @@ the decision that evidence will support.
    - memory: heap occupancy/allocation rate vs native RSS growth.
    Launch-time JFR with unified GC and safepoint logging covers most of this on
    JDK 21 and 25 without host privileges.
-5. **Route** with the symptom map in `references/triage.md`. Pick one skill and
+5. **Route** with the symptom map in `references/triage.md`. For services in
+   containers or Kubernetes, check limits first with `references/containers.md`. Pick one skill and
    one question. Record what result would confirm or reject the hypothesis.
 6. **Experiment discipline.** Change one factor, repeat on the same host and
    load, compare against a control, and verify the service metric without
@@ -55,6 +56,12 @@ unless evidence says otherwise, because each layer masks the next:
    `java-async-profiler`, `java-hardware-counters`, `java-cache-efficiency`,
    `java-performance-patterns`.
 5. Placement: cores, SMT siblings, cache domains, NUMA — `java-numa-affinity`.
+6. Code shape: allocation-free hot paths, single writers, wait strategies —
+   `java-low-latency-patterns`.
+
+When perf, eBPF, or attach access is not available, start with the
+`java-flight-recorder` skill: JFR needs no privileges and covers GC, locks,
+I/O, allocation, and CPU samples.
 
 ## Guardrails
 

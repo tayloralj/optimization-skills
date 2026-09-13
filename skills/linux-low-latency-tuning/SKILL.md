@@ -1,6 +1,6 @@
 ---
 name: linux-low-latency-tuning
-description: Audit and tune a Linux host for low-latency, low-jitter Java workloads - CPU isolation (isolcpus, nohz_full, rcu_nocbs, cpuset partitions), IRQ and kernel-thread affinity, frequency governors and EPP, C-states, SMT, clocksource, transparent and explicit huge pages, swap, NUMA balancing, watchdogs, cgroup CPU quotas, tuned profiles, and JVM thread placement. Read-only audit by default, with an opt-in lab mode that applies allowlisted runtime changes with recorded, verified rollback. Use when tail latency or jitter is not explained by GC/JIT, when preparing a benchmark or trading host, or when pinning busy-spin threads.
+description: Audit a Linux host for jitter that hurts low-latency Java (IRQs, timer ticks, C-states, frequency, THP, swap, CPU quotas) and plan CPU isolation and thread pinning. Read-only, with an opt-in lab mode for reversible changes. Use when tail latency is not explained by GC or JIT.
 ---
 
 # Linux Low-Latency Tuning
@@ -15,9 +15,10 @@ before changing the host, and measure every change.
   with rollback. Never change the host.
 - **Lab mode**: only when the user has explicitly stated, in this conversation,
   that the target is a lab/benchmark host (not production). Follow
-  `references/lab-mode.md`: show the plan, get approval, and use
-  `scripts/lab-tune.sh`, which the operator runs as root with a hostname
-  acknowledgement. Boot parameters and persistent configuration remain
+  `references/lab-mode.md`: generate a host-specific plan with
+  `scripts/make-lab-plan.py` (profiles `benchmark-host`, `irq-isolation`,
+  `quiet-watchdogs`), show it, get approval, and have the operator apply it as
+  root with `scripts/lab-tune.sh` and a hostname acknowledgement. Boot parameters and persistent configuration remain
   operator-owned in both modes.
 
 ## Workflow

@@ -56,6 +56,9 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], str] | None:
             raise ValueError(f"block scalar for {key!r}; use a single-line value")
         if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
             value = value[1:-1]
+        elif value and (": " in value or " #" in value or value[0] in "&*!|>%@`[]{}'\""):
+            raise ValueError(f"unquoted value for {key.strip()!r} is not valid YAML (contains ': ' or ' #' or starts "
+                             "with a YAML indicator); reword or quote it")
         fields[key.strip()] = value
     return fields, body
 
@@ -199,6 +202,36 @@ def validate_plugin(repo: Path, names: list[str], report: Report) -> None:
             report.error("README.md", f"skill table does not mention `{name}`")
 
 
+def github_slug(heading: str) -> str:
+    text = re.sub(r"[`*_]", "", heading.strip().lower())
+    text = re.sub(r"[^\w\- ]", "", text)
+    return text.replace(" ", "-")
+
+
+def validate_links(repo: Path, report: Report) -> None:
+    """Relative Markdown links (and their #anchors) in project docs must resolve."""
+    docs = [repo / "README.md", repo / "AGENTS.md", repo / "CHANGELOG.md", *sorted((repo / "docs").rglob("*.md")),
+            *sorted((repo / "evals").glob("*.md"))]
+    link_re = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+    for doc in docs:
+        if not doc.is_file():
+            continue
+        text = strip_code_fences(doc.read_text(encoding="utf-8"))
+        for target in link_re.findall(text):
+            if re.match(r"^[a-z]+:", target):
+                continue
+            path_part, _, anchor = target.partition("#")
+            dest = (doc.parent / path_part).resolve() if path_part else doc
+            where = str(doc.relative_to(repo))
+            if not dest.exists():
+                report.error(where, f"broken link {target}")
+                continue
+            if anchor and dest.suffix == ".md":
+                headings = re.findall(r"^#+\s+(.*)$", strip_code_fences(dest.read_text(encoding="utf-8")), re.M)
+                if anchor not in {github_slug(h) for h in headings}:
+                    report.error(where, f"broken anchor {target}")
+
+
 def main(argv: list[str]) -> int:
     repo = Path(argv[1]).resolve() if len(argv) > 1 else Path(__file__).resolve().parents[1]
     skills_root = repo / "skills"
@@ -208,6 +241,7 @@ def main(argv: list[str]) -> int:
     for skill_dir in skill_dirs:
         validate_skill(skill_dir, set(names), report)
     validate_plugin(repo, names, report)
+    validate_links(repo, report)
     for line in report.errors:
         print(f"ERROR {line}")
     print(f"validated {len(names)} skills: {'FAILED' if report.errors else 'ok'}")

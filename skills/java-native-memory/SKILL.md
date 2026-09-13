@@ -1,6 +1,6 @@
 ---
 name: java-native-memory
-description: Explain and control JVM resident memory beyond the Java heap on Linux for JDK 21 and 25 - Native Memory Tracking, metaspace, code cache, thread stacks, GC structures, direct and mapped buffers, glibc malloc arenas and trimming, JNI and FFM native libraries, transparent huge pages, and cgroup v2 limits and OOM kills. Use when RSS or container memory grows while the heap looks stable, when a JVM is OOM-killed, when sizing memory limits, or when off-heap buffers, memory-mapped journals, or native libraries are suspected.
+description: Explain JVM memory beyond the heap with Native Memory Tracking - metaspace, threads, code cache, direct and mapped buffers, malloc arenas, and cgroup limits. Use when RSS or container memory grows while the heap is stable, or when a JVM is OOM-killed.
 ---
 
 # Java Native Memory

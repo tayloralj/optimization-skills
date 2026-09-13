@@ -1,6 +1,6 @@
 ---
 name: java-jit-codegen
-description: Diagnose HotSpot JIT behaviour on JDK 21 and 25 - tiered compilation, inlining decisions, deoptimization and recompilation churn, megamorphic call sites, OSR, code cache exhaustion, intrinsics, escape analysis, loop optimisations, generated assembly (hsdis, JMH perfasm), Vector API, warmup, and startup via CDS and the JDK 25 AOT cache. Use when hot Java code is slower than expected, performance changes after warmup or deploys, latency spikes coincide with deoptimization, or a proposed micro-optimisation depends on what C2 actually generates.
+description: Explain what the HotSpot JIT does to hot Java code - inlining, deoptimization, code cache, generated assembly, warmup, CDS, and the JDK 25 AOT cache. Use when hot code is slower than expected, slows after warmup or a deploy, or a micro-optimisation depends on C2 output.
 ---
 
 # Java JIT and Code Generation

@@ -1,6 +1,6 @@
 ---
 name: java-jmh-benchmarking
-description: Design, audit, run, and interpret trustworthy JMH benchmarks for Java optimizations. Use when creating a microbenchmark, checking that an existing benchmark still models production code, avoiding dead-code and state-scope errors, separating setup activity from measured score, collecting reproducible JSON results, or comparing a baseline and candidate with uncertainty.
+description: Write, audit, run, and compare trustworthy JMH microbenchmarks that still model production code. Use when creating or reviewing a Java microbenchmark, checking a claimed speedup, or comparing baseline and candidate with uncertainty.
 ---
 
 # Java JMH Benchmarking

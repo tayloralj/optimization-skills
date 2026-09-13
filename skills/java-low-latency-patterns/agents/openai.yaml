@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Low-Latency Patterns"
+  short_description: "Zero-GC hot paths, ring buffers, flyweights"
+  default_prompt: "Use $java-low-latency-patterns to review this hot path and propose verified low-latency changes."

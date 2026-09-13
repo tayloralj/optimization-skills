@@ -12,8 +12,11 @@ skills/<name>/scripts/*         executable helpers; paths are relative to the sk
 skills/<name>/agents/openai.yaml Codex UI metadata (ignored by Claude)
 .claude-plugin/                  Claude Code plugin + marketplace manifests
 .claude/skills/, .agents/skills/ symlinks to skills/ for in-repo discovery
-scripts/validate_skills.py       bundled validator (both agents' rules)
+scripts/validate_skills.py       bundled validator (both agents' rules, doc links)
 tests/                           script tests and real JDK fixtures
+evals/                           Claude Code eval cases (claude plugin eval)
+docs/                            getting started, annotated examples, walkthrough
+CHANGELOG.md                     user-facing changes per version
 install.sh                       personal install for Codex and/or Claude
 ```
 
@@ -32,9 +35,16 @@ install.sh                       personal install for Codex and/or Claude
   Every file in `references/` and `scripts/` must be referenced.
 - `agents/openai.yaml` needs `display_name`, a 25–64 character
   `short_description`, and a `default_prompt` containing `$<name>`.
+- Write descriptions in plain words, ideally under 300 characters: every
+  description is loaded into every session of both agents.
 - New skill: add the directory, both symlinks
   (`ln -s ../../skills/<name> .claude/skills/<name>` and the same under
-  `.agents/skills/`), a README table row, and tests for any script.
+  `.agents/skills/`), a README table row, tests for any script, at least one
+  eval case in `evals/`, and a CHANGELOG entry.
+- Documentation examples must be real output from a real run, trimmed but not
+  edited. Label synthetic fixtures as synthetic.
+- Java helpers are single-file programs runnable with the JDK source launcher
+  (`java Tool.java`), with no dependencies.
 
 ## Script conventions
 
@@ -58,9 +68,11 @@ install.sh                       personal install for Codex and/or Claude
 
 ```bash
 ./scripts/validate-all.sh
-./tests/run-tests.sh
-shellcheck skills/*/scripts/*.sh scripts/*.sh install.sh tests/*.sh
+WALKTHROUGH_TESTS=1 ./tests/run-tests.sh
+shellcheck --severity=warning skills/*/scripts/*.sh scripts/*.sh install.sh tests/*.sh
+claude plugin eval . --case <changed-skill-case> --runs 3 --max-cost-usd 5   # when a skill's behaviour changes
 ```
 
 Bump `VERSION`, `.claude-plugin/plugin.json`, and the marketplace entry
-together when releasing.
+together when releasing, move the CHANGELOG section from "unreleased" to a
+dated version, and tag `vX.Y.Z` on `main`.

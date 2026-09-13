@@ -1,6 +1,6 @@
 ---
 name: java-linux-perf
-description: Java and JVM-aware Linux perf workflow covering permission smoke tests, workload classification, JIT symbolization, vendor-portable events, topology-aware CPU sets, stat, record, report, and c2c caveats. Use when perf is requested for a JVM service or benchmark and native-only ldd, nm, DWARF, static thread, or generic taskset guidance would be misleading.
+description: Profile JVM workloads with Linux perf using working JIT symbols, portable events, and bounded captures. Use when perf stat, record, report, or c2c is requested for a Java service or benchmark.
 ---
 
 # Java Linux perf

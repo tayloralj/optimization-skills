@@ -17,6 +17,20 @@ jobs:
         run: python3 scripts/validate_skills.py
       - name: ShellCheck
         run: shellcheck --severity=warning skills/*/scripts/*.sh scripts/*.sh install.sh tests/*.sh
+      - name: Frontmatter parses as YAML (what Codex and Claude actually load)
+        run: |
+          python3 -m pip install --quiet pyyaml
+          python3 - <<'PY'
+          import pathlib, sys, yaml
+          bad = 0
+          for p in sorted(pathlib.Path("skills").glob("*/SKILL.md")):
+              text = p.read_text()
+              front = text.split("---\n", 2)[1]
+              data = yaml.safe_load(front)
+              if not isinstance(data, dict) or not data.get("name") or not data.get("description"):
+                  print(f"{p}: missing name/description"); bad = 1
+          sys.exit(bad)
+          PY
       - name: Python syntax
         run: python3 -m py_compile skills/*/scripts/*.py scripts/*.py tests/*.py
 
@@ -33,5 +47,7 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
-      - name: Script tests (includes live GC/JIT/NMT logs from this JDK)
+      - name: Script tests (includes live GC/JIT/NMT/JFR runs on this JDK)
         run: ./tests/run-tests.sh
+        env:
+          WALKTHROUGH_TESTS: ${{ matrix.java == '25' && '1' || '0' }}

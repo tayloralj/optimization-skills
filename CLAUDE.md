@@ -9,6 +9,6 @@
 - Validate the plugin with `claude plugin validate .` (also run by
   `scripts/validate-all.sh`). Test an install from the checkout with
   `claude plugin marketplace add ./` then
-  `claude plugin install java-optimization-skills@optimization-skills`.
+  `claude plugin install optimization-skills@optimization-skills`.
 - When a skill script needs root (lab mode, eBPF), print the command for the
   user to run with `! sudo ...` rather than attempting privilege escalation.

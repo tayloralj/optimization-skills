@@ -1,6 +1,6 @@
 ---
 name: java-latency-measurement
-description: Measure Java latency and jitter correctly - open-loop fixed-rate load, coordinated omission, intended-start timestamps, HdrHistogram recording and merging, percentile statistics and sample counts, clocks and timestamps, platform hiccup measurement, JFR latency correlation, load-generator saturation, and maximum-sustainable-throughput curves. Use before trusting any latency number, when designing a load test or latency benchmark for a JVM service or messaging pipeline, when p99 or max results look too good or unstable, or when comparing tail latency between builds, JVMs, or hosts.
+description: Measure Java latency correctly - open-loop load, coordinated omission, HdrHistogram, percentiles and sample counts, and host jitter. Use before trusting a latency number, when designing a latency test, or when comparing tail latency between builds or hosts.
 ---
 
 # Java Latency Measurement

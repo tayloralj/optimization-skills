@@ -1,6 +1,6 @@
 ---
 name: java-async-profiler
-description: Safe Java async-profiler workflow for CPU, timer, wall-clock, allocation, lock, native, and JFR evidence. Use to profile JVM services or JMH benchmarks, select a permitted event, capture bounded artifacts, interpret Java and native frames, compare before and after profiles, or operate under restricted perf_event_paranoid settings.
+description: Capture and read async-profiler CPU, allocation, lock, and wall-clock profiles of a JVM safely and within bounds. Use to find where a Java service or JMH benchmark spends time, allocates, or blocks, including on hosts where perf access is restricted.
 ---
 
 # Java Async Profiler

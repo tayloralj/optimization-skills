@@ -1,6 +1,6 @@
 ---
 name: linux-ebpf-io-network
-description: Explain JVM latency that happens outside Java code using eBPF (BCC, bpftrace) and kernel statistics - off-CPU and run-queue latency, syscall latency, storage I/O (fsync, page cache writeback, mmap journals, major faults, O_DIRECT), and network paths (socket buffers, drops, retransmits, interrupt coalescing, RSS/RPS, busy polling, UDP and Aeron-style transports). Use when threads are waiting rather than computing, when tail latency coincides with disk or network activity, or when profilers show time in syscalls, parking, or unknown kernel frames.
+description: Find where JVM threads wait outside Java using eBPF and kernel statistics - off-CPU time, run-queue delay, syscalls, disk and fsync latency, and network drops or retransmits. Use when threads wait rather than compute, or tail latency follows disk or network activity.
 ---
 
 # Linux eBPF, I/O, and Network for JVMs

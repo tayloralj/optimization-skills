@@ -1,6 +1,6 @@
 ---
 name: java-gc-tuning
-description: Evidence-driven HotSpot garbage-collector selection and tuning for JDK 21 and 25 on Linux, covering G1, generational ZGC, Shenandoah, Parallel, and Epsilon; unified GC and safepoint logging; pause, time-to-safepoint, allocation-rate, and humongous-object analysis; heap sizing, pre-touch, large pages, container ergonomics, and heap retention. Use when GC pauses, safepoints, allocation pressure, heap growth, or collector choice may explain latency, throughput, or footprint.
+description: Analyse GC and safepoint logs and tune HotSpot collectors (G1, ZGC, Shenandoah, Parallel) on JDK 21 and 25. Use when GC pauses, time-to-safepoint, allocation rate, heap growth, or collector choice may explain latency, throughput, or memory use.
 ---
 
 # Java GC Tuning
@@ -20,8 +20,8 @@ headroom, not a different allocation profile.
 
    Also record `java -XX:+PrintFlagsFinal -version` for the exact launch flags,
    the JDK build/vendor, container limits, and the workload phase.
-2. **Summarise.** Run `scripts/gc-log-summary.py gc-*.log` (add `--json` for
-   records). It reports pause distributions per type, pause fraction, an
+2. **Summarise.** Run `scripts/gc-log-summary.py --from-uptime 60 gc-*.log`
+   (`--from-uptime` excludes warmup; add `--json` for records). It reports pause distributions per type, pause fraction, an
    approximate allocation rate, concurrent-cycle counts, time-to-safepoint
    (TTSP) distributions, and alarms (Full GC, evacuation failure, humongous
    allocation, allocation stalls, degenerated cycles, `System.gc()`).
