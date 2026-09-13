@@ -264,6 +264,106 @@ class MakeLabPlanTest(unittest.TestCase):
         self.assertEqual(module.compact([0, 1, 2, 5, 7, 8]), "0-2,5,7-8")
 
 
+ANALYZE = REPO / "skills/java-offline-capture/scripts/analyze-bundle.py"
+
+
+def make_archive(path: Path, entries: dict, links: dict | None = None, top: str = "jvmcap-h-1-20260101T000000Z") -> None:
+    import io
+    import tarfile
+    with tarfile.open(path, "w:gz") as tar:
+        for name, data in entries.items():
+            info = tarfile.TarInfo(name if name.startswith(("/", "..")) else f"{top}/{name}")
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+        for name, target in (links or {}).items():
+            info = tarfile.TarInfo(f"{top}/{name}")
+            info.type = tarfile.SYMTYPE
+            info.linkname = target
+            tar.addfile(info)
+
+
+def minimal_bundle(tamper: bool = False) -> dict:
+    import hashlib
+    files = {
+        "MANIFEST.txt": b"bundle_format=1\nbundle=jvmcap-h-1-20260101T000000Z\npid=1\nduration_s=10\nclk_tck=100\nstep.proc-start=ok\n",
+        "proc-start/uptime_s": b"100.0\n",
+        "proc-end/uptime_s": b"110.0\n",
+        "proc-start/threads.tsv": b"tid\tcomm\tutime\tstime\tvoluntary_ctxt\tnonvoluntary_ctxt\trun_delay_ns\tprocessor\n7\tworker\t100\t0\t1\t1\t0\t2\n",
+        "proc-end/threads.tsv": b"tid\tcomm\tutime\tstime\tvoluntary_ctxt\tnonvoluntary_ctxt\trun_delay_ns\tprocessor\n7\tworker\t600\t0\t5\t90\t900000000\t2\n",
+        "proc-start/vmstat": b"pswpin 0\npswpout 10\n",
+        "proc-end/vmstat": b"pswpin 5\npswpout 50\n",
+        "proc-start/net_snmp": b"Udp: InDatagrams InErrors RcvbufErrors\nUdp: 10 0 0\n",
+        "proc-end/net_snmp": b"Udp: InDatagrams InErrors RcvbufErrors\nUdp: 90 7 7\n",
+    }
+    sums = "".join(f"{hashlib.sha256(v).hexdigest()}  ./{k}\n" for k, v in sorted(files.items()))
+    files["SHA256SUMS"] = sums.encode()
+    if tamper:
+        files["proc-end/vmstat"] = b"pswpin 0\npswpout 10\n"
+    return files
+
+
+class AnalyzeBundleTest(unittest.TestCase):
+    def analyze(self, archive: Path, out: Path, *extra: str) -> subprocess.CompletedProcess:
+        return subprocess.run([sys.executable, str(ANALYZE), str(archive), str(out), *extra], capture_output=True, text=True)
+
+    def test_findings_from_proc_deltas(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = Path(tmp) / "b.tar.gz"
+            make_archive(archive, minimal_bundle())
+            result = self.analyze(archive, Path(tmp) / "out")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            text = (Path(tmp) / "out" / "ANALYSIS.md").read_text()
+        self.assertIn("Integrity: OK", text)
+        self.assertIn("| worker (7) | 50.0 | 900.0 | 89 | 2 |", text)   # 500 ticks = 5 s CPU in 10 s; 0.9 s delay
+        self.assertIn("swapping during the window", text)
+        self.assertIn("UDP receive errors (RcvbufErrors=7", text)
+        self.assertIn("waited 900 ms for a CPU", text)
+        self.assertIn("`linux-ebpf-io-network`", text)
+
+    def test_tampered_bundle_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = Path(tmp) / "b.tar.gz"
+            make_archive(archive, minimal_bundle(tamper=True))
+            result = self.analyze(archive, Path(tmp) / "out")
+            text = (Path(tmp) / "out" / "ANALYSIS.md").read_text()
+        self.assertEqual(result.returncode, 6)
+        self.assertIn("checksum mismatch proc-end/vmstat", text)
+
+    def test_expected_sha_mismatch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = Path(tmp) / "b.tar.gz"
+            make_archive(archive, minimal_bundle())
+            result = self.analyze(archive, Path(tmp) / "out", "--expect-sha256", "0" * 64)
+            self.assertEqual(result.returncode, 5)
+            self.assertFalse((Path(tmp) / "out").exists())
+
+    def test_rejects_unsafe_archives(self):
+        cases = {
+            "traversal": ({"../escape.txt": b"x"}, None, "jvmcap-a"),
+            "absolute": ({"/tmp/abs.txt": b"x"}, None, "jvmcap-a"),
+            "symlink": ({"MANIFEST.txt": b"x"}, {"link": "/etc/passwd"}, "jvmcap-a"),
+            "not-a-bundle": ({"MANIFEST.txt": b"x"}, None, "something-else"),
+        }
+        for name, (entries, links, top) in cases.items():
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                archive = Path(tmp) / "bad.tar.gz"
+                make_archive(archive, entries, links, top)
+                result = self.analyze(archive, Path(tmp) / "out")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((Path(tmp) / "out").exists() and any((Path(tmp) / "out").rglob("*passwd*")))
+                self.assertFalse((Path(tmp) / "escape.txt").exists())
+
+    def test_unlisted_file_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = Path(tmp) / "b.tar.gz"
+            files = minimal_bundle()
+            files["extra.txt"] = b"not in sums"
+            make_archive(archive, files)
+            result = self.analyze(archive, Path(tmp) / "out")
+            self.assertEqual(result.returncode, 6)
+            self.assertIn("unlisted file extra.txt", (Path(tmp) / "out" / "ANALYSIS.md").read_text())
+
+
 class ValidatorTest(unittest.TestCase):
     def copy_repo(self, tmp: str) -> Path:
         dest = Path(tmp) / "repo"

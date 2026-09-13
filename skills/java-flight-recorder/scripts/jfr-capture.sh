@@ -73,7 +73,7 @@ while (( SECONDS < deadline )); do
   sleep 1
   [[ $(start_time 2>/dev/null) == "$started" ]] || { printf 'Target exited during recording.\n' >&2; exit 5; }
   # A finished recording disappears ("Could not find NAME"), so match the state line, not just the name.
-  if ! jcmd "$pid" JFR.check name="$name" 2>/dev/null | grep -Eq "name=$name .*\((running|delayed|new)\)"; then
+  if ! jcmd "$pid" JFR.check name="$name" 2>/dev/null | grep -E "name=$name .*\((running|delayed|new)\)" >/dev/null; then
     break
   fi
 done

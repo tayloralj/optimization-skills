@@ -10,6 +10,8 @@ skills/<name>/SKILL.md          frontmatter + workflow (shared by both agents)
 skills/<name>/references/*.md   detail loaded on demand; linked from SKILL.md
 skills/<name>/scripts/*         executable helpers; paths are relative to the skill dir
 skills/<name>/agents/openai.yaml Codex UI metadata (ignored by Claude)
+skills/<name>/assets/            files shipped elsewhere (e.g. the offline collector kit)
+skills/<name>/requires.txt       other skills whose scripts this skill uses (install.sh follows it)
 .claude-plugin/                  Claude Code plugin + marketplace manifests
 .claude/skills/, .agents/skills/ symlinks to skills/ for in-repo discovery
 scripts/validate_skills.py       bundled validator (both agents' rules, doc links)
@@ -69,7 +71,7 @@ install.sh                       personal install for Codex and/or Claude
 ```bash
 ./scripts/validate-all.sh
 WALKTHROUGH_TESTS=1 ./tests/run-tests.sh
-shellcheck --severity=warning skills/*/scripts/*.sh scripts/*.sh install.sh tests/*.sh
+shellcheck --severity=warning skills/*/scripts/*.sh skills/*/assets/*/*.sh scripts/*.sh install.sh tests/*.sh
 claude plugin eval . --case <changed-skill-case> --runs 3 --max-cost-usd 5   # when a skill's behaviour changes
 ```
 

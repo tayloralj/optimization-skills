@@ -152,6 +152,16 @@ def validate_skill(skill_dir: Path, all_names: set[str], report: Report) -> None
             if not script.read_text(encoding="utf-8").startswith("#!/usr/bin/env "):
                 report.error(where, f"{script.name} must start with a '#!/usr/bin/env' shebang")
 
+    requires = skill_dir / "requires.txt"
+    if requires.is_file():
+        for dep in requires.read_text(encoding="utf-8").split():
+            if dep.startswith("#"):
+                continue
+            if dep not in all_names:
+                report.error(where, f"requires.txt names unknown skill {dep}")
+        if f"requires.txt" not in body:
+            report.error(where, "SKILL.md should mention requires.txt so users know about dependencies")
+
     openai_yaml = skill_dir / "agents" / "openai.yaml"
     if not openai_yaml.is_file():
         report.error(where, "missing agents/openai.yaml (Codex UI metadata)")
