@@ -10,7 +10,7 @@ nodes and how cores, SMT siblings, and LLC domains map to CPU IDs.
 
 ## Workflow
 
-1. Run `$profiling-readiness`; then inspect `lscpu -e` and `lstopo` when
+1. Run the `profiling-readiness` skill; then inspect `lscpu -e` and `lstopo` when
    available. Record cgroup/cpuset limits because visible host CPUs may not be
    usable by the process.
 2. If there is one NUMA node, stop the remote-memory experiment. Reframe the

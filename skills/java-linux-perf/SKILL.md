@@ -5,7 +5,7 @@ description: Java and JVM-aware Linux perf workflow covering permission smoke te
 
 # Java Linux perf
 
-Use `perf` only after `$profiling-readiness` proves the intended collection is
+Use `perf` only after the `profiling-readiness` skill proves the intended collection is
 possible. Do not treat a JAR like an ELF binary.
 
 ## Workflow

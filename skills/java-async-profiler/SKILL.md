@@ -6,7 +6,7 @@ description: Safe Java async-profiler workflow for CPU, timer, wall-clock, alloc
 # Java Async Profiler
 
 Capture a bounded, reproducible profile that answers one stated question. Run
-`$profiling-readiness` first when host permissions are unknown.
+the `profiling-readiness` skill first when host permissions are unknown.
 
 ## Workflow
 
