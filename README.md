@@ -59,6 +59,7 @@ Describe the problem in your own words. The matching skill loads automatically:
 - "This JVM's RSS keeps growing but the heap is flat."
 - "Review this hot path for allocation and contention."
 - "Is this machine ready for latency testing on CPUs 4-7?"
+- "Production can't run an agent. Give the ops team a kit to capture the JVM during tonight's peak, and I'll send you the result."
 
 Or name a skill directly: `/java-gc-tuning` in Claude Code, `$java-gc-tuning` in
 Codex. **New here?** Read [Getting started](docs/getting-started.md): what to
@@ -76,6 +77,7 @@ routes to the rest.
 | Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
 | | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |
 | | `java-jmh-benchmarking` | Write and run microbenchmarks that model production |
+| | `java-offline-capture` | Collect evidence on prod/QA hosts that can't run an agent; analyse the bundle later |
 | Profile | `java-async-profiler` | CPU, allocation, lock, and wall-clock profiles |
 | | `java-linux-perf` | Linux `perf` with working Java symbols |
 | | `java-hardware-counters` | CPU counter experiments (cache, branch, IPC) |

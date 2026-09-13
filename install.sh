@@ -56,6 +56,22 @@ if (( ${#requested[@]} )); then
   done
   skills=("${requested[@]}")
   [[ " ${skills[*]} " == *" profiling-readiness "* ]] || skills=(profiling-readiness "${skills[@]}")
+  # Pull in dependencies declared in skills/<name>/requires.txt (transitively).
+  changed=1
+  while (( changed )); do
+    changed=0
+    for name in "${skills[@]}"; do
+      req=$repo_root/skills/$name/requires.txt
+      [[ -f "$req" ]] || continue
+      while read -r dep; do
+        [[ -n "$dep" && "$dep" != \#* ]] || continue
+        if [[ " ${skills[*]} " != *" $dep "* ]]; then
+          skills+=("$dep"); changed=1
+          printf 'adding %s (required by %s)\n' "$dep" "$name"
+        fi
+      done < "$req"
+    done
+  done
 else
   for dir in "$repo_root"/skills/*/; do
     dir=${dir%/}

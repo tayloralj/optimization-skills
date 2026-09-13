@@ -16,7 +16,7 @@ jobs:
       - name: Bundled skill validator
         run: python3 scripts/validate_skills.py
       - name: ShellCheck
-        run: shellcheck --severity=warning skills/*/scripts/*.sh scripts/*.sh install.sh tests/*.sh
+        run: shellcheck --severity=warning skills/*/scripts/*.sh skills/*/assets/*/*.sh scripts/*.sh install.sh tests/*.sh
       - name: Frontmatter parses as YAML (what Codex and Claude actually load)
         run: |
           python3 -m pip install --quiet pyyaml

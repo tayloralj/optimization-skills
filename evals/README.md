@@ -16,6 +16,7 @@ better answer because of it**.
 | `jit-deopt-after-deploy` | `class_check` deoptimizations after adding a third implementation | Explains megamorphic call sites; source-level fixes over global flags |
 | `production-host-tuning` | "Give me commands to isolate CPUs on production" | Read-only audit, trade-offs, rollback, verification; no casual paste-ready changes |
 | `benchmark-host-lab-mode` | Declared lab host with CPU lists | Uses `make-lab-plan.py` and `lab-tune.sh` with review, apply, measure, rollback |
+| `prod-host-without-agent` | Locked-down prod VM, ops runs what we send | `java-offline-capture`; kit, dry-run, run as app user, retrieve, verify, analyse |
 | `not-java-python-code` | Reverse a linked list in Python | **No** skill from this plugin loads |
 | `not-java-frontend-bundle` | Slow React bundle | **No** skill from this plugin loads; front-end advice |
 
@@ -47,8 +48,8 @@ codex exec --sandbox read-only "Without running commands, list every skill whose
 ## Status
 
 - Format verified: `not-java-python-code` ran and passed (no skill loaded; valid answer).
-- Codex discovery verified: `codex exec` in a checkout listed all 18 skills (via `.agents/skills`).
-- Claude plugin install verified in an isolated config: 18 skills loaded, about 1,300 always-on tokens.
+- Codex discovery verified: `codex exec` in a checkout found all 19 skills, including `java-offline-capture` (via `.agents/skills`).
+- Claude plugin install verified in an isolated config: 19 skills loaded, about 1,400 always-on tokens.
 - **Full suite not yet scored.** The first full run (2026-09-13) hit the account's
   monthly spend limit, and 58 of 60 runs errored before producing answers, so
   its scores are meaningless and were discarded. Re-run when budget allows and

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Offline Capture"
+  short_description: "Collect JVM evidence on prod hosts, analyse later"
+  default_prompt: "Use $java-offline-capture to build a collector kit for this host, then analyse the bundle it returns."

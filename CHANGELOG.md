@@ -9,6 +9,16 @@ and `.claude-plugin/plugin.json`.
 Making the collection understandable to newcomers and proving it works as skills.
 
 ### Added
+- `java-offline-capture` skill for hosts that cannot run an agent: `build-kit.sh`
+  makes a reproducible, checksummed collector kit (bash only on the target);
+  `collect.sh` captures a bounded bundle (JFR new or dump of a continuous
+  recording, GC logs found from the JVM's log configuration, jcmd and NMT
+  snapshots, thread dumps, optional async-profiler, before/after `/proc`
+  deltas, host audit), scrubs secrets from JFR with `jfr scrub`, and seals it
+  with checksums; `analyze-bundle.py` safely extracts, verifies, and writes
+  `ANALYSIS.md` with findings and next skills. Runbooks for VMs, Kubernetes,
+  JRE-only runtimes, and always-on incident recording.
+- `requires.txt` skill dependencies, followed by `install.sh` and checked by the validator.
 - `java-flight-recorder` skill: JFR settings, `jcmd` control, custom events,
   streaming; `jfr-capture.sh` (bounded recording of a running JVM, no root) and
   `jfr-report.sh` (curated `jfr view` reports). Covers the JDK 25 CPU-time
@@ -23,7 +33,7 @@ Making the collection understandable to newcomers and proving it works as skills
   with a no-root path and glossary, [annotated real output](docs/examples.md)
   from every tool, and an end-to-end [walkthrough](docs/walkthrough/README.md)
   (p99.99 2.18 ms → 55 µs) with a runnable demo program.
-- Eval suite for Claude Code (`evals/`): 8 trigger-and-outcome cases and 2
+- Eval suite for Claude Code (`evals/`): 9 trigger-and-outcome cases and 2
   cases where no skill should load.
 - Tests for all new scripts; optional walkthrough smoke test
   (`WALKTHROUGH_TESTS=1`); relative-link checking in the validator.
@@ -33,7 +43,7 @@ Making the collection understandable to newcomers and proving it works as skills
   `java-optimization-skills`). Reinstall with
   `claude plugin install optimization-skills@optimization-skills`.
 - Skill descriptions rewritten in plain words and shortened by 46%. The
-  always-on context cost for all 18 skills is about 1,300 tokens.
+  always-on context cost for all 19 skills is about 1,400 tokens.
 - `gc-log-summary.py`: `--from-uptime`/`--to-uptime` windows to exclude
   warmup; a log with zero pauses is now a successful result, not an error.
 - `latency-report.py`: flags queueing at p99.9 and p99.99, not only p99, where
@@ -45,6 +55,9 @@ Making the collection understandable to newcomers and proving it works as skills
 ### Fixed
 - `jfr-capture.sh` polled until timeout after a recording finished (the
   "Could not find NAME" message matched the name check).
+- `cmd | grep -q` under `pipefail` could report a false negative when grep
+  exited early (in `jfr-capture.sh` this could end the wait loop too soon);
+  replaced in `jfr-capture.sh`, `native-memory-snapshot.sh`, and the collector.
 
 ## [0.2.0] - 2026-09-13
 
