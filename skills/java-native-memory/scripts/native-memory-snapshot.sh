@@ -80,8 +80,11 @@ if jcmd "$pid" help 2>/dev/null | grep -q 'System.native_heap_info'; then
   capture native-heap-info.xml jcmd "$pid" System.native_heap_info
 fi
 
-[[ $(target_start_time 2>/dev/null) == "$start_before" ]] || {
-  printf 'Target PID changed during snapshot; discard %s.\n' "$output_dir" >&2; exit 5;
+if ! start_after=$(target_start_time 2>/dev/null); then
+  printf 'Target exited during snapshot; discard %s.\n' "$output_dir" >&2; exit 5
+fi
+[[ "$start_after" == "$start_before" ]] || {
+  printf 'Target PID was reused during snapshot; discard %s.\n' "$output_dir" >&2; exit 5;
 }
 chmod 600 "$output_dir"/*
 printf 'snapshot=%s\n' "$output_dir"

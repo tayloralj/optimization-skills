@@ -180,15 +180,15 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
   expect_rc "jit summary on live JDK $major log" 0 python3 "$repo/skills/java-jit-codegen/scripts/jit-log-summary.py" "$work/jit.txt"
   expect_rc "jitter meter spin" 0 java "$repo/skills/java-latency-measurement/scripts/JitterMeter.java" --mode spin --duration 1 --warmup 0
   expect_contains "jitter meter prints percentiles" "p99.99_us=" "$LAST_OUT"
-  java -XX:NativeMemoryTracking=summary -cp "$work/classes" Churn 6 >/dev/null 2>&1 &
+  java -XX:NativeMemoryTracking=summary -cp "$work/classes" Churn 120 >/dev/null 2>&1 &
   jvm=$!
-  sleep 2
+  for _ in $(seq 1 50); do jcmd "$jvm" VM.version >/dev/null 2>&1 && break; sleep 0.2; done
   expect_rc "native snapshot t0" 0 "$nms" "$jvm" "$work/nm0"
   expect_rc "native snapshot t1" 0 "$nms" "$jvm" "$work/nm1"
   expect_rc "nmt compare live snapshots" 0 python3 "$repo/skills/java-native-memory/scripts/nmt-compare.py" "$work/nm0" "$work/nm1"
   expect_contains "nmt compare sees heap" "nmt_committed_delta" "$LAST_OUT"
   [[ $(stat -c %a "$work/nm0") == 700 ]] && ok "snapshot dir is private" || fail "snapshot dir is private"
-  wait "$jvm" 2>/dev/null
+  kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
 else
   printf '== live JDK tests skipped\n'
 fi
