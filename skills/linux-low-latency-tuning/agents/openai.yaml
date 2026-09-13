@@ -1,0 +1,4 @@
+interface:
+  display_name: "Linux Low-Latency Tuning"
+  short_description: "Audit and tune Linux hosts for Java jitter"
+  default_prompt: "Use $linux-low-latency-tuning to audit this host for latency interference and plan one measured change."

@@ -10,7 +10,7 @@ nodes and how cores, SMT siblings, and LLC domains map to CPU IDs.
 
 ## Workflow
 
-1. Run `$profiling-readiness`; then inspect `lscpu -e` and `lstopo` when
+1. Run the `profiling-readiness` skill; then inspect `lscpu -e` and `lstopo` when
    available. Record cgroup/cpuset limits because visible host CPUs may not be
    usable by the process.
 2. If there is one NUMA node, stop the remote-memory experiment. Reframe the
@@ -39,6 +39,12 @@ Use `numactl --localalloc`, not the invalid `--membind=local`. Numeric binding
 requires a node ID, for example `--membind=0`. Query `numactl --hardware` and the
 installed help before composing a command. Read `references/java-numa.md` for
 first touch and JVM caveats.
+
+## Related skills
+
+CPU isolation, IRQ placement, idle states, and the jitter audit live in the
+`linux-low-latency-tuning` skill; measure placement effects with the
+`java-latency-measurement` skill.
 
 ## Guardrails
 

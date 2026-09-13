@@ -5,7 +5,7 @@ description: Design and interpret portable Java PMU and hardware-counter experim
 
 # Java Hardware Counters
 
-Counters are model-specific observations. Start with `$profiling-readiness`,
+Counters are model-specific observations. Start with the `profiling-readiness` skill,
 then build a minimal event set for one hypothesis.
 
 ## Workflow

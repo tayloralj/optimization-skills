@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bundled skill validator
+        run: python3 scripts/validate_skills.py
+      - name: ShellCheck
+        run: shellcheck --severity=warning skills/*/scripts/*.sh scripts/*.sh install.sh tests/*.sh
+      - name: Python syntax
+        run: python3 -m py_compile skills/*/scripts/*.py scripts/*.py tests/*.py
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ["21", "25"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+      - name: Script tests (includes live GC/JIT/NMT logs from this JDK)
+        run: ./tests/run-tests.sh

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Java Native Memory"
+  short_description: "Explain JVM RSS beyond heap with NMT evidence"
+  default_prompt: "Use $java-native-memory to build a native memory ledger for this JVM and find what is growing."

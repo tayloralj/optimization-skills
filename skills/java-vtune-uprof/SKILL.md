@@ -10,7 +10,7 @@ analysis terminology onto AMD PMUs or vice versa.
 
 ## Workflow
 
-1. Run `$profiling-readiness`. Record CPU vendor/model, kernel, tool version,
+1. Run the `profiling-readiness` skill. Record CPU vendor/model, kernel, tool version,
    permissions, topology, JDK, JVM flags, and workload revision.
 2. Select Intel VTune for a supported Intel host and AMD uProf for a supported
    AMD host. If neither tool is installed, do not invent a download URL or CLI;

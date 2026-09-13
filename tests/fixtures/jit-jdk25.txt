@@ -1,0 +1,286 @@
+14    1       3       java.lang.Byte::toUnsignedInt (6 bytes)
+15    2       3       java.lang.String::hashCode (60 bytes)
+                              @ 17   java.lang.String::isLatin1 (19 bytes)   inline
+                              @ 27   java.lang.StringLatin1::hashCode (9 bytes)   inline
+                                @ 5   jdk.internal.util.ArraysSupport::hashCodeOfUnsigned (55 bytes)   failed to inline: callee is too large
+                              @ 37  java/lang/StringUTF16::hashCode (not loaded)   failed to inline: not inlineable
+15    3       3       java.lang.Object::<init> (1 bytes)
+15    4     n 0       jdk.internal.misc.Unsafe::getReferenceVolatile (native)   
+15    5     n 0       jdk.internal.vm.Continuation::enterSpecial (native)   (static)
+15    6     n 0       jdk.internal.vm.Continuation::doYield (native)   (static)
+16    7       3       java.lang.String::coder (15 bytes)
+16    8       3       java.lang.String::isLatin1 (19 bytes)
+17    9       3       java.lang.String::length (11 bytes)
+                              @ 6   java.lang.String::coder (15 bytes)   inline
+17   10       3       jdk.internal.util.Preconditions::checkIndex (18 bytes)
+                              @ 12   jdk.internal.util.Preconditions::outOfBoundsCheckIndex (25 bytes)   failed to inline: callee uses too much stack
+17   11       3       java.lang.String::charAt (25 bytes)
+17   14     n 0       jdk.internal.misc.Unsafe::getLong (native)   
+                              @ 1   java.lang.String::isLatin1 (19 bytes)   inline
+                              @ 12   java.lang.StringLatin1::charAt (15 bytes)   inline
+                     17   15     n 0       java.lang.System::arraycopy (native)   (static)
+           @ 3   java.lang.String::checkIndex (10 bytes)   inline
+                                  @ 5   jdk.internal.util.Preconditions::checkIndex (18 bytes)   intrinsic
+                              @ 21  java/lang/StringUTF16::charAt (not loaded)   failed to inline: not inlineable
+17   12       3       java.lang.StringLatin1::charAt (15 bytes)
+                              @ 3   java.lang.String::checkIndex (10 bytes)   inline
+                                @ 5   jdk.internal.util.Preconditions::checkIndex (18 bytes)   intrinsic
+17   13       3       java.lang.String::checkIndex (10 bytes)
+                              @ 5   jdk.internal.util.Preconditions::checkIndex (18 bytes)   intrinsic
+17   16       3       java.util.ArrayList::add (25 bytes)
+                              @ 20   java.util.ArrayList::add (23 bytes)   inline
+                                @ 7   java.util.ArrayList::grow (11 bytes)   inline
+                                  @ 7   java.util.ArrayList::18   22       4       java.lang.Object::<init> (1 bytes)
+grow (60 bytes)   failed to inline: callee is too large
+18   17       3       java.util.ArrayList::add (23 bytes)
+18    3       3       java.lang.Object::<init> (1 bytes)   made not entrant: not used
+                              @ 7   java.util.ArrayList::grow (11 bytes)   inline
+                                @ 7   java.util.ArrayList::grow (60 bytes)   failed to inline: callee is too large
+18   23       3       java.util.ArrayList$Itr::hasNext (20 bytes)
+18   24       3       java.util.ArrayList$Itr::next (66 bytes)
+                              @ 1   java.util.ArrayList$Itr::checkForComodification (23 bytes)   inline
+                                @ 18  java/util/ConcurrentModificationException::<init> (not loaded)   failed to inline: not inlineable
+                              @ 24  java/util/NoSuchElementException::<init> (not loaded)   failed to inline: not inlineable
+                              @ 46  java/util/ConcurrentModificationException::<init> (not loaded)   failed to inline: not inlineable
+18   19       3       Churn$Sq::<init> (10 bytes)
+18   20       3       Churn$Ci::<init> (10 bytes)
+                              @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                                     @ 1   java.lang.Object::<init>         @ 1   java.lang.Record::<init> (5 bytes) (1 bytes)   inline
+   inline
+                                @ 1   java.lang.Object::<init> (1 bytes)   inline
+19   21       3       Churn$Tr::<init> (15 bytes)
+                              @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                @ 1   java.lang.Object::<init> (1 bytes)   inline
+19   26       3       Churn$Sq::area (10 bytes)
+19   27       3       Churn$Ci::area (14 bytes)
+19   28       3       Churn$Tr::area (14 bytes)
+19   29       4       java.util.ArrayList::add (25 bytes)
+19   18       2       java.lang.Record::<init> (5 bytes)
+19   25       3       java.util.ArrayList$Itr::checkForComodification (23 bytes)
+                              @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 18  java/util/ConcurrentModificationException::<init> (not loaded)   failed to inline: not inlineable
+20   16       3       java.util.ArrayList::add (25 bytes)   made not entrant: not used
+                              @ 20   java.util.ArrayList::add (23 bytes)   inline (hot)
+                                @ 7   java.util.ArrayList::grow (11 bytes)   failed to inline: low call site frequency
+20   33       4       java.util.ArrayList$Itr::hasNext (20 bytes)
+20   34       4       java.util.ArrayList$Itr::next (66 bytes)
+20   23       3       java.util.ArrayList$Itr::hasNext (20 bytes)   made not entrant: not used
+20   30       4       Churn$Sq::area (10 bytes)
+20   26       3       Churn$Sq::area (10 bytes)   made not entrant: not used
+20   31       4       Churn$Ci::area (14 bytes)
+20   35     n 0       java.lang.Object::getClass (native)   
+20   27       3       Churn$Ci::area (14 bytes)   made not entrant: not used
+20   32       4       Churn$Tr::area (14 bytes)
+21   24       3       java.util.ArrayList$Itr::next (66 bytes)   made not entrant: not used
+                              @ 1   java.util.ArrayList$Itr::checkForComodification (23 bytes)   inline (hot)
+21   28       3       Churn$Tr::area (14 bytes)   made not entrant: not used
+21   36       3       java.lang.Math::min (11 bytes)
+21   37       4       Churn$Sq::<init> (10 bytes)
+21   19       3       Churn$Sq::<init> (10 bytes)   made not entrant: not used
+                              @ 1   java.lang.Record::<init> (5 bytes)   inline (hot)
+                                @ 1   java.lang.Object::<init> (1 bytes)   inline (hot)
+21   39       4       Churn$Tr::<init> (15 bytes)
+21   38       4       Churn$Ci::<init> (10 bytes)
+21   21       3       Churn$Tr::<init> (15 bytes)   made not entrant: not used
+                              @ 1  22   20       3       Churn$Ci::<init> (10 bytes)   made not entrant: not used
+                              @ 1   java.lang.Record:: java.lang.Record::<init> (5 bytes)   inline (hot)
+                                @ 1  <init> (5 bytes)   inline (hot) java.lang.Object::<init> (1 bytes)
+                inline (hot)
+                   @ 1   java.lang.Object::<init> (1 bytes)   inline (hot)
+23   40       3       java.lang.Math::max (11 bytes)
+23   41       3       jdk.internal.util.ArraysSupport::newLength (27 bytes)
+                              @ 3   java.lang.Math::max (11 bytes)   inline
+                              @ 23   jdk.internal.util.ArraysSupport::hugeLength (60 bytes)   failed to inline: callee is too large
+24   42     n 0       jdk.internal.misc.Unsafe::compareAndSetLong (native)   
+24   43       3       java.util.ArrayList::grow (11 bytes)
+24   44       3       java.util.ArrayList::grow (60 bytes)
+                              @ 7   java.util.ArrayList::grow (60 bytes)   failed to inline: callee is too large
+                              @ 49   java.lang.Math::max (11 bytes)   inline
+                              @ 27   jdk.internal.util.ArraysSupport::24   45       3       java.util.Arrays::copyOf (10 bytes)
+newLength (27 bytes)   inline
+                                      @ 3   java.lang.Object::getClass                       (0 bytes)   intrinsic
+  @ 3   java.lang.Math::max                    (11 bytes)   inline
+           @ 6   java.util.Arrays::copyOf (40 bytes)   failed to inline: callee is too large
+                                @ 23   jdk.internal.util.ArraysSupport::hugeLength (60 bytes)   failed to inline: callee is too large
+                              @ 37   java.util.Arrays::copyOf (10 bytes)   inline24   46       3       java.util.Arrays::copyOf (40 bytes)
+
+                                @ 3   java.lang.Object::getClass (0 bytes)   intrinsic
+                                                   @ 6   java.util.Arrays::           copyOf (40 bytes)   failed to inline: callee is too large@ 14   java.lang.Class::getComponentType
+ (5 bytes)   inline
+                              @ 18  java/lang/reflect/Array::newInstance (not loaded)   failed to inline: not inlineable
+                              @ 32   java.lang.Math::min (11 bytes)   inline
+                              @ 35   java.lang.System::arraycopy (0 bytes)   intrinsic
+28   47 %     3       Churn::main @ 49 (221 bytes)
+                              @ 4   java.util.ArrayList::<init> (12 bytes)   inline
+                                @ 1   java.util.AbstractList::<init> (10 bytes)   inline
+                                  @ 1   java.util.AbstractCollection::<init> (5 bytes)   inline
+                                    @ 1   java.lang.Object::<init> (1 bytes)   inline
+28   48 %     3       Churn::sum @ 9 (44 bytes)
+                              @ 13   java.util.Random::<init> (53 bytes)   failed to inline: callee is too large
+                                                   @ 19   java.lang.System::nanoTime (0 bytes)         @ 3     intrinsic
+ java.util.List::                   iterator (0 bytes)   failed to inline: no static binding           @ 28   java.lang.System::nanoTime
+ (0 bytes)   intrinsic
+                              @ 41   java.util.ArrayList::<init>                              @ 10   java.util.Iterator::hasNext (12 bytes)   inline
+ (0 bytes)                                   failed to inline: no static binding
+@ 1                                @ 19   java.util.Iterator::next java.util.AbstractList::<init> (10 bytes)   inline
+                                  @ 1   java.util.AbstractCollection::<init> (5 bytes)   inline
+                                    @ 1   java.lang.Object::<init> (0 bytes)   failed to inline: no static binding
+ (1 bytes)   inline                              @ 32   Churn$Shape::area
+ (0 bytes)   failed to inline: no static binding
+                              @ 95   Churn$Sq::<init> (10 bytes)   inline
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 108   Churn$Ci::<init> (10 bytes)   inline
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 124   Churn$Tr::<init> (15 bytes)   inline
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 127   java.util.List::add (0 bytes)   failed to inline: no static binding
+                              @ 142   Churn::sum (44 bytes)   failed to inline: callee is too large
+29   49       3       Churn::sum (44 bytes)
+                              @ 151   java.util.Random::nextInt (74 bytes)   failed to inline: callee is too large                   
+                   @ 3                        @ 156   java.util.List::add (0 bytes) java.util.List::iterator (0 bytes)   failed to inline: no static binding
+   failed to inline: no static binding
+                                                            @ 10   java.util.Iterator::@ 163   java.util.List::size (0 bytes)   failed to inline: no static binding
+hasNext (0 bytes)   failed to inline: no static binding
+                                                   @ 179   java.util.List::         @ 19  subList (0 bytes)   failed to inline: no static binding
+ java.util.Iterator::next (0 bytes)                              @ 184   java.util.List::clear   failed to inline: no static binding
+ (0 bytes)                              @ 32   Churn$Shape::area   failed to inline: no static binding
+ (0 bytes)   failed to inline: no static binding
+                              @ 193   java.util.Random::nextInt (74 bytes)   failed to inline: callee is too large
+                              @ 204   java.util.List::add (0 bytes)   failed to inline: no static binding
+                              @ 217  java/io/PrintStream::println (not loaded)   failed to inline: not inlineable
+30   50       3       Churn::main (221 bytes)
+                              @ 4   java.util.ArrayList::<init> (12 bytes)   inline
+                                @ 1   java.util.AbstractList::<init> (10 bytes)   inline
+                                  @ 1   java.util.AbstractCollection::<init> (5 bytes)   inline
+                                    @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 13   java.util.Random::<init> (53 bytes)   failed to inline: callee is too large
+                              @ 19   java.lang.System::nanoTime (0 bytes)   intrinsic
+                              @ 28   java.lang.System::nanoTime (0 bytes)   intrinsic
+                              @ 41   java.util.ArrayList::<init> (12 bytes)   inline
+                                @ 1   java.util.AbstractList::<init> (10 bytes)   inline
+                                  @ 1   java.util.AbstractCollection::<init> (5 bytes)   inline
+                                    @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 95   Churn$Sq::<init> (10 bytes)   inline
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 108   Churn$Ci::<init> (10 bytes)   inline
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 124   Churn$Tr::<init> (15 bytes)   inline
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline
+                              @ 127   java.util.List::add (0 bytes)   failed to inline: no static binding
+                              @ 142   Churn::sum (44 bytes)   failed to inline: callee is too large
+                              @ 151   java.util.Random::nextInt (74 bytes)   failed to inline: callee is too large
+                              @ 156   java.util.ArrayList::add (25 bytes)   inline
+                                @ 20   java.util.ArrayList::add (23 bytes)   inline
+                                  @ 7   java.util.ArrayList::grow (11 bytes)   inline
+                                    @ 7   java.util.ArrayList::grow (60 bytes)   failed to inline: callee is too large
+                              @ 163   java.util.ArrayList::size (5 bytes)   inline
+                              @ 179   java.util.ArrayList::subList (20 bytes)   failed to inline: callee uses too much stack
+                              @ 184   java.util.List::clear (0 bytes)   failed to inline: no static binding
+                              @ 193   java.util.Random::nextInt (74 bytes)   failed to inline: callee is too large
+                              @ 204   java.util.ArrayList::add (25 bytes)   inline
+                                @ 20   java.util.ArrayList::add (23 bytes)   inline
+                                  @ 7   java.util.ArrayList::grow (11 bytes)   inline
+                                    @ 7   java.util.ArrayList::grow (60 bytes)   failed to inline: callee is too large
+                              @ 217  java/io/PrintStream::println (not loaded)   failed to inline: not inlineable
+31   51 %     4       Churn::main @ 49 (221 bytes)
+31   52 %     4       Churn::sum @ 9 (44 bytes)
+33   53       1       java.util.concurrent.atomic.AtomicLong::get (5 bytes)
+34   48 %     3       Churn::sum @ 9 (44 bytes)   made not entrant: OSR invalidation of lower level
+                              @ 10   java.util.ArrayList$Itr::hasNext (20 bytes)   inline (hot)   callee changed to  Churn::sum (44 bytes)    \-> TypeProfile (40020/40020 counts) = java/util/ArrayList$Itr
+                              @ 19   java.util.ArrayList$Itr::next (66 bytes)   inline (hot)
+                                @ 1   java.util.ArrayList$Itr::checkForComodification (23 bytes)   inline (hot)
+                              @ 32   Churn$Shape::area (0 bytes)   failed to inline: virtual call
+34   54       4       Churn::sum (44 bytes)
+36   49       3       Churn::sum (44 bytes)   made not entrant: not used
+                              @ 3   java.util.ArrayList::iterator (9 bytes)   inline (hot)   callee changed to  Churn::sum (44 bytes)    \-> TypeProfile (45/45 counts) = java/util/ArrayList
+                                @ 5   java.util.ArrayList$Itr::<init> (31 bytes)   inline (hot)
+                                  @ 3   java.util.Objects::requireNonNull (14 bytes)   force inline by annotation
+                                  @ 11   java.lang.Object::<init> (1 bytes)   inline (hot)
+                              @ 10   java.util.ArrayList$Itr::hasNext (20 bytes)   inline (hot)   inline (hot)
+                              @ 19   java.util.ArrayList$Itr::next (66 bytes)   inline (hot)
+                                @ 1   java.util.ArrayList$Itr::checkForComodification (23 bytes)   inline (hot)
+                              @ 32   Churn$Shape::area (0 bytes)   failed to inline: virtual call
+38   55       1       java.util.ArrayList::size (5 bytes)
+39   56       3       java.util.Random::next (47 bytes)
+39   57       3       java.util.concurrent.atomic.AtomicLong::compareAndSet (13 bytes)
+                              @ 8   java.util.concurrent.atomic.AtomicLong::get (5 bytes)   inline
+                              @ 9                        jdk.internal.misc.Unsafe::compareAndSetLong (0 bytes)   intrinsic
+         @ 32   java.util.concurrent.atomic.AtomicLong::compareAndSet (13 bytes)   failed to inline: callee uses too much stack
+41   58       3       java.util.Random::nextInt (74 bytes)
+                              @ 10   java.lang.IllegalArgumentException::<init> (6 bytes)   failed to inline: don't inline Throwable constructors
+                              @ 17   java.util.Random::next (47 bytes)   failed to inline: callee is too large
+                              @ 64   java.util.Random::next (47 bytes)   failed to inline: callee is too large
+41   47 %     3       Churn::main @ 49 (221 bytes)   made not entrant: OSR invalidation of lower level
+                              @ 28   java.lang.System::nanoTime (0 bytes)   (intrinsic)
+                              @ 41   java.util.ArrayList::<init> (12 bytes)   inline (hot)
+                                @ 1   java.util.AbstractList::<init> (10 bytes)   inline (hot)
+                                  @ 1   java.util.AbstractCollection::<init> (5 bytes)   inline (hot)
+                                    @ 1   java.lang.Object::<init> (1 bytes)   inline (hot)
+                              @ 95   Churn$Sq::<init> (10 bytes)   inline (hot)
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline (hot)
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline (hot)
+                              @ 108   Churn$Ci::<init> (10 bytes)   inline (hot)
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline (hot)
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline (hot)
+                              @ 124   Churn$Tr::<init> (15 bytes)   inline (hot)
+                                @ 1   java.lang.Record::<init> (5 bytes)   inline (hot)
+                                  @ 1   java.lang.Object::<init> (1 bytes)   inline (hot)
+                              @ 127   java.util.ArrayList::add (25 bytes)   inline (hot)
+                                @ 20   java.util.ArrayList::add (23 bytes)   inline (hot)
+                                  @ 7   java.util.ArrayList::grow (11 bytes)   failed to inline: low call site frequency
+                              @ 142   Churn::sum (44 bytes)   inline (hot)
+                                @ 3   java.util.ArrayList::iterator (9 bytes)   inline (hot)
+                                  @ 5   java.util.ArrayList$Itr::<init> (31 bytes)   inline (hot)
+                                    @ 3   java.util.Objects::requireNonNull (14 bytes)   force inline by annotation
+                                    @ 11   java.lang.Object::<init> (1 bytes)   inline (hot)
+                                @ 10   java.util.ArrayList$Itr::hasNext (20 bytes)   inline (hot)   inline (hot)
+                                @ 19   java.util.ArrayList$Itr::next (66 bytes)   inline (hot)
+                                  @ 1   java.util.ArrayList$Itr::checkForComodification (23 bytes)   inline (hot)
+                                @ 32   Churn$Shape::area (0 bytes)   failed to inline: virtual call
+                              @ 151   java.util.Random::nextInt (74 bytes)   inline (hot)
+                                @ 17   java.util.Random::next (47 bytes)   failed to inline: too big
+                                @ 64   java.util.Random::next (47 bytes)   failed to inline: too big
+                              @ 156   java.util.ArrayList::add (25 bytes)   inline (hot)
+                                @ 20   java.util.ArrayList::add (23 bytes)   inline (hot)
+                                  @ 7   java.util.ArrayList::grow (11 bytes)   failed to inline: low call site frequency
+                              @ 163   java.util.ArrayList::size (5 bytes)   accessor
+                              @ 179   java.util.ArrayList::subList (20 bytes)   failed to inline: never executed
+                              @ 184   java.util.List::clear (0 bytes)   failed to inline: virtual call
+                              @ 193   java.util.Random::nextInt (74 bytes)   inline (hot)
+                                @ 17   java.util.Random::next (47 bytes)   failed to inline: too big
+                                @ 64   java.util.Random::next (47 bytes)   failed to inline: too big
+                              @ 204   java.util.ArrayList::add (25 bytes)   failed to inline: low call site frequency
+54   59       4       java.util.ArrayList::grow (11 bytes)
+56   43       3       java.util.ArrayList::grow (11 bytes)   made not entrant: not used
+                              @ 7   java.util.ArrayList::grow (60 bytes)   inline (hot)
+                                @ 27   jdk.internal.util.ArraysSupport::newLength (27 bytes)   inline (hot)
+                                  @ 3   java.lang.Math::max (11 bytes)   (intrinsic)
+                                @ 37   java.util.Arrays::copyOf (10 bytes)   inline (hot)
+                                  @ 3   java.lang.Object::getClass (0 bytes)   (intrinsic)
+                                  @ 6   java.util.Arrays::copyOf (40 bytes)   (intrinsic)
+                                @ 49   java.lang.Math::max (11 bytes)   (intrinsic)
+74   60       4       java.util.concurrent.atomic.AtomicLong::compareAndSet (13 bytes)
+74   57       3       java.util.concurrent.atomic.AtomicLong::compareAndSet (13 bytes)   made not entrant: not used
+                              @ 9   jdk.internal.misc.Unsafe::compareAndSetLong (0 bytes)   (intrinsic)
+180   61       4       java.util.Random::next (47 bytes)
+181   56       3       java.util.Random::next (47 bytes)   made not entrant: not used
+                              @ 8   java.util.concurrent.atomic.AtomicLong::get (5 bytes)   accessor
+                              @ 32   java.util.concurrent.atomic.AtomicLong::compareAndSet (13 bytes)   inline (hot)
+                                @ 9   jdk.internal.misc.Unsafe::compareAndSetLong (0 bytes)   (intrinsic)
+2107   62 %     3       java.util.ArrayList::shiftTailOverGap @ 34 (53 bytes)
+                              @ 10   java.lang.System::arraycopy (0 bytes)   intrinsic
+2141   63       3       java.util.ArrayList::shiftTailOverGap (53 bytes)
+                              @ 10   java.lang.System::arraycopy (0 bytes)   intrinsic
+3266   64 %     4       java.util.ArrayList::shiftTailOverGap @ 34 (53 bytes)
+3267   62 %     3       java.util.ArrayList::shiftTailOverGap @ 34 (53 bytes)   made not entrant: OSR invalidation of lower level
+3436   65       4       java.util.ArrayList::shiftTailOverGap (53 bytes)
+3437   63       3       java.util.ArrayList::shiftTailOverGap (53 bytes)   made not entrant: not used
+                              @ 10   java.lang.System::arraycopy (0 bytes)   (intrinsic)
+4017   51 %     4       Churn::main @ 49 (221 bytes)   made not entrant: uncommon trap
+5.048873507916401E14

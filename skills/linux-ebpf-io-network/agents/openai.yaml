@@ -1,0 +1,4 @@
+interface:
+  display_name: "Linux eBPF, I/O and Network"
+  short_description: "Find JVM waiting time in kernel, I/O, network"
+  default_prompt: "Use $linux-ebpf-io-network to find where this Java workload waits in the kernel, disk, or network."

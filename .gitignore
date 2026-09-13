@@ -6,3 +6,6 @@ perf.data*
 target/
 build/
 .idea/
+__pycache__/
+*.pyc
+!tests/fixtures/*.log
