@@ -23,8 +23,8 @@ Mode:
   --dry-run    print actions without changing anything
 
 With no SKILL arguments every skill is installed. profiling-readiness is always
-included because the specialised skills route through it. Subsets omit other
-workflow destinations: install the whole collection for complete investigations.
+included because the specialised skills route through it. Declared helper
+dependencies are also included. Subsets omit other workflow destinations: install the whole collection for complete investigations.
 Use CODEX_SKILLS_DIR to override the Codex directory (including legacy cleanup).
 
 Claude Code users may prefer the plugin instead:
@@ -62,6 +62,22 @@ if (( ${#requested[@]} )); then
   fi
   skills=("${requested[@]}")
   [[ " ${skills[*]} " == *" profiling-readiness "* ]] || skills=(profiling-readiness "${skills[@]}")
+  # Pull in dependencies declared in skills/<name>/requires.txt (transitively).
+  changed=1
+  while (( changed )); do
+    changed=0
+    for name in "${skills[@]}"; do
+      req=$repo_root/skills/$name/requires.txt
+      [[ -f "$req" ]] || continue
+      while read -r dep; do
+        [[ -n "$dep" && "$dep" != \#* ]] || continue
+        if [[ " ${skills[*]} " != *" $dep "* ]]; then
+          skills+=("$dep"); changed=1
+          printf 'adding %s (required by %s)\n' "$dep" "$name"
+        fi
+      done < "$req"
+    done
+  done
 else
   for dir in "$repo_root"/skills/*/; do
     dir=${dir%/}

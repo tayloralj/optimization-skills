@@ -76,7 +76,7 @@ fi
 capture gc-heap-info.txt jcmd "$pid" GC.heap_info
 capture metaspace.txt jcmd "$pid" VM.metaspace
 capture codecache.txt jcmd "$pid" Compiler.codecache
-if jcmd "$pid" help 2>/dev/null | grep -q 'System.native_heap_info'; then
+if jcmd "$pid" help 2>/dev/null | grep 'System.native_heap_info' >/dev/null; then
   capture native-heap-info.xml jcmd "$pid" System.native_heap_info
 fi
 

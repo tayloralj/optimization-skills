@@ -20,6 +20,7 @@ better answer because of it**.
 | `incomplete-capture` | All JFR views failed with exit zero | Does not infer absence of GC or contention |
 | `periodic-allocation` | Allocating first measured round but final-round PASS | Requires every measured round to meet the allocation budget |
 | `interrupted-rollback` | Failed restoration followed by rolled-back status | Treats state as incomplete and preserves recovery evidence |
+| `prod-host-without-agent` | Locked-down prod VM, ops runs what we send | `java-offline-capture`; kit, dry-run, run as app user, retrieve, verify, analyse |
 | `not-java-python-code` | Reverse a linked list in Python | **No** skill from this plugin loads |
 | `not-java-frontend-bundle` | Slow React bundle | **No** skill from this plugin loads; front-end advice |
 
@@ -58,8 +59,8 @@ Installation and format checks are not behavioral evals.
 ## Status
 
 - Format verified: `not-java-python-code` ran and passed (no skill loaded; valid answer).
-- Codex discovery verified: `codex exec` in a checkout listed all 18 skills (via `.agents/skills`).
-- Claude plugin install verified in an isolated config: 18 skills loaded, about 1,300 always-on tokens.
+- Codex discovery verified: `codex exec` in a checkout found all 19 skills, including `java-offline-capture` (via `.agents/skills`).
+- Claude plugin install verified in an isolated config: 19 skills loaded, about 1,400 always-on tokens.
 - **Full suite not yet scored.** The first full run (2026-09-13) hit the account's
   monthly spend limit, and 58 of 60 runs errored before producing answers, so
   its scores are meaningless and were discarded. Re-run when budget allows and
@@ -80,3 +81,11 @@ Installation and format checks are not behavioral evals.
   before model execution; that is unverified, not a score.
 - Release remains gated on completed behavioral results for both agents; the
   historical full-suite budget failure above is not resolved by local tests.
+
+## PR refresh, 2026-09-14
+
+Main's offline-capture additions were merged into the hardening branch, preserving
+all regression cases and the bounded JFR completion checks. The attempted Claude
+eval retry was blocked by automatic approval review before execution because it
+would send plugin content to Claude and could incur up to $5. No new behavioral
+score is claimed; the release gate above remains open.

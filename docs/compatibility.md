@@ -68,3 +68,14 @@ Worktree validation on Linux 7.0.0-31-generic:
 
 No live perf, async-profiler, BCC, VTune, or uProf captures were performed during
 this validation. Live JVM tests attached only to their own temporary processes.
+
+## Merged-branch verification, 2026-09-14
+
+After integrating main's offline capture kit, the full suite including walkthrough
+checks passed on Temurin 25.0.2 (125 checks) and Oracle 21.0.10 (126 checks).
+The Python suite passed all 34 tests. All 19 skills passed structural and agent
+validation; ShellCheck 0.11.0 passed, including the offline collector. The expected
+root CLAUDE.md context warning remains. Live attachment checks ran outside the
+agent sandbox against temporary test-owned JVMs after sandbox attachment failed.
+These are correctness checks, not new performance measurements. Claude behavioral
+evaluation remains unverified; see the evaluation status linked above.

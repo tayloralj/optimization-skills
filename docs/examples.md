@@ -16,6 +16,7 @@ trimmed for length. Every script lives in `skills/<skill>/scripts/` and prints
 - [Latency report](#latency-report)
 - [Allocation probe](#allocation-probe)
 - [eBPF capture (dry run)](#ebpf-capture-dry-run)
+- [Offline capture on a host without an agent](#offline-capture-on-a-host-without-an-agent)
 
 ## Profiling readiness
 
@@ -255,3 +256,64 @@ dry_run=1 (nothing executed). The operator runs the command above as root.
 command for you to run (in Claude Code: `! sudo ...`) instead of trying to
 escalate. For stack-based tools it also warns when Java frames will be
 unreadable and how to fix that.
+
+## Offline capture on a host without an agent
+
+On the analysis machine, `skills/java-offline-capture/scripts/build-kit.sh ./kits`:
+
+```text
+kit=./kits/jvm-collector-0.3.0.tar.gz
+sha256=fef2f1591d29e56645c95fc354a71c2c47c8e83fb6f9d7be1fb5e8e002532fdc
+files=9
+```
+
+On the target host, as the JVM's user, `bash collect.sh --pid 2770898 --duration 20 --thread-dumps 2 --cpus 4-5 --redact-hostname --yes`:
+
+```text
+[19:14:17] proc-start             ok
+[19:14:18] readiness              ok
+[19:14:18] jcmd-VM.version        ok
+...
+[19:14:20] nmt-start              ok
+[19:14:26] thread-dump-1          ok
+[19:14:32] thread-dump-2          ok
+[19:14:41] jfr-new                ok
+[19:14:41] host-audit             ok
+[19:14:42] nmt-end                ok
+[19:14:42] gc-logs                copied=3 bytes=12266708
+
+bundle=.../jvmcap-host-57eb5aed-2770898-20260913T191417Z.tar.gz
+size_bytes=15210565
+sha256=2313618bf1d2439f42e88a2d89e14b7e04c8784814e283a4bc9c235598fb332a
+```
+
+Back on the analysis machine, `analyze-bundle.py jvmcap-....tar.gz ./analysis --expect-sha256 2313618b...` writes `ANALYSIS.md`:
+
+```text
+## Findings
+
+- **warn**: GC pauses took 19.3% of wall time (high allocation or small heap)
+- **warn**: GC alarms: evacuation_failure: 28, humongous_allocation: 53
+- **info**: time-to-safepoint reached 13.7 ms (threads slow to stop)
+
+## Suggested next skills
+
+- `java-gc-tuning`
+
+## Process
+
+- RSS 173 MiB → 204 MiB (+30 MiB over the window)
+- 25 threads; total CPU 178% of one core
+
+| Thread (tid) | CPU % | Run-queue delay ms | Involuntary switches | Last CPU |
+| java (2770900) | 78.7 | 12.9 | 733 | 3 |
+| GC Thread#0 (2770903) | 14.7 | 11.9 | 304 | 12 |
+```
+
+**Reading it:** the demo workload (a deliberately allocation-heavy program with
+a 128 MB heap) spent a fifth of its time in GC, and the GC threads rank
+right behind the application thread in CPU. The report also holds the JFR
+views (hot methods, allocation by site), NMT deltas, interrupt and vmstat
+deltas, and thread-dump state counts. In the bundle the JFR recording has zero
+environment-variable, system-property, command-line, and process events, and
+the real hostname appears nowhere.

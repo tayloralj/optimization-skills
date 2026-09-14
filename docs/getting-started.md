@@ -92,6 +92,22 @@ most investigations:
 Only CPU hardware counters, `perf`, eBPF, and lab-mode tuning need more
 access, and the readiness check tells you exactly which.
 
+## The problem host can't run an agent
+
+Production and QA hosts usually won't have Codex or Claude installed, and you
+may not have a shell there at all. Ask for a capture kit instead:
+
+> "Build a collector kit for our order service on prod (PID unknown, runs as
+> `orders`) to capture the 18:00 latency spike. I'll send the bundle back."
+
+The **`java-offline-capture`** skill builds `jvm-collector-VERSION.tar.gz` and
+writes step-by-step instructions for the operator: verify, `--dry-run`, run as
+the application user, and copy the bundle back. The collector needs only bash
+on the host. It is read-only apart from attaching to that one JVM, and it
+strips environment variables and command lines from recordings. When the
+bundle comes back, the agent verifies it and produces `ANALYSIS.md` with
+findings, then carries on with the usual skills.
+
 ## See it end to end
 
 The [walkthrough](walkthrough/README.md) takes a p99.99 latency problem from

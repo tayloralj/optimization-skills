@@ -48,8 +48,8 @@ Restart the agent afterwards. Requirements: Linux, Bash 4+, GNU coreutils (inclu
 Python 3.9+ (standard library only), and a JDK 21 or 25. Profilers, BCC/bpftrace, and JOL are optional and
 detected when needed.
 
-The full install is recommended. Named subsets include readiness but omit other
-skills referenced by their workflows. Set `CODEX_SKILLS_DIR` to override the
+The full install is recommended. Named subsets include readiness and declared helper dependencies, but omit
+other skills referenced by their workflows. Set `CODEX_SKILLS_DIR` to override the
 Codex destination. For a previous legacy install, remove its owned entries with
 `CODEX_SKILLS_DIR="$HOME/.codex/skills" ./install.sh --codex --uninstall`, then
 install into the default location. Keep the checkout in place for symlink installs.
@@ -63,6 +63,7 @@ Describe the problem in your own words. The agent can select a matching skill au
 - "This JVM's RSS keeps growing but the heap is flat."
 - "Review this hot path for allocation and contention."
 - "Is this machine ready for latency testing on CPUs 4-7?"
+- "Production can't run an agent. Give the ops team a kit to capture the JVM during tonight's peak, and I'll send you the result."
 
 Or name a skill directly: `/optimization-skills:java-gc-tuning` with the Claude
 plugin, `/java-gc-tuning` with standalone Claude skills, or `$java-gc-tuning`
@@ -81,6 +82,7 @@ routes to the rest.
 | Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
 | | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |
 | | `java-jmh-benchmarking` | Write and run microbenchmarks that model production |
+| | `java-offline-capture` | Collect evidence on prod/QA hosts that can't run an agent; analyse the bundle later |
 | Profile | `java-async-profiler` | CPU, allocation, lock, and wall-clock profiles |
 | | `java-linux-perf` | Linux `perf` with working Java symbols |
 | | `java-hardware-counters` | CPU counter experiments (cache, branch, IPC) |

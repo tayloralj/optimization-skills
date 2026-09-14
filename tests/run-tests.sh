@@ -242,6 +242,63 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
   expect_rc "allocation probe rejects non-finite threshold" 2 java -cp "$work/alloc" "$probe" NoAlloc --max-bytes-per-op NaN
   expect_rc "allocation probe rejects non-Runnable" 2 java -cp "$work/alloc" "$probe" java.lang.String
 
+  printf '== offline capture kit (live)\n'
+  kitbuild=$repo/skills/java-offline-capture/scripts/build-kit.sh
+  analyze=$repo/skills/java-offline-capture/scripts/analyze-bundle.py
+  expect_rc "kit builds" 0 "$kitbuild" "$work/kits"
+  kit_sha1=$(sha256sum "$work"/kits/*.tar.gz | awk '{print $1}')
+  expect_rc "kit build is reproducible" 0 "$kitbuild" "$work/kits2"
+  [[ $(sha256sum "$work"/kits2/*.tar.gz | awk '{print $1}') == "$kit_sha1" ]] && ok "kit sha256 identical across builds" || fail "kit sha256 identical across builds"
+  mkdir -p "$work/target" && tar -xzf "$work"/kits/*.tar.gz -C "$work/target"
+  kitdir=$(echo "$work"/target/jvm-collector-*)
+  (cd "$kitdir" && sha256sum -c --quiet SHA256SUMS) && ok "kit checksums verify" || fail "kit checksums verify"
+  collect=$kitdir/collect.sh
+
+  expect_rc "collect rejects non-java pid" 4 bash "$collect" --pid $$ --duration 10 --yes --out "$work/caps"
+  expect_rc "collect rejects bad duration" 2 bash "$collect" --pid $$ --duration 5
+
+  (cd "$work" && exec java -XX:NativeMemoryTracking=summary -Xmx128m \
+     "-Xlog:gc*,safepoint:file=$work/capgc.log:time,uptime,level,tags" \
+     -XX:StartFlightRecording=name=continuous,settings=default,maxage=5m -cp "$work/classes" Churn 120 >/dev/null 2>&1) &
+  jvm=$!
+  for _ in $(seq 1 50); do jcmd "$jvm" VM.version >/dev/null 2>&1 && break; sleep 0.2; done
+  expect_rc "collect requires --yes when not interactive" 2 bash -c "bash '$collect' --pid \$1 --duration 10 --out '$work/caps' < /dev/null" _ "$jvm"
+  install -d -m 755 "$work/shared-out"
+  expect_rc "collect refuses a group/world-readable --out" 4 bash "$collect" --pid "$jvm" --duration 10 --yes --out "$work/shared-out"
+  [[ $(stat -c %a "$work/shared-out") == 755 ]] && ok "collect leaves existing --out permissions alone" || fail "collect leaves existing --out permissions alone"
+  expect_rc "collect dry-run" 0 bash "$collect" --pid "$jvm" --duration 10 --dry-run --out "$work/caps"
+  [[ ! -e "$work/caps" ]] && ok "dry-run wrote nothing" || fail "dry-run wrote nothing"
+  expect_rc "collect lists java processes" 0 bash "$collect" --list
+  expect_contains "collect list shows target" "$jvm" "$LAST_OUT"
+  expect_rc "collect new recording" 0 bash "$collect" --pid "$jvm" --duration 10 --thread-dumps 1 --redact-hostname --out "$work/caps" --yes
+  bundle_tgz=$(ls "$work"/caps/jvmcap-host-*.tar.gz 2>/dev/null | head -1)
+  [[ -n "$bundle_tgz" && $(stat -c %a "$bundle_tgz") == 600 ]] && ok "bundle archive is private" || fail "bundle archive is private" "$(ls -la "$work/caps")"
+  if [[ -n "$bundle_tgz" ]]; then
+    bundle_sha=$(sha256sum "$bundle_tgz" | awk '{print $1}')
+    expect_rc "analyze bundle" 0 python3 "$analyze" "$bundle_tgz" "$work/analysis" --expect-sha256 "$bundle_sha"
+    analysis_md=$(cat "$work/analysis/ANALYSIS.md" 2>/dev/null)
+    for needle in "## Findings" "Integrity: OK" "## Process" "During the capture window" "recording.jfr" "## Native memory" "thread-dump-01.txt"; do
+      expect_contains "analysis contains: $needle" "$needle" "$analysis_md"
+    done
+    extracted=$(echo "$work"/analysis/jvmcap-*)
+    grep -q '^jfr_scrub.recording.jfr=ok' "$extracted/MANIFEST.txt" && ok "jfr scrubbed on target" || fail "jfr scrubbed on target"
+    leaked=$(jfr summary "$extracted/jvm/recording.jfr" 2>/dev/null | awk '/InitialEnvironmentVariable|InitialSystemProperty|SystemProcess|JVMInformation/ {s += $2} END {print s + 0}')
+    [[ "$leaked" == 0 ]] && ok "no env/property/command-line events in recording" || fail "no env/property/command-line events in recording" "count=$leaked"
+    grep -rqF "$(uname -n)" "$extracted" && fail "hostname redacted everywhere" || ok "hostname redacted everywhere"
+    ls "$extracted"/logs/*gc* >/dev/null 2>&1 && ok "gc log auto-detected and copied" || fail "gc log auto-detected and copied"
+  fi
+  expect_rc "collect dump of continuous recording" 0 bash "$collect" --pid "$jvm" --jfr dump --duration 10 --out "$work/caps-dump" --yes
+  dump_tgz=$(ls "$work"/caps-dump/*.tar.gz 2>/dev/null | head -1)
+  [[ -n "$dump_tgz" ]] && tar -tzf "$dump_tgz" | grep 'jvm/continuous.jfr' >/dev/null && ok "dump bundle has continuous.jfr" || fail "dump bundle has continuous.jfr"
+  bash "$collect" --pid "$jvm" --duration 60 --jfr none --out "$work/caps-int" --yes > "$work/int.log" 2>&1 &
+  collector=$!
+  sleep 6; kill -TERM "$collector"; wait "$collector"; int_rc=$?
+  [[ $int_rc == 130 ]] && ok "interrupted collect exits 130" || fail "interrupted collect exits 130" "rc=$int_rc $(tail -5 "$work/int.log")"
+  int_tgz=$(ls "$work"/caps-int/*.tar.gz 2>/dev/null | head -1)
+  [[ -n "$int_tgz" ]] && tar -xzOf "$int_tgz" --wildcards '*/MANIFEST.txt' | grep '^interrupted=1' >/dev/null \
+    && ok "interrupted collect still writes a partial bundle" || fail "interrupted collect still writes a partial bundle" "$(tail -5 "$work/int.log")"
+  kill "$jvm" 2>/dev/null; wait "$jvm" 2>/dev/null
+
   if [[ ${WALKTHROUGH_TESTS:-0} == 1 ]]; then
     wt=$work/walk
     mkdir -p "$wt"
