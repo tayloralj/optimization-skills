@@ -31,14 +31,18 @@ def load(path: str) -> dict:
             if not row or row[0].strip().startswith("#"):
                 continue
             try:
-                values = [int(float(cell)) for cell in row]
+                values = [int(cell) for cell in row]
             except ValueError:
-                if row_no == 1:
-                    continue  # header
+                if row_no == 1 and row in (["latency_ns"], ["intended_start_ns", "actual_start_ns", "end_ns"]):
+                    continue
                 raise SystemExit(f"{path}:{row_no}: non-numeric row")
-            if len(values) >= 3:
+            if len(values) == 3:
+                if not values[0] <= values[1] <= values[2]:
+                    raise SystemExit(f"{path}:{row_no}: require intended <= actual start <= end")
                 intended.append(values[0]); starts.append(values[1]); ends.append(values[2])
             elif len(values) == 1:
+                if values[0] < 0:
+                    raise SystemExit(f"{path}:{row_no}: latency must be non-negative")
                 single.append(values[0])
             else:
                 raise SystemExit(f"{path}:{row_no}: expected 1 or 3 columns")
@@ -120,6 +124,8 @@ def line(name: str, d: dict) -> str:
 
 def print_text(r: dict, baseline: dict | None) -> None:
     print(line("response_time", r["response_ns"]))
+    if r["indicative_percentiles"]:
+        print("note: fewer than 100 tail samples; indicative only: " + ", ".join(r["indicative_percentiles"]))
     if r["kind"] == "timestamps":
         print(line("service_time ", r["service_ns"]))
         print(line("queue_delay  ", r["queue_delay_ns"]))
@@ -163,11 +169,17 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--blocks", type=int, default=10)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
+    if args.blocks < 1:
+        parser.error("--blocks must be positive")
     result = analyse(load(args.csv), args.blocks)
     baseline = analyse(load(args.baseline), args.blocks) if args.baseline else None
-    if result["response_ns"]["count"] == 0:
+    if result["response_ns"]["count"] == 0 or (baseline is not None and baseline["response_ns"]["count"] == 0):
         print("no rows", file=sys.stderr)
         return 4
+    for report in (result, baseline):
+        if report is not None:
+            count = report["response_ns"]["count"]
+            report["indicative_percentiles"] = [f"p{p:g}" for p in PCTS if count * (1 - p / 100) < 100 - 1e-8]
     if args.json:
         json.dump({"candidate": result, "baseline": baseline}, sys.stdout, indent=2)
         print()

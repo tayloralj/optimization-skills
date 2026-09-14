@@ -16,6 +16,10 @@ better answer because of it**.
 | `jit-deopt-after-deploy` | `class_check` deoptimizations after adding a third implementation | Explains megamorphic call sites; source-level fixes over global flags |
 | `production-host-tuning` | "Give me commands to isolate CPUs on production" | Read-only audit, trade-offs, rollback, verification; no casual paste-ready changes |
 | `benchmark-host-lab-mode` | Declared lab host with CPU lists | Uses `make-lab-plan.py` and `lab-tune.sh` with review, apply, measure, rollback |
+| `invalid-latency` | Negative response times with exit zero | Rejects SLO conclusion and requires valid timestamps |
+| `incomplete-capture` | All JFR views failed with exit zero | Does not infer absence of GC or contention |
+| `periodic-allocation` | Allocating first measured round but final-round PASS | Requires every measured round to meet the allocation budget |
+| `interrupted-rollback` | Failed restoration followed by rolled-back status | Treats state as incomplete and preserves recovery evidence |
 | `prod-host-without-agent` | Locked-down prod VM, ops runs what we send | `java-offline-capture`; kit, dry-run, run as app user, retrieve, verify, analyse |
 | `not-java-python-code` | Reverse a linked list in Python | **No** skill from this plugin loads |
 | `not-java-frontend-bundle` | Slow React bundle | **No** skill from this plugin loads; front-end advice |
@@ -30,8 +34,8 @@ skills loading for unrelated work.
 Claude Code:
 
 ```bash
-claude plugin eval . --runs 3 -j 4 --max-cost-usd 10          # whole suite, with and without the plugin
-claude plugin eval . --case gc-log-triage --runs 3            # one case
+claude plugin eval . --runs 3 -j 4 --max-cost-usd 10 --no-publish  # whole suite, with and without the plugin
+claude plugin eval . --case gc-log-triage --runs 3 --max-cost-usd 5 --no-publish  # one case
 ```
 
 By default each case runs twice: with the plugin and without it (a baseline).
@@ -39,11 +43,18 @@ The report shows the score difference. Results go to `evals/results/`, which is
 gitignored. The runs use your Claude account, so each full suite costs real
 money: set `--max-cost-usd`.
 
-Codex has no equivalent runner. Check discovery manually from a checkout:
+For Codex, use the same prompts and rubric files in a fresh unrelated directory
+with this collection linked under `.agents/skills`. Run the installed CLI's
+`codex exec --ephemeral --sandbox read-only --skip-git-repo-check -C DIR --json`
+with a prompt on stdin; retain its JSONL trace and final response privately.
+Grade against each case's rubric and verify actual skill reads in the trace.
+This is a manual behavioral evaluation, not merely a request to list skill names.
+Use a bounded timeout and record the CLI/model. Do not claim equivalence to the
+Claude scored ablation or a no-plugin baseline from a single Codex answer.
 
-```bash
-codex exec --sandbox read-only "Without running commands, list every skill whose name starts with java-, linux-, or profiling-."
-```
+Agent evals send prompts and loaded skills to the configured external service.
+Obtain any required authorization, cap paid runs, and keep publishing disabled.
+Installation and format checks are not behavioral evals.
 
 ## Status
 
@@ -54,3 +65,27 @@ codex exec --sandbox read-only "Without running commands, list every skill whose
   monthly spend limit, and 58 of 60 runs errored before producing answers, so
   its scores are meaningless and were discarded. Re-run when budget allows and
   record the results here with the date, model, and Claude Code version.
+
+## Review-fix validation, 2026-09-13
+
+- Local worktree: script suites passed on Temurin 25.0.2 (94 checks) and Azul
+  21.0.8 (95 checks), including 29 Python tests, live JFR/NMT, and walkthrough checks.
+- Structural validation and ShellCheck passed. Claude 2.1.270 validates the
+  plugin, with the expected warning that repository-root CLAUDE.md is not
+  shipped as plugin context. Codex CLI present: 0.153.4.
+- New behavioral cases are authored. A bounded Codex pass (CLI 0.153.4) covered
+  all four synthetic cases and correctly rejected invalid latency evidence,
+  incomplete JFR analysis, periodic allocation hidden by a final-round check,
+  and incomplete rollback. Claude 2.1.270 launched the case, but both the
+  plugin and no-plugin arms were rejected by the account monthly spend limit
+  before model execution; that is unverified, not a score.
+- Release remains gated on completed behavioral results for both agents; the
+  historical full-suite budget failure above is not resolved by local tests.
+
+## PR refresh, 2026-09-14
+
+Main's offline-capture additions were merged into the hardening branch, preserving
+all regression cases and the bounded JFR completion checks. The attempted Claude
+eval retry was blocked by automatic approval review before execution because it
+would send plugin content to Claude and could incur up to $5. No new behavioral
+score is claimed; the release gate above remains open.

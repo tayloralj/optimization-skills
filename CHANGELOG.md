@@ -4,6 +4,15 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
+## Unreleased
+
+- Preserve incomplete rollback status after interruption and allow recovery retries.
+- Require every measured allocation round to meet the budget; reject invalid latency data without losing integer timestamp precision.
+- Fail incomplete JFR reports and bound diagnostic command waits during capture.
+- Correct Claude plugin invocation and use the documented Codex personal skill directory, with an explicit legacy-directory override.
+- Test installer lifecycle outside the checkout; document selective-install limitations, per-helper capture guarantees, and compatibility evidence.
+- Separate walkthrough diagnostics from repeated comparisons and add behavioral regression eval cases.
+
 ## [0.3.0] - unreleased
 
 Making the collection understandable to newcomers and proving it works as skills.

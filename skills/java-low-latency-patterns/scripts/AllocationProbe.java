@@ -39,6 +39,9 @@ public final class AllocationProbe {
             }
         }
 
+        if (!Double.isFinite(maxBytesPerOp) || maxBytesPerOp < 0) {
+            fail("--max-bytes-per-op must be finite and non-negative");
+        }
         Object instance = Class.forName(className).getDeclaredConstructor().newInstance();
         if (!(instance instanceof Runnable task)) {
             fail(className + " must implement Runnable");
@@ -49,39 +52,43 @@ public final class AllocationProbe {
             fail("thread allocated-memory measurement is not available on this JVM");
         }
 
-        for (long i = 0; i < warmupOps; i++) {
-            task.run();
-        }
+        runOperations(task, warmupOps);
         // Prime the measurement call itself so it does not count toward round one.
         threads.getCurrentThreadAllocatedBytes();
 
         double worst = 0;
         double last = 0;
-        StringBuilder perRound = new StringBuilder();
+        double[] measurements = new double[rounds];
         for (int r = 0; r < rounds; r++) {
             long before = threads.getCurrentThreadAllocatedBytes();
-            for (long i = 0; i < ops; i++) {
-                task.run();
-            }
+            runOperations(task, ops);
             long after = threads.getCurrentThreadAllocatedBytes();
             last = (double) (after - before) / ops;
             worst = Math.max(worst, last);
-            perRound.append(String.format(Locale.ROOT, "%s%.4f", r == 0 ? "" : ",", last));
+            measurements[r] = last;
         }
 
+        StringBuilder perRound = new StringBuilder();
+        for (int r = 0; r < rounds; r++) {
+            perRound.append(String.format(Locale.ROOT, "%s%.4f", r == 0 ? "" : ",", measurements[r]));
+        }
         System.out.printf(Locale.ROOT, "class=%s%n", className);
         System.out.printf(Locale.ROOT, "jvm=%s%n", System.getProperty("java.vm.version"));
         System.out.printf(Locale.ROOT, "warmup_ops=%d ops_per_round=%d rounds=%d%n", warmupOps, ops, rounds);
         System.out.printf(Locale.ROOT, "bytes_per_op_by_round=%s%n", perRound);
         System.out.printf(Locale.ROOT, "bytes_per_op_last_round=%.4f%n", last);
         System.out.printf(Locale.ROOT, "bytes_per_op_worst_round=%.4f%n", worst);
-        boolean pass = last <= maxBytesPerOp;
-        System.out.printf(Locale.ROOT, "result=%s (threshold %.4f bytes/op on the last round)%n",
+        boolean pass = worst <= maxBytesPerOp;
+        System.out.printf(Locale.ROOT, "result=%s (threshold %.4f bytes/op in every measured round)%n",
                 pass ? "PASS" : "FAIL", maxBytesPerOp);
         if (!pass && worst > last) {
-            System.out.println("note: allocation fell across rounds; warmup may be too short for this path");
+            System.out.println("note: measured rounds differ; check periodic paths and warmup separately");
         }
         System.exit(pass ? 0 : 1);
+    }
+
+    private static void runOperations(Runnable task, long count) {
+        for (long i = 0; i < count; i++) task.run();
     }
 
     private static long positive(String name, String value) {

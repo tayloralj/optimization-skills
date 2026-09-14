@@ -3,12 +3,10 @@
 ## What this is, in one paragraph
 
 These are instructions and small tools that an AI coding agent (Claude Code or
-OpenAI Codex) loads when you ask it about Java performance. Without them, an
-agent tends to guess: it suggests JVM flags it saw online, trusts a single
-benchmark run, or runs profilers that need permissions you don't have. With
-them, it follows the method an experienced performance engineer would:
+OpenAI Codex) loads when you ask it about Java performance. They guide the agent to
 check what the machine can measure, collect evidence, change one thing, and
-prove the result. You don't call the tools yourself; you describe the problem.
+verify the result. You describe the problem; the agent can run available tools.
+Behavioral validation status is recorded in [compatibility](compatibility.md).
 
 ## Who it is for
 
@@ -55,7 +53,8 @@ Ask in your own words. Good first prompts:
 | "Review this order-handling hot path for latency problems." | The **low-latency patterns** skill looks for allocation, contention, and blocking, and proves fixes |
 | "Is this box ready for latency testing? Hot threads will run on CPUs 4-7." | The **low-latency tuning** skill audits the host and lists what would interfere |
 
-You can also name a skill: `/java-gc-tuning ...` in Claude Code, or
+Name a skill with `/optimization-skills:java-gc-tuning ...` for the Claude
+plugin, `/java-gc-tuning ...` for standalone Claude skills, or
 `$java-gc-tuning ...` in Codex.
 
 ## What the agent will and won't do
@@ -112,8 +111,8 @@ findings, then carries on with the usual skills.
 ## See it end to end
 
 The [walkthrough](walkthrough/README.md) takes a p99.99 latency problem from
-symptom to verified fix: 2.18 ms down to 55 µs, with the evidence at each
-step. [Examples](examples.md) shows real output from every tool and how to
+symptom to a repeated comparison, with separate diagnostic captures and
+explicit limits on tail-percentile conclusions. [Examples](examples.md) shows real output from every tool and how to
 read it.
 
 ## Glossary
@@ -127,7 +126,7 @@ read it.
 | **Safepoint / time-to-safepoint (TTSP)** | A point where all Java threads stop for JVM work; TTSP is how long it takes them to stop |
 | **JIT / deoptimization** | The JVM compiles hot code to machine code; deoptimization throws that code away when its assumptions break |
 | **JFR** | JDK Flight Recorder, a low-overhead event recorder built into the JVM |
-| **NMT** | Native Memory Tracking: a JVM breakdown of memory outside the Java heap |
+| **NMT** | Native Memory Tracking: JVM-tracked reserved and committed memory, including the heap |
 | **RSS** | Resident set size: physical memory the process actually uses |
 | **Allocation-free hot path** | Code that creates no new objects per operation, so it causes no GC work |
 | **IRQ** | A hardware interrupt, which can steal CPU time from a latency-critical thread |

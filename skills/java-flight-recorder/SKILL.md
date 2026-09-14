@@ -16,7 +16,9 @@ when nothing else is allowed, and a good first look even when everything is.
      `-XX:StartFlightRecording=settings=profile,filename=app.jfr,maxsize=512m,maxage=30m`
    - Running JVM owned by you, same host namespace:
      `scripts/jfr-capture.sh PID 120 ./jfr/run1.jfr [profile|default|file.jfc]`
-     (bounded duration and size; verifies the target; stops the recording if interrupted).
+     (bounded duration and retained data; verifies the target and attempts cleanup
+     on interruption, reporting any unconfirmed stop). Each `jcmd` has a timeout
+     (`JCMD_TIMEOUT_SECONDS`, default 10). A failed check is not proof of completion.
    - Inside a container: run `jcmd` inside the container, then copy the file out.
 2. **Pick settings for the question** (`references/jfr-guide.md`): `default`
    for always-on, `profile` for investigations, or a custom `.jfc` built with
@@ -25,7 +27,9 @@ when nothing else is allowed, and a good first look even when everything is.
    load, long enough to include the rare events you care about (GC cycles,
    spikes). Note the wall-clock time of any incident.
 4. **Report**: `scripts/jfr-report.sh run1.jfr ./jfr/report --focus latency|cpu|memory|all`
-   renders curated `jfr view` tables (JDK 21+ tool) and an index. On older tools
+   renders curated `jfr view` tables (JDK 21+ tool) and an index. Missing views
+   are listed; failed views or no usable views return non-zero. Inspect the
+   index before drawing conclusions from absent events. On older tools
    use `jfr summary` and `jfr print --events TYPE`.
 5. **Interpret** with the event map in the reference: pauses (GC, safepoints,
    VM operations), waiting (monitors, parks, sockets, files), CPU (execution

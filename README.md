@@ -9,12 +9,10 @@ benchmarks. Instead of guessing at JVM flags, the agent follows an engineer's
 method. It checks what the machine can measure, collects evidence, changes one
 thing, and proves the result.
 
-> **Example.** "Our order gateway's p99.99 is 2 ms but the handler is fast."
-> The agent shows the time is spent *waiting*, not computing, and ties the wait
-> to GC pauses. It finds the allocating code with JDK Flight Recorder (no root
-> needed), rewrites it allocation-free, proves zero allocation, and re-runs the
-> same test: **p99.99 2.18 ms → 55 µs**. The full story, with real output, is in
-> [the walkthrough](docs/walkthrough/README.md).
+> **Example.** Investigate a slow order gateway by separating handler time from
+> queueing, checking GC evidence, and comparing repeated unprofiled runs.
+> The [walkthrough](docs/walkthrough/README.md) uses a synthetic workload and
+> real tool output; its measurements are illustrative, not a promised speedup.
 
 ## Who it is for
 
@@ -41,18 +39,24 @@ claude plugin install optimization-skills@optimization-skills
 ```bash
 git clone git@github.com:tayloralj/optimization-skills.git
 cd optimization-skills
-./install.sh                 # links every skill into ~/.codex/skills and ~/.claude/skills
+./install.sh                 # links every skill into ~/.agents/skills and ~/.claude/skills
 ./install.sh --codex         # Codex only; --claude for Claude only; --copy to copy instead of link
 ./install.sh --uninstall     # removes only what this installer created
 ```
 
-Restart the agent afterwards. Requirements: Linux, Bash 4+, Python 3.9+ (standard
-library only), and a JDK. Profilers, BCC/bpftrace, and JOL are optional and
+Restart the agent afterwards. Requirements: Linux, Bash 4+, GNU coreutils (including `timeout`),
+Python 3.9+ (standard library only), and a JDK 21 or 25. Profilers, BCC/bpftrace, and JOL are optional and
 detected when needed.
+
+The full install is recommended. Named subsets include readiness and declared helper dependencies, but omit
+other skills referenced by their workflows. Set `CODEX_SKILLS_DIR` to override the
+Codex destination. For a previous legacy install, remove its owned entries with
+`CODEX_SKILLS_DIR="$HOME/.codex/skills" ./install.sh --codex --uninstall`, then
+install into the default location. Keep the checkout in place for symlink installs.
 
 ## Use it
 
-Describe the problem in your own words. The matching skill loads automatically:
+Describe the problem in your own words. The agent can select a matching skill automatically:
 
 - "My service's p99 latency jumps every few minutes. Help me find out why."
 - "Summarise these GC logs and tell me whether pauses are a problem."
@@ -61,8 +65,9 @@ Describe the problem in your own words. The matching skill loads automatically:
 - "Is this machine ready for latency testing on CPUs 4-7?"
 - "Production can't run an agent. Give the ops team a kit to capture the JVM during tonight's peak, and I'll send you the result."
 
-Or name a skill directly: `/java-gc-tuning` in Claude Code, `$java-gc-tuning` in
-Codex. **New here?** Read [Getting started](docs/getting-started.md): what to
+Or name a skill directly: `/optimization-skills:java-gc-tuning` with the Claude
+plugin, `/java-gc-tuning` with standalone Claude skills, or `$java-gc-tuning`
+in Codex. **New here?** Read [Getting started](docs/getting-started.md): what to
 ask, what the agent will and won't do, the no-root path, and a glossary.
 
 ## What's included
@@ -102,7 +107,10 @@ easy to get wrong in convincing ways. So the skills are **read-only by default**
 - No `sudo`, no kernel or service changes, and no production JVM restarts
   without your explicit approval. When root is needed, the agent prints the
   exact command for you to run.
-- Captures are time- and size-limited and target only processes you own.
+- JVM attach helpers check ownership and target identity. BPF also supports
+  explicitly selected system-wide, operator-run captures. Duration and storage
+  controls vary by helper; see [capture guarantees](docs/compatibility.md#capture-guarantees).
+  Instruction-level guardrails are not a sandbox or a hard resource limit.
 - **Lab mode** (`linux-low-latency-tuning`) is for machines you declare
   expendable. It generates a host-specific plan of reversible runtime
   settings, which you apply as root. Every original value is recorded, and
@@ -119,4 +127,5 @@ easy to get wrong in convincing ways. So the skills are **read-only by default**
   [`evals/`](evals/README.md); CI runs on JDK 21 and 25
 - Names: the repository, Claude marketplace, and plugin are all
   `optimization-skills`
+- [Compatibility and validation status](docs/compatibility.md)
 - Sources and credits: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) · Licence: MIT ([`LICENSE`](LICENSE))
