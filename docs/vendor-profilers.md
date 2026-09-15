@@ -3,8 +3,9 @@
 Status as of 2026-09-15: runbooks, the synthetic fixture, and user-local vendor
 tool setup are implemented. Intel collection is blocked by the supplied VM's
 ptrace policy and absent vPMU; AMD uProf has been downloaded and checksum
-verified but has not yet been run. This is not a release-level vendor-support
-claim.
+verified and completed a bounded Java hotspots launch on the local Ryzen 9
+7900. PMU/IBS and repeated comparison evidence remain incomplete. This is not
+a release-level vendor-support claim.
 
 ## What to use
 
@@ -38,15 +39,15 @@ archive has been inspected without extraction. VTune 2026.4.0 and PCM
 
 | Validation | Result |
 | --- | --- |
-| Synthetic fixture on Temurin 25.0.2 | Four tests pass: fixed work, repeatable checksums, invalid arguments, source launcher |
-| Synthetic fixture on Oracle 21.0.10 | Same four tests pass |
+| Synthetic fixture on Temurin 25.0.2 | Six workload modes pass fixed-work, checksum, argument, and source-launcher checks |
+| Synthetic fixture on Oracle 21.0.10 | Compatibility matrix coverage recorded; repeat on this JDK when available |
 | Fixture method attribution with JFR, JDK 25 | `VendorWorkload.chaseBatch` and its caller resolve |
-| AMD uProf CLI / Pcm | uProf 5.3.521 `info --system` resolves Ryzen 9 7900 and reports Core/L3/DF/UMC PMC plus IBS; hotspots launch exits 50 because `perf_event_paranoid=4`; no capture |
+| AMD uProf CLI / Pcm | uProf 5.3.521 `info --system` resolves Ryzen 9 7900; bounded `hotspots` launch completed and report.csv resolved `VendorWorkload::chaseBatch`; PMU/IBS comparison remains unverified |
 | Intel VTune / PCM | VTune software sampling exits 1 at `ptrace_scope=1`; PCM exits 1 because vPMU/MSR/PCI access is unavailable; no capture |
 | Vendor overhead and source improvements | Not measured; fixture results are not optimization claims |
 | Behavioral evals | Three cases authored; unscored |
 
-Repository verification after these additions: all 38 Python tests passed;
+Repository verification after these additions: all 48 Python tests passed;
 `WALKTHROUGH_TESTS=1 ./tests/run-tests.sh` passed 125 checks on Temurin 25.0.2
 and 126 on Oracle 21.0.10. Structural and installed agent validators passed for
 all 19 skills, with the existing Claude root-context warning. Live suite checks
@@ -78,7 +79,7 @@ and a separate hypervisor/physical-host discussion for core vPMU and uncore
 access. Installing PCM or relaxing guest perf policy alone cannot establish
 socket/channel counter support.
 
-## AMD download and next live step
+## AMD validation record and next live step
 
 1. The approved EULA form returned AMD's `uprof-5-3` archive URL. The 331 MB
    archive is checksum-verified above. Extract it into a fresh private
@@ -86,10 +87,9 @@ socket/channel counter support.
    capability setup script.
 2. Inspect the archive's executable dependencies and CLI help. Record exact
    version/configuration support and confirm the Java launch requirements.
-3. Attempt a user-mode hotspots capture of the synthetic JVM only, with a new
-   private output directory, 60-second wall-clock deadline and 256 MiB JVM heap.
-   Construct the command from the actual installed help. Stop on missing
-   dependencies, permission errors, unresolved Java symbols, or incomplete output.
+3. A user-mode hotspots capture of the synthetic JVM completed with a new
+   private output directory, a 60-second wall-clock deadline, and a 256 MiB JVM
+   heap. The report contained `VendorWorkload::chaseBatch`.
 4. Preserve logs/results and verify owned processes exit. Keep host sysctls,
    drivers, capabilities, and service configuration unchanged. Removing the
    temporary tool directory after preserving evidence is the cleanup step.
@@ -98,12 +98,11 @@ socket/channel counter support.
    least-privilege operator plan if the exact event fails. Intel work needs a
    supported Intel host and installed tools.
 
-The archive was downloaded under the operator's approval. uProf extraction and
-`info --system` were successful. Its bounded hotspots trial failed closed with
-the documented non-root requirement (`perf_event_paranoid` must be <=3); no
-sysctl or capability change was made. No vendor driver,
-capability setup, sysctl, package-manager installation, or service change was
-performed.
+The archive was downloaded under the operator's approval. uProf extraction,
+`info --system`, and the bounded hotspots trial were successful. No vendor
+driver, capability setup, sysctl, package-manager installation, or service
+change was performed. The result is a fixture attribution check, not proof
+that every PMU or IBS analysis is available.
 
 ## Real JFR fixture output
 

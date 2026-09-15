@@ -4,7 +4,7 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
-## Unreleased
+## [0.3.0] - 2026-09-15
 
 - Add a bounded JDK compatibility matrix runner for the vendor workload,
   preserving per-mode logs and failing closed on failed or unavailable JDKs.
