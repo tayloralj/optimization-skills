@@ -142,3 +142,9 @@ the first slow `benchmark-host-lab-mode` case reached its 300-second per-run
 limit. It was interrupted at $0.30 after both arms scored 0.00 due timeout;
 the aggregate is partial and is not a behavioral result. Continue with
 shorter, targeted cases rather than treating this timeout as a skill failure.
+
+Targeted retries then completed `gc-log-triage` (plugin 1.00, baseline 1.00,
+two PASS judge votes per scored arm, $0.17) and `closed-loop-latency` (plugin
+1.00, baseline 0.67, plugin delta +0.33, $0.15). Reports are retained under
+`evals/results/2026-09-15T19-47-17-625Z/` and
+`evals/results/2026-09-15T19-48-29-423Z/`; publishing was disabled.

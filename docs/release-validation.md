@@ -70,3 +70,8 @@ the broader non-vendor suite remains to be scored before tagging.
 A complete-suite attempt launched 18 cases but timed out on the first
 `benchmark-host-lab-mode` arm after 300 seconds and was interrupted at $0.30.
 That partial run is retained as a timeout diagnostic, not as a score.
+
+Shorter targeted evaluations subsequently passed for `gc-log-triage` (1.00
+with and without the plugin) and `closed-loop-latency` (1.00 with the plugin,
+0.67 without, delta +0.33). These cases provide valid behavioral evidence;
+the remaining non-vendor cases still need targeted runs.
