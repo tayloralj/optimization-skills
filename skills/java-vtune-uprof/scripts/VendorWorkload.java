@@ -1,6 +1,7 @@
 import java.lang.management.ManagementFactory;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.locks.LockSupport;
 
 /** Synthetic profiler attribution fixture, not a benchmark or application model. */
 public final class VendorWorkload {
@@ -8,6 +9,7 @@ public final class VendorWorkload {
     private static volatile Object escaped;
     private static volatile long sink;
     private final int[] data;
+    private final Object monitor = new Object();
     private int cursor;
     private long sequence;
 
@@ -65,6 +67,25 @@ public final class VendorWorkload {
         return cursor;
     }
 
+    private long lockBatch() {
+        long sum = sequence;
+        for (int i = 0; i < OPS_PER_BATCH; i++) {
+            synchronized (monitor) {
+                sum += (i ^ sequence++);
+            }
+        }
+        return sum;
+    }
+
+    private long parkBatch() {
+        long sum = sequence;
+        for (int i = 0; i < OPS_PER_BATCH; i++) {
+            LockSupport.parkNanos(100L);
+            sum += i ^ sequence++;
+        }
+        return sum;
+    }
+
     private long run(String mode, int batches) {
         long result = 0;
         for (int i = 0; i < batches; i++) {
@@ -73,6 +94,8 @@ public final class VendorWorkload {
                 case "branch" -> branchBatch();
                 case "stream" -> streamBatch();
                 case "chase" -> chaseBatch();
+                case "lock" -> lockBatch();
+                case "park" -> parkBatch();
                 default -> throw new AssertionError(mode);
             };
         }
@@ -83,14 +106,14 @@ public final class VendorWorkload {
     public static void main(String[] args) {
         if (args.length == 1 && args[0].equals("--help")) {
             System.out.println("Usage: java VendorWorkload.java MODE BATCHES WARMUP_BATCHES WORKING_SET_MIB");
-            System.out.println("MODE: allocation|branch|stream|chase; batches 1-1000000; warmup 0-1000000; MiB 1-256");
+            System.out.println("MODE: allocation|branch|stream|chase|lock|park; batches 1-1000000; warmup 0-1000000; MiB 1-256");
             System.out.println("Synthetic fixed-work fixture. Use an external timeout; prints measurement uptime bounds.");
             return;
         }
         try {
             if (args.length != 4) throw new IllegalArgumentException("expected four arguments; use --help");
             String mode = args[0];
-            if (!mode.matches("allocation|branch|stream|chase")) throw new IllegalArgumentException("invalid mode");
+            if (!mode.matches("allocation|branch|stream|chase|lock|park")) throw new IllegalArgumentException("invalid mode");
             int batches = number(args[1], 1, 1_000_000, "batches");
             int warmup = number(args[2], 0, 1_000_000, "warmup batches");
             int mib = number(args[3], 1, 256, "working set MiB");

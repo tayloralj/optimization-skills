@@ -11,6 +11,8 @@ It has named methods for four input patterns:
 | branch | Seeded values with two arithmetic paths | JIT may if-convert; do not presume branch misses |
 | stream | Sequential int-array reads | One thread need not saturate memory channels |
 | chase | Dependent reads through a seeded single-cycle permutation | Cache residency depends on working set and placement |
+| lock | Uncontended Java monitor acquisition | Does not model multi-thread contention; use a service-shaped lock test for that |
+| park | Short `LockSupport.parkNanos` waits | Timer/scheduler behavior is host-dependent; it is not a queue benchmark |
 
 Do not compare modes as equivalent implementations. Use identical arguments and
 checksums when comparing a mode with/without profiling. Each batch performs
