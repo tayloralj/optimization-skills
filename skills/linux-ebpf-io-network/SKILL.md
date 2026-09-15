@@ -17,7 +17,9 @@ configuration, the kernel, or the hardware path.
 2. **Start broad and cheap** (no privileges): `/proc/PID/task/*/stat`
    (voluntary/involuntary context switches, `majflt`), `/proc/pressure/{cpu,io,memory}`,
    `/proc/vmstat`, `/proc/net/snmp` and `nstat`, `ss -tmi`, `ethtool -S` (read),
-   `iostat -x`. JFR socket/file/park events give the Java-side view.
+   `iostat -x`. JFR socket/file/park events give the Java-side view. Use
+   `scripts/runqueue-delta.py` for a bounded schedstat delta and read
+   `references/scheduler-correlation.md` before attributing scheduler delay.
 3. **Pick one question and one tool** with `references/io-network.md`, then
    build a bounded command:
 
