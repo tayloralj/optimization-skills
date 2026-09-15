@@ -6,6 +6,9 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add a bounded vendor-profiler comparison runner that interleaves profiled and
+  unprofiled fixed-work commands, checks completion and checksums, and preserves
+  raw output with a JSON overhead summary.
 - Add vendor-specific VTune/uProf runbooks, Intel PCM and AMD system-counter guidance, an offline result handoff, and a tested synthetic Java attribution fixture. Live vendor captures remain unverified.
 - Preserve incomplete rollback status after interruption and allow recovery retries.
 - Require every measured allocation round to meet the budget; reject invalid latency data without losing integer timestamp precision.

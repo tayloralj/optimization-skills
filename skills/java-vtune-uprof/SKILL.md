@@ -62,6 +62,8 @@ branching, streaming reads, and dependent memory reads. It runs with the JDK
 source launcher and no dependencies. It is not a JMH replacement or a service
 latency benchmark. Read `references/validation.md` for bounded commands,
 measurement-window checks, overhead comparisons, and acceptance criteria.
+For repeated fixed-work comparisons, use `scripts/profile-compare.py`; read
+`references/comparison-runner.md` before using it.
 
 For socket/channel bandwidth or other system counters, use the
 `java-hardware-counters` skill. Intel PCM and AMD `AMDuProfPcm` are different
