@@ -6,6 +6,8 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add a bounded, read-only schedstat delta tool for per-thread run-queue delay,
+  with PID-reuse checks and scheduler/off-CPU correlation guidance.
 - Add a read-only frequency, thermal, boost, and powercap snapshot for
   frequency-aware Intel and AMD Java comparisons.
 - Add a read-only container profiling readiness report for PID namespaces,
