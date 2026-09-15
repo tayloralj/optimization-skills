@@ -136,3 +136,9 @@ seconds. The run was complete and publishing was disabled.
 Private local report: `evals/results/2026-09-15T19-35-26-305Z/report.html`.
 This closes the vendor behavioral cases; the broader suite still has the
 non-vendor cases listed above.
+
+An attempted complete-suite run on 2026-09-15 launched 18 cases (36 arms) but
+the first slow `benchmark-host-lab-mode` case reached its 300-second per-run
+limit. It was interrupted at $0.30 after both arms scored 0.00 due timeout;
+the aggregate is partial and is not a behavioral result. Continue with
+shorter, targeted cases rather than treating this timeout as a skill failure.

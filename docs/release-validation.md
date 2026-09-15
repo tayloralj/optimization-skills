@@ -66,3 +66,7 @@ baseline: every arm scored 1.00 with three PASS votes, total cost $0.57, and
 delta 0.00. Its report is in
 `evals/results/2026-09-15T19-35-26-305Z/`. The vendor behavioral gate is closed;
 the broader non-vendor suite remains to be scored before tagging.
+
+A complete-suite attempt launched 18 cases but timed out on the first
+`benchmark-host-lab-mode` arm after 300 seconds and was interrupted at $0.30.
+That partial run is retained as a timeout diagnostic, not as a score.
