@@ -63,6 +63,10 @@ Installation and format checks are not behavioral evals.
 
 ## Status
 
+- Vendor behavioral evaluation attempt on 2026-09-15 was unscored: the
+  trusted-plugin run started, but the API request failed with `EAI_AGAIN`
+  before a model response. No score is claimed.
+
 - Format verified: `not-java-python-code` ran and passed (no skill loaded; valid answer).
 - Codex discovery verified: `codex exec` in a checkout found all 19 skills, including `java-offline-capture` (via `.agents/skills`).
 - Claude plugin install verified in an isolated config: 19 skills loaded, about 1,400 always-on tokens.
