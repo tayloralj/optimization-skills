@@ -25,7 +25,7 @@ class VendorWorkloadTest(unittest.TestCase):
                               capture_output=True, text=True, timeout=15)
 
     def test_modes_complete_fixed_work_and_repeat_checksum(self):
-        for mode in ('allocation', 'branch', 'stream', 'chase'):
+        for mode in ('allocation', 'branch', 'stream', 'chase', 'lock', 'park'):
             with self.subTest(mode=mode):
                 results = []
                 for _ in range(2):

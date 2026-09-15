@@ -6,6 +6,8 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Extend the vendor workload fixture with synchronization and scheduler-wait
+  modes, with explicit limits on contention and queueing interpretation.
 - Extend the offline capture kit with checksum-verified vendor profiler
   companion artifacts and report their paths without parsing proprietary data.
 - Add a bounded, read-only schedstat delta tool for per-thread run-queue delay,
