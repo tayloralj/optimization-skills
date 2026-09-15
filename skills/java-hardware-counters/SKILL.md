@@ -24,6 +24,8 @@ then build a minimal event set for one hypothesis.
    can compare runs but rarely identify source by themselves.
 7. Compare a control, baseline, and candidate on the same host. Interpret
    ratios using the CPU vendor/model documentation and `references/events.md`.
+   For the Intel/AMD routing matrix and required topology fields, read
+   `references/cpu-capability-matrix.md` before choosing model-specific events.
 
 For Intel PCM or AMD `AMDuProfPcm` system counters, read
 `references/system-counters.md`. Distinguish process-core events from shared
