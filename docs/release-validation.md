@@ -60,6 +60,9 @@ sandbox: plugin 1.00, baseline 1.00, delta 0.00, three PASS votes per arm,
 prior execution error recurred; this does not isolate their original cause.
 
 The private local report is in
-`evals/results/2026-09-15T17-58-04-560Z/`. This one-case result does not complete
-the full behavioral suite or establish an improvement over baseline.
-v0.3.0 remains untagged pending the remaining release gate.
+`evals/results/2026-09-15T17-58-04-560Z/`. A subsequent vendor-only suite run
+covered all three vendor cases with one repetition each, both plugin and
+baseline: every arm scored 1.00 with three PASS votes, total cost $0.57, and
+delta 0.00. Its report is in
+`evals/results/2026-09-15T19-35-26-305Z/`. The vendor behavioral gate is closed;
+the broader non-vendor suite remains to be scored before tagging.

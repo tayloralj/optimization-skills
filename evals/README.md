@@ -123,3 +123,16 @@ Private local report: `evals/results/2026-09-15T17-58-04-560Z/report.html`;
 machine-readable evidence: `aggregate-result.json` in the same directory.
 Publishing was disabled. Remaining cases and repeated behavioral coverage
 still require execution before the full release gate can be closed.
+
+## Vendor suite retry, 2026-09-15
+
+The three vendor cases were then run with one repetition each, both with and
+without the plugin, using Claude Code 2.1.272. All six arms passed all three
+judge votes: `vendor-perf-blocked` 1.00/1.00,
+`vendor-uncore-scope` 1.00/1.00, and `vendor-vm-no-pmu` 1.00/1.00. The mean
+plugin-versus-baseline delta was 0.00; total cost was $0.57 and runtime 288
+seconds. The run was complete and publishing was disabled.
+
+Private local report: `evals/results/2026-09-15T19-35-26-305Z/report.html`.
+This closes the vendor behavioral cases; the broader suite still has the
+non-vendor cases listed above.
