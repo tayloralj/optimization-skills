@@ -75,3 +75,7 @@ Shorter targeted evaluations subsequently passed for `gc-log-triage` (1.00
 with and without the plugin) and `closed-loop-latency` (1.00 with the plugin,
 0.67 without, delta +0.33). These cases provide valid behavioral evidence;
 the remaining non-vendor cases still need targeted runs.
+
+`invalid-latency` and `incomplete-capture` also passed 1.00 in both arms,
+costing $0.13 and $0.17 respectively. Their reports are retained in the
+corresponding timestamped `evals/results/` directories.

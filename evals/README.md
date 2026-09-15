@@ -148,3 +148,8 @@ two PASS judge votes per scored arm, $0.17) and `closed-loop-latency` (plugin
 1.00, baseline 0.67, plugin delta +0.33, $0.15). Reports are retained under
 `evals/results/2026-09-15T19-47-17-625Z/` and
 `evals/results/2026-09-15T19-48-29-423Z/`; publishing was disabled.
+
+Further targeted cases passed: `invalid-latency` scored 1.00 with and without
+the plugin ($0.13), and `incomplete-capture` scored 1.00 with and without the
+plugin ($0.17). Reports are in `evals/results/2026-09-15T19-49-48-535Z/` and
+`evals/results/2026-09-15T19-50-37-691Z/`.
