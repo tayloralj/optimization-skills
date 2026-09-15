@@ -24,6 +24,11 @@ access from a sysctl value alone and never change the host during preflight.
 5. Re-run the readiness script after an approved change. Do not call the host
    ready until the exact intended event succeeds.
 
+For a JVM in a container or pod, run `scripts/container-readiness.py --pid PID`
+before choosing an attach or PMU workflow. Read its JSON output together with
+`java-performance-investigation`'s container reference; it is read-only and
+does not prove that a profiler can attach.
+
 ## Interpret the report
 
 - `READY_PERF_SOFTWARE_EVENT`: the bundled user-space software-event smoke test succeeded.

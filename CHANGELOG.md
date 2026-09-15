@@ -6,6 +6,9 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add a read-only container profiling readiness report for PID namespaces,
+  mount namespaces, cgroup limits, capabilities, seccomp, and effective CPU and
+  memory placement.
 - Add an Intel/AMD CPU capability matrix covering hybrid cores, AMD CCD/CCX and
   EPYC scopes, VM vPMU boundaries, and the minimum evidence required before
   selecting model-specific events.
