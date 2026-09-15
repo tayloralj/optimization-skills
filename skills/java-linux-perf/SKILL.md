@@ -21,6 +21,9 @@ possible. Do not treat a JAR like an ELF binary.
 4. Choose symbolization using `references/java-symbols.md`. Do not use `ldd`,
    `nm`, `objdump --dwarf`, or missing native DWARF to judge Java bytecode debug
    quality. `javap -c -l` checks Java line tables but not live JIT symbols.
+   After exporting a text report, use the vendor skill's
+   `validate-symbols.py` check to require representative Java methods and
+   reject unresolved frames before interpreting hotspots.
 5. Capture a bounded steady-state interval. Prefer per-process and user-space
    collection; avoid `-a` unless system-wide evidence is required and approved.
 6. Interpret samples together with JIT/GC/safepoint state, multiplexing, CPU

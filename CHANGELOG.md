@@ -6,6 +6,9 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add a vendor-neutral Java/JIT symbol validation check for exported profiler
+  reports, with required-method checks, unresolved-frame markers, JSON output,
+  and conservative inconclusive status.
 - Add a bounded vendor-profiler comparison runner that interleaves profiled and
   unprofiled fixed-work commands, checks completion and checksums, and preserves
   raw output with a JSON overhead summary.
