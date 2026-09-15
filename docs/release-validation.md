@@ -52,11 +52,14 @@ layout. The retained failed run has no model trace. Its missing-prompt error
 and the grader's EAI_AGAIN are separate failures; the latter is consistent
 with restricted network access but has not been proven to be the sole cause.
 
-An authorized $5-capped retry outside the sandbox was rejected by automatic
-approval review because private plugin data could be transmitted to the Claude
-API. Explicit data-transfer approval is required before another external run.
-The proposed payload comprises the selected synthetic evaluation prompt,
-plugin instructions/resources loaded by the evaluator, model responses and
-rubric; report publishing remains disabled. The missing-prompt failure still
-requires diagnosis after network access is authorized. No behavioral pass is
-claimed and v0.3.0 has not been tagged or published.
+Automatic approval review initially rejected the external retry pending
+explicit private-plugin data-transfer approval. After the user approved it,
+Claude Code 2.1.272 completed `vendor-perf-blocked` outside the restricted
+sandbox: plugin 1.00, baseline 1.00, delta 0.00, three PASS votes per arm,
+105 seconds, $0.196756 total, exit 0. Publishing remained disabled. Neither
+prior execution error recurred; this does not isolate their original cause.
+
+The private local report is in
+`evals/results/2026-09-15T17-58-04-560Z/`. This one-case result does not complete
+the full behavioral suite or establish an improvement over baseline.
+v0.3.0 remains untagged pending the remaining release gate.

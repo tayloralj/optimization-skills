@@ -102,3 +102,24 @@ all regression cases and the bounded JFR completion checks. The attempted Claude
 eval retry was blocked by automatic approval review before execution because it
 would send plugin content to Claude and could incur up to $5. No new behavioral
 score is claimed; the release gate above remains open.
+
+## Approved retry, 2026-09-15
+
+Claude Code 2.1.272 completed `vendor-perf-blocked` outside the restricted
+sandbox after explicit approval of the private-plugin data transfer:
+
+```bash
+timeout --kill-after=5s 300s claude plugin eval . --trust-plugin \
+  --case vendor-perf-blocked --runs 1 --max-cost-usd 5 --no-publish
+```
+
+Both plugin and baseline arms scored 1.00, with three PASS judge votes each;
+delta was 0.00. Total reported cost was $0.196756 (displayed $0.20), runtime
+105 seconds, exit 0, and `partial=false`. No missing-prompt or API error
+recurred. This verifies one case, not the full suite or a plugin improvement.
+The earlier failure's root cause has not been isolated.
+
+Private local report: `evals/results/2026-09-15T17-58-04-560Z/report.html`;
+machine-readable evidence: `aggregate-result.json` in the same directory.
+Publishing was disabled. Remaining cases and repeated behavioral coverage
+still require execution before the full release gate can be closed.
