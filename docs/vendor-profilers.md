@@ -4,8 +4,11 @@ Status as of 2026-09-15: runbooks, the synthetic fixture, and user-local vendor
 tool setup are implemented. Intel collection is blocked by the supplied VM's
 ptrace policy and absent vPMU; AMD uProf has been downloaded and checksum
 verified and completed a bounded Java hotspots launch on the local Ryzen 9
-7900. PMU/IBS and repeated comparison evidence remain incomplete. This is not
+7900. CPI and IBS fixture attribution and three hotspots comparison pairs also
+completed during release hardening; see the release validation record. This is not
 a release-level vendor-support claim.
+
+See [release validation](release-validation.md) for the latest checks and open gates.
 
 ## What to use
 
@@ -33,21 +36,20 @@ Read-only readiness check: AMD Ryzen 9 7900, Ubuntu 26.04.1, kernel
 Launch-time JFR was created and parsed successfully. AMD uProf 5.3.521 is
 downloaded to the private validation area (MD5
 `45437d8bc0b4276a0b78e28d21de23cb`; SHA-256
-`134659c6d9394be323632ad406169c1bd53623b27e58f5eb72f7235daaa6c0f9`) and the
-archive has been inspected without extraction. VTune 2026.4.0 and PCM
+`134659c6d9394be323632ad406169c1bd53623b27e58f5eb72f7235daaa6c0f9`) and was subsequently extracted for CLI and capture validation. VTune 2026.4.0 and PCM
 202502-1build2 are installed under `$HOME/.local/opt` on the supplied Intel VM.
 
 | Validation | Result |
 | --- | --- |
 | Synthetic fixture on Temurin 25.0.2 | Six workload modes pass fixed-work, checksum, argument, and source-launcher checks |
-| Synthetic fixture on Oracle 21.0.10 | Compatibility matrix coverage recorded; repeat on this JDK when available |
+| Synthetic fixture on Oracle 21.0.10 | Historical fixture tests passed; see the release validation record for current coverage |
 | Fixture method attribution with JFR, JDK 25 | `VendorWorkload.chaseBatch` and its caller resolve |
-| AMD uProf CLI / Pcm | uProf 5.3.521 `info --system` resolves Ryzen 9 7900; bounded `hotspots` launch completed and report.csv resolved `VendorWorkload::chaseBatch`; PMU/IBS comparison remains unverified |
+| AMD uProf CLI / Pcm | uProf 5.3.521 `info --system` resolves Ryzen 9 7900; bounded `hotspots` launch completed and report.csv resolved `VendorWorkload::chaseBatch`; CPI/IBS attribution and hotspots comparisons subsequently completed |
 | Intel VTune / PCM | VTune software sampling exits 1 at `ptrace_scope=1`; PCM exits 1 because vPMU/MSR/PCI access is unavailable; no capture |
-| Vendor overhead and source improvements | Not measured; fixture results are not optimization claims |
+| Vendor overhead and source improvements | Three hotspots comparison pairs completed; noisy timing is not an optimization claim |
 | Behavioral evals | Three cases authored; unscored |
 
-Repository verification after these additions: all 48 Python tests passed;
+Historical verification (before release hardening): 48 Python tests passed;
 `WALKTHROUGH_TESTS=1 ./tests/run-tests.sh` passed 125 checks on Temurin 25.0.2
 and 126 on Oracle 21.0.10. Structural and installed agent validators passed for
 all 19 skills, with the existing Claude root-context warning. Live suite checks
@@ -74,7 +76,7 @@ event limitation; the missing PMU is an independent obstacle. No packages,
 privileges, VM configuration, or services were changed.
 
 Next steps are an operator-reviewed ptrace policy decision for a repeatable
-VTune software trial, extraction and CLI validation of uProf on the AMD host,
+VTune software trial, repeated AMD profile comparisons,
 and a separate hypervisor/physical-host discussion for core vPMU and uncore
 access. Installing PCM or relaxing guest perf policy alone cannot establish
 socket/channel counter support.
@@ -94,7 +96,7 @@ socket/channel counter support.
    drivers, capabilities, and service configuration unchanged. Removing the
    temporary tool directory after preserving evidence is the cleanup step.
 5. If successful, perform the repeated comparison and JDK matrix in the protocol.
-   IBS/PMU access is a separate, still-blocked investigation, requiring its own
+   Other CPU/JDK/analysis combinations require separate validation and their own
    least-privilege operator plan if the exact event fails. Intel work needs a
    supported Intel host and installed tools.
 

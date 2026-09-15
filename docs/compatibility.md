@@ -79,3 +79,8 @@ root CLAUDE.md context warning remains. Live attachment checks ran outside the
 agent sandbox against temporary test-owned JVMs after sandbox attachment failed.
 These are correctness checks, not new performance measurements. Claude behavioral
 evaluation remains unverified; see the evaluation status linked above.
+
+## Release hardening evidence
+
+See [release validation](release-validation.md) for the current full JDK suites,
+ShellCheck result, AMD CPI/IBS evidence, Intel VM blockers, and evaluation gate.

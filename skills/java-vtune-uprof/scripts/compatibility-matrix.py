@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-import tempfile
+import math
 
 MODES = ('allocation', 'branch', 'stream', 'chase', 'lock', 'park')
 REQUIRED = ('measured_operations', 'checksum', 'elapsed_ns')
@@ -37,6 +37,8 @@ def run(argv, timeout, stdout_path=None):
             stdout_path.write_text(result.stdout, encoding='utf-8')
             stdout_path.with_suffix('.stderr').write_text(result.stderr, encoding='utf-8')
         return result.returncode, result.stdout, result.stderr
+    except OSError as exc:
+        return 126, '', str(exc)
     except subprocess.TimeoutExpired as exc:
         out = exc.stdout or ''
         err = exc.stderr or ''
@@ -75,18 +77,25 @@ def host_metadata(timeout):
 
 def main():
     args = parse_args()
-    if args.batches < 1 or args.warmup_batches < 0 or args.working_set_mib < 1 or args.timeout <= 0:
+    os.umask(0o077)
+    if not (1 <= args.batches <= 1000000 and 0 <= args.warmup_batches <= 1000000
+            and 1 <= args.working_set_mib <= 256 and math.isfinite(args.timeout)
+            and 0 < args.timeout <= 600) or len(set(args.modes)) != len(args.modes):
         print('batches, working set, and timeout must be positive; warmup cannot be negative', file=sys.stderr)
         return 2
-    source = Path(args.source).expanduser().resolve()
+    source = Path(args.source).expanduser().absolute()
     if not source.is_file() or source.is_symlink():
         print('source must be a regular file', file=sys.stderr)
         return 2
-    output = Path(args.output_dir).expanduser().resolve()
-    if output.exists() and output.is_symlink():
-        print('output directory may not be a symlink', file=sys.stderr)
+    output = Path(args.output_dir).expanduser().absolute()
+    if any(p.is_symlink() for p in (output, *output.parents, source, *source.parents)):
+        print('source and output paths must not contain symlinks', file=sys.stderr)
         return 2
-    output.mkdir(parents=True, exist_ok=True)
+    try:
+        output.mkdir(mode=0o700, exist_ok=False)
+    except OSError as exc:
+        print(f'output must be a new directory under an existing parent: {exc}', file=sys.stderr)
+        return 2
     host = host_metadata(args.timeout)
     results = []
     for index, home in enumerate(args.jdk, 1):
@@ -106,6 +115,7 @@ def main():
         vm_properties = {}
         for line in (vm_version + vm_version_err).splitlines():
             key, sep, value = line.strip().partition('=')
+            key = key.strip()
             if sep and key in ('java.vm.name', 'java.vm.vendor', 'java.runtime.version'):
                 vm_properties[key] = value.strip()
         compile_rc, _, compile_err = run([str(javac), '-g', '-d', str(classes), str(source)], args.timeout)
@@ -126,6 +136,7 @@ def main():
                 expected = args.batches * 1024
                 if missing or int(data.get('measured_operations', -1)) != expected or int(data.get('elapsed_ns', 0)) <= 0:
                     raise ValueError('missing or invalid measurement fields')
+                int(data['checksum'])
                 status, error = ('verified', '') if run_rc == 0 else ('failed', 'java exited %d' % run_rc)
             except (ValueError, TypeError) as exc:
                 status, error = 'failed', str(exc)
