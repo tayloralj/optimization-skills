@@ -6,6 +6,8 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add a read-only frequency, thermal, boost, and powercap snapshot for
+  frequency-aware Intel and AMD Java comparisons.
 - Add a read-only container profiling readiness report for PID namespaces,
   mount namespaces, cgroup limits, capabilities, seccomp, and effective CPU and
   memory placement.
