@@ -128,4 +128,5 @@ easy to get wrong in convincing ways. So the skills are **read-only by default**
 - Names: the repository, Claude marketplace, and plugin are all
   `optimization-skills`
 - [Compatibility and validation status](docs/compatibility.md)
+- [Vendor-profiler investigation and validation gaps](docs/vendor-profilers.md)
 - Sources and credits: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) · Licence: MIT ([`LICENSE`](LICENSE))

@@ -6,6 +6,11 @@ better answer because of it**.
 
 ## Cases
 
+Vendor cases `vendor-perf-blocked`, `vendor-uncore-scope`, and `vendor-vm-no-pmu`
+cover missing tools, JFR-versus-PMU evidence, shared counter scope, cross-vendor
+event misuse, and guest permissions versus PMU exposure.
+They are authored but have not yet been scored.
+
 | Case | Request | Expect |
 | --- | --- | --- |
 | `gc-log-triage` | GC log excerpt with a 912 ms full GC | `java-gc-tuning`; names the full GC and evacuation failure; evidence before flags |

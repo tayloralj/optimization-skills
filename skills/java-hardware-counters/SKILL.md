@@ -25,6 +25,11 @@ then build a minimal event set for one hypothesis.
 7. Compare a control, baseline, and candidate on the same host. Interpret
    ratios using the CPU vendor/model documentation and `references/events.md`.
 
+For Intel PCM or AMD `AMDuProfPcm` system counters, read
+`references/system-counters.md`. Distinguish process-core events from shared
+socket/channel traffic; a process filter does not make uncore traffic private
+to that process. For Java method attribution, use the `java-vtune-uprof` skill.
+
 For production attachment, obtain operator approval, verify PID identity/UID
 and process start time before and after the bounded interval, protect the output,
 and handle target exit or PID reuse explicitly. Record that `:u` intentionally

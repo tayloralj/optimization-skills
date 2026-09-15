@@ -6,6 +6,7 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add vendor-specific VTune/uProf runbooks, Intel PCM and AMD system-counter guidance, an offline result handoff, and a tested synthetic Java attribution fixture. Live vendor captures remain unverified.
 - Preserve incomplete rollback status after interruption and allow recovery retries.
 - Require every measured allocation round to meet the budget; reject invalid latency data without losing integer timestamp precision.
 - Fail incomplete JFR reports and bound diagnostic command waits during capture.
