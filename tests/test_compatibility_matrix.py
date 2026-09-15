@@ -28,6 +28,8 @@ class CompatibilityMatrixTest(unittest.TestCase):
             summary = json.loads((Path(directory) / 'summary.json').read_text())
             self.assertEqual(summary['verified'], 2)
             self.assertEqual({row['status'] for row in summary['results']}, {'verified'})
+            self.assertIn('host', summary)
+            self.assertIn('jvm', summary['results'][0])
             self.assertTrue((Path(directory) / 'jdk-1' / 'lock.stdout').is_file())
 
     def test_missing_jdk_is_unavailable_and_fails_closed(self):

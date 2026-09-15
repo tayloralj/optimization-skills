@@ -4,7 +4,6 @@ import argparse
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -51,6 +50,29 @@ def run(argv, timeout, stdout_path=None):
         return 124, out, err + '\ntimeout\n'
 
 
+def host_metadata(timeout):
+    metadata = {'kernel': 'unavailable', 'cpu': 'unavailable', 'virtualization': 'unavailable'}
+    try:
+        result = subprocess.run(['uname', '-sr'], capture_output=True, text=True, timeout=timeout, check=False)
+        if result.returncode == 0 and result.stdout.strip():
+            metadata['kernel'] = result.stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    try:
+        result = subprocess.run(['lscpu'], capture_output=True, text=True, timeout=timeout, check=False)
+        if result.returncode == 0:
+            fields = {}
+            for line in result.stdout.splitlines():
+                key, sep, value = line.partition(':')
+                if sep:
+                    fields[key.strip()] = value.strip()
+            metadata['cpu'] = {key: fields[key] for key in ('Vendor ID', 'Model name', 'CPU(s)', 'Socket(s)', 'NUMA node(s)') if key in fields}
+            metadata['virtualization'] = {key: fields[key] for key in ('Hypervisor vendor', 'Virtualization type') if key in fields}
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return metadata
+
+
 def main():
     args = parse_args()
     if args.batches < 1 or args.warmup_batches < 0 or args.working_set_mib < 1 or args.timeout <= 0:
@@ -65,6 +87,7 @@ def main():
         print('output directory may not be a symlink', file=sys.stderr)
         return 2
     output.mkdir(parents=True, exist_ok=True)
+    host = host_metadata(args.timeout)
     results = []
     for index, home in enumerate(args.jdk, 1):
         java = executable(home, 'java')
@@ -79,11 +102,17 @@ def main():
         classes.mkdir(parents=True, exist_ok=True)
         rc, version, version_err = run([str(java), '-version'], args.timeout)
         version_line = (version_err or version).splitlines()[0] if (version_err or version).splitlines() else 'unknown'
+        vm_version_rc, vm_version, vm_version_err = run([str(java), '-XshowSettings:properties', '-version'], args.timeout)
+        vm_properties = {}
+        for line in (vm_version + vm_version_err).splitlines():
+            key, sep, value = line.strip().partition('=')
+            if sep and key in ('java.vm.name', 'java.vm.vendor', 'java.runtime.version'):
+                vm_properties[key] = value.strip()
         compile_rc, _, compile_err = run([str(javac), '-g', '-d', str(classes), str(source)], args.timeout)
         if compile_rc != 0:
             for mode in args.modes:
                 results.append({**row_base, 'mode': mode, 'status': 'failed', 'java_version': version_line,
-                                'error': 'javac failed: ' + compile_err[-500:]})
+                            'error': 'javac failed: ' + compile_err[-500:], 'jvm': vm_properties})
             continue
         for mode in args.modes:
             log = jdk_dir / (mode + '.stdout')
@@ -102,8 +131,8 @@ def main():
                 status, error = 'failed', str(exc)
             results.append({**row_base, 'mode': mode, 'status': status, 'java_version': version_line,
                             'measured_operations': data.get('measured_operations'), 'checksum': data.get('checksum'),
-                            'elapsed_ns': data.get('elapsed_ns'), 'error': error, 'stderr': stderr[-500:]})
-    summary = {'source': str(source), 'modes': args.modes, 'results': results,
+                            'elapsed_ns': data.get('elapsed_ns'), 'error': error, 'stderr': stderr[-500:], 'jvm': vm_properties})
+    summary = {'source': str(source), 'modes': args.modes, 'host': host, 'results': results,
                'verified': sum(r['status'] == 'verified' for r in results),
                'failed': sum(r['status'] == 'failed' for r in results),
                'unavailable': sum(r['status'] == 'unavailable' for r in results)}

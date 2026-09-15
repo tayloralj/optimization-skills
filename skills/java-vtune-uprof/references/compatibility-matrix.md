@@ -12,6 +12,11 @@ python3 skills/java-vtune-uprof/scripts/compatibility-matrix.py \
   --output-dir /tmp/vendor-compat
 ```
 
+The summary also records kernel, CPU vendor/model, topology, virtualization
+fields when `uname`/`lscpu` expose them, plus the selected JDK's VM vendor and
+runtime version. Redact these fields before publishing results when the host
+is sensitive.
+
 `verified` means only that this fixture compiled and completed with the
 expected operation count and valid timing. `failed` and `unavailable` remain
 visible and produce a non-zero exit; neither status may be converted into a
