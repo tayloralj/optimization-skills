@@ -40,9 +40,14 @@ logging at launch if the JVM has none (see Plan D).
 ... collect.sh --pid PID --duration 120 --thread-dumps 3 --out ~/jvmcap/bundles --yes
 # with async-profiler installed on the host:
 ... collect.sh --pid PID --duration 120 --asprof cpu --out ~/jvmcap/bundles --yes
+# preserve a vendor session collected separately during the same window:
+... collect.sh --pid PID --duration 120 --vendor-artifact /path/to/vtune-result \
+  --vendor-artifact /path/to/perf.data --out ~/jvmcap/bundles --yes
 ```
 
 Capture at peak load. Thread dumps show what busy and blocked threads are doing.
+Vendor artifacts are copied unchanged under `vendor/`, checksum-verified, and
+left for analysis with the matching VTune, uProf, perf, or PCM release.
 
 ## Plan C: memory growth or OOM kills
 

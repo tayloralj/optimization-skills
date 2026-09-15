@@ -31,6 +31,7 @@ What to collect:
   --gc-log PATH           copy this log file (and its rotations); repeatable
   --cpus LIST             latency-critical CPUs for the host audit, e.g. 2-5
   --asprof EVENT          also run async-profiler (cpu|ctimer|wall|alloc|lock) if asprof is installed
+  --vendor-artifact PATH  copy an existing VTune/uProf/perf/PCM result into vendor/ (repeatable)
   --readiness-smoke-test  let the readiness check run its short perf/JFR self-tests
 
 Privacy and limits:
@@ -49,6 +50,7 @@ pid=; duration=120; jfr_mode=new; jfr_settings=profile; thread_dumps=0; gc_logs=
 cpus=; asprof_event=; readiness_smoke=0; max_mb=512; redact_host=0; keep_cmdline=0
 out_parent=./jvmcap-bundles; dry_run=0; assume_yes=0; list=0
 declare -a extra_gc_logs=()
+declare -a vendor_artifacts=()
 while (( $# )); do
   case "$1" in
     --pid) pid=${2:-}; shift ;;
@@ -59,6 +61,7 @@ while (( $# )); do
     --thread-dumps) thread_dumps=${2:-}; shift ;;
     --gc-logs) gc_logs=${2:-}; shift ;;
     --gc-log) extra_gc_logs+=("${2:-}"); shift ;;
+    --vendor-artifact) vendor_artifacts+=("${2:-}"); shift ;;
     --cpus) cpus=${2:-}; shift ;;
     --asprof) asprof_event=${2:-}; shift ;;
     --readiness-smoke-test) readiness_smoke=1 ;;
@@ -98,6 +101,9 @@ fi
 [[ -z "$asprof_event" || "$asprof_event" =~ ^(cpu|ctimer|wall|alloc|lock)$ ]] || die "--asprof must be cpu, ctimer, wall, alloc, or lock."
 [[ "$max_mb" =~ ^[0-9]+$ ]] && (( max_mb >= 16 && max_mb <= 4096 )) || die "--max-mb must be 16-4096."
 for log in "${extra_gc_logs[@]}"; do [[ -n "$log" && -f "$log" ]] || die "--gc-log file not found: $log"; done
+for artifact in "${vendor_artifacts[@]}"; do
+  [[ -n "$artifact" && -e "$artifact" && ! -L "$artifact" ]] || die "--vendor-artifact must be an existing non-symlink path: $artifact"
+done
 
 # Target checks: same user, visible java, readable identity.
 [[ -r "/proc/$pid/status" ]] || die "PID $pid is not visible to this user." 4
@@ -171,6 +177,7 @@ free_bytes=$(( $(df -Pk "$out_parent" | awk 'NR==2 {print $4}') * 1024 ))
 bundle=$out_parent/$bundle_name
 mkdir -m 700 -- "$bundle" || die "Cannot create $bundle." 4
 mkdir -m 700 -- "$bundle/proc-start" "$bundle/proc-end" "$bundle/jvm" "$bundle/host" "$bundle/logs"
+if (( ${#vendor_artifacts[@]} )); then mkdir -m 700 -- "$bundle/vendor"; fi
 
 manifest=$bundle/MANIFEST.txt
 cmdlog=$bundle/commands.log
@@ -200,6 +207,7 @@ alive() { [[ "$(start_time 2>/dev/null)" == "$target_start" ]]; }
   printf 'duration_s=%s\n' "$duration"
   printf 'jfr_mode=%s\njfr_settings=%s\nthread_dumps=%s\ngc_logs=%s\nasprof_event=%s\n' "$jfr_mode" "$jfr_settings" "$thread_dumps" "$gc_logs" "${asprof_event:-none}"
   printf 'max_mb=%s\nredact_hostname=%s\nkeep_command_line=%s\n' "$max_mb" "$redact_host" "$keep_cmdline"
+  printf 'vendor_artifacts=%s\n' "${#vendor_artifacts[@]}"
   printf 'jcmd=%s\njfr_tool=%s\n' "${jcmd_bin:-missing}" "${jfr_bin:-missing}"
 } > "$manifest"
 
@@ -359,6 +367,19 @@ for base in "${gc_candidates[@]}"; do
   done < <(ls -1t -- "$base" "$base".* 2>/dev/null)
 done
 step_status gc-logs "copied=$copied bytes=$copied_bytes"
+
+# Preserve externally collected vendor sessions without parsing or modifying them.
+vendor_copied=0
+for artifact in "${vendor_artifacts[@]}"; do
+  name=${artifact##*/}
+  [[ -n "$name" && ! -e "$bundle/vendor/$name" ]] || die "duplicate vendor artifact name: $name"
+  cp -R -- "$artifact" "$bundle/vendor/$name" || die "cannot copy vendor artifact: $artifact"
+  if find "$bundle/vendor/$name" -type l -print -quit | grep -q .; then
+    die "vendor artifact contains symlinks: $artifact"
+  fi
+  vendor_copied=$((vendor_copied + 1))
+done
+step_status vendor-artifacts "copied=$vendor_copied"
 
 # Seal: size check, checksums, archive
 content_bytes=$(du -sb "$bundle" | awk '{print $1}')

@@ -42,7 +42,10 @@ returned bundle here. The agent never needs a shell on the target.
    It refuses unsafe archives, verifies every checksum, computes per-thread CPU
    and run-queue delay, interrupt, vmstat, network, and pressure deltas, runs the
    GC, JFR, and NMT analysers for the capture window, and writes
-   `ANALYSIS.md` with findings and suggested next skills.
+   `ANALYSIS.md` with findings and suggested next skills. To preserve a vendor
+   result collected alongside the JVM window, repeat `--vendor-artifact PATH`
+   for each existing VTune, uProf, `perf`, or PCM file/directory; the analyser
+   verifies checksums and leaves proprietary databases for their native tools.
 6. **Interpret with the specialist skills** named in `ANALYSIS.md`
    (`java-gc-tuning`, `java-flight-recorder`, `java-native-memory`,
    `linux-low-latency-tuning`, `linux-ebpf-io-network`, ...). Treat automatic

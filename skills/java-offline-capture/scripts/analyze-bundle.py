@@ -295,6 +295,16 @@ def main(argv: list[str]) -> int:
         findings.append(("warn", "bundle integrity problems: " + "; ".join(problems[:5])))
     md.append("")
 
+    vendor_files = sorted((bundle / "vendor").rglob("*") if (bundle / "vendor").is_dir() else [])
+    if vendor_files:
+        md += ["## Vendor profiler artifacts", "",
+               "These files were preserved and checksum-verified. Open them with the matching vendor tool; this analyser does not parse proprietary databases.", ""]
+        for path in vendor_files:
+            if path.is_file():
+                md.append(f"- `{path.relative_to(bundle)}` ({path.stat().st_size} bytes, sha256 `{sha256(path)}`)")
+        md.append("")
+        next_skills.add("java-vtune-uprof")
+
     # Process and threads
     threads = thread_deltas(bundle, clk_tck, elapsed)
     rss_start = status_field(bundle / "proc-start/pid_status", "VmRSS")
