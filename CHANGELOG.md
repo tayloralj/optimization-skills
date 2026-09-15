@@ -6,6 +6,9 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add an Intel/AMD CPU capability matrix covering hybrid cores, AMD CCD/CCX and
+  EPYC scopes, VM vPMU boundaries, and the minimum evidence required before
+  selecting model-specific events.
 - Add a vendor-neutral Java/JIT symbol validation check for exported profiler
   reports, with required-method checks, unresolved-frame markers, JSON output,
   and conservative inconclusive status.
