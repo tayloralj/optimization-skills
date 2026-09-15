@@ -64,6 +64,8 @@ latency benchmark. Read `references/validation.md` for bounded commands,
 measurement-window checks, overhead comparisons, and acceptance criteria.
 For repeated fixed-work comparisons, use `scripts/profile-compare.py`; read
 `references/comparison-runner.md` before using it.
+Before interpreting a vendor or perf export, use `scripts/validate-symbols.py`
+and read `references/symbol-validation.md` to check Java/JIT attribution.
 
 For socket/channel bandwidth or other system counters, use the
 `java-hardware-counters` skill. Intel PCM and AMD `AMDuProfPcm` are different
