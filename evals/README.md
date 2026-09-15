@@ -64,8 +64,12 @@ Installation and format checks are not behavioral evals.
 ## Status
 
 - Vendor behavioral evaluation attempt on 2026-09-15 was unscored: the
-  trusted-plugin run started, but the API request failed with `EAI_AGAIN`
-  before a model response. No score is claimed.
+  trusted-plugin run started, but the child reported missing prompt input and
+  the grader API request failed with `EAI_AGAIN`. These are separate failures;
+  neither produced valid behavioral evidence. The later retry outside the
+  sandbox was rejected by automatic approval review because transmitting the
+  private plugin content to the Claude API required explicit data-transfer
+  approval. No new score is claimed.
 
 - Format verified: `not-java-python-code` ran and passed (no skill loaded; valid answer).
 - Codex discovery verified: `codex exec` in a checkout found all 19 skills, including `java-offline-capture` (via `.agents/skills`).

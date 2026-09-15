@@ -3,6 +3,9 @@
 Use `scripts/compatibility-matrix.py` to compile and run the fixed
 `VendorWorkload.java` fixture with each explicitly supplied JDK. The runner
 uses bounded, fixed work and writes raw stdout/stderr plus `summary.json`.
+Choose a new output directory under an existing parent. Existing destinations
+and symlink paths are refused; output is private to the current user.
+Timeouts must be finite and no greater than 600 seconds per subprocess.
 
 ```bash
 python3 skills/java-vtune-uprof/scripts/compatibility-matrix.py \

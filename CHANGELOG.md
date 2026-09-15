@@ -4,8 +4,9 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
-## [0.3.0] - 2026-09-15
+## [0.3.0] - unreleased
 
+- Harden compatibility matrix private output, path checks, timeout validation, and JVM metadata parsing.
 - Add a bounded JDK compatibility matrix runner for the vendor workload,
   preserving per-mode logs and failing closed on failed or unavailable JDKs.
 - Record host CPU, kernel, virtualization, and JVM identity alongside matrix
@@ -30,15 +31,13 @@ and `.claude-plugin/plugin.json`.
 - Add a bounded vendor-profiler comparison runner that interleaves profiled and
   unprofiled fixed-work commands, checks completion and checksums, and preserves
   raw output with a JSON overhead summary.
-- Add vendor-specific VTune/uProf runbooks, Intel PCM and AMD system-counter guidance, an offline result handoff, and a tested synthetic Java attribution fixture. Live vendor captures remain unverified.
+- Add vendor-specific VTune/uProf runbooks, Intel PCM and AMD system-counter guidance, an offline result handoff, and a tested synthetic Java attribution fixture. AMD Java hotspots attribution succeeded; Intel collection remains blocked.
 - Preserve incomplete rollback status after interruption and allow recovery retries.
 - Require every measured allocation round to meet the budget; reject invalid latency data without losing integer timestamp precision.
 - Fail incomplete JFR reports and bound diagnostic command waits during capture.
 - Correct Claude plugin invocation and use the documented Codex personal skill directory, with an explicit legacy-directory override.
 - Test installer lifecycle outside the checkout; document selective-install limitations, per-helper capture guarantees, and compatibility evidence.
 - Separate walkthrough diagnostics from repeated comparisons and add behavioral regression eval cases.
-
-## [0.3.0] - unreleased
 
 Making the collection understandable to newcomers and proving it works as skills.
 
