@@ -15,7 +15,8 @@ analysis terminology onto AMD PMUs or vice versa.
 2. Select Intel VTune for a supported Intel host and AMD uProf for a supported
    AMD host. If neither tool is installed, do not invent a download URL or CLI;
    use the vendor's current official documentation and organisation package
-   policy.
+   policy. Read `references/tool-setup.md` for approved user-local setup and
+   installation checks. Existing approval covers that setup; do not ask again.
 3. If neither vendor tool is installed, route to a verified JFR or
    async-profiler workflow rather than blocking the whole investigation. Query
    an installed tool's help and available analysis types. Names and
@@ -32,6 +33,10 @@ analysis terminology onto AMD PMUs or vice versa.
    Use memory, cache, branch, or concurrency analysis only when the broad run
    supports that question. Roofline is appropriate for compute kernels, not by
    default for network, journal, queue, or latency services.
+   Read `references/intel.md` for VTune or `references/amd.md` for uProf before
+   choosing collection mode: user-mode hotspots, timer sampling, and PMU/IBS
+   collection have different requirements. A blocked perf test does not by
+   itself prove user-mode sampling is unavailable.
 5. Confirm whether the selected analysis supports launch or attach in this
    release. Set an explicit duration and private result directory, then capture
    JDK/JVM/workload metadata.
@@ -43,6 +48,22 @@ analysis terminology onto AMD PMUs or vice versa.
 8. Interpret vendor metrics relative to a same-host baseline and workload.
    Fixed “healthy” thresholds are not portable across microarchitectures.
 9. Apply one change and verify with an unprofiled representative test.
+
+## Validate a new host or tool version
+
+Use `scripts/VendorWorkload.java`, a synthetic fixed-work fixture for allocation,
+branching, streaming reads, and dependent memory reads. It runs with the JDK
+source launcher and no dependencies. It is not a JMH replacement or a service
+latency benchmark. Read `references/validation.md` for bounded commands,
+measurement-window checks, overhead comparisons, and acceptance criteria.
+
+For socket/channel bandwidth or other system counters, use the
+`java-hardware-counters` skill. Intel PCM and AMD `AMDuProfPcm` are different
+tools; neither supplies Java method attribution by itself.
+
+For hosts without an agent, read `references/offline-results.md`: preserve the
+vendor's native result and JIT metadata alongside the offline JVM bundle. The
+existing bundle analyser does not parse or certify vendor profiler results.
 
 ## Java-specific checks
 
