@@ -48,6 +48,11 @@ reports nothing when the kernel kills it.
 
 ## Profiling inside containers
 
+- Run `profiling-readiness/scripts/container-readiness.py --pid PID` inside the
+  pod or against the same PID namespace. Preserve its JSON output. It records
+  cgroup limits, effective cpus/memory nodes, UID, capabilities, seccomp,
+  `NoNewPrivs`, and PID/mount namespace identity. A host-side result for a
+  different namespace is not evidence that the container target is attachable.
 - `jcmd`, JFR, and async-profiler need the same PID and mount namespace as the
   JVM: run them inside the container (`kubectl exec`) or use a sidecar that
   shares the process namespace.
@@ -55,6 +60,9 @@ reports nothing when the kernel kills it.
   (`kubectl cp`).
 - perf and eBPF usually need host access or privileged debugging pods; that is
   an operator decision (see the `profiling-readiness` skill).
+- A container can have a permissive-looking capability set while its host
+  `perf_event_paranoid`, seccomp profile, or absent vPMU still blocks collection.
+  Check the host and pod separately; do not add `privileged: true` as a default.
 
 ## Kubernetes checklist
 
