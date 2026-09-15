@@ -47,7 +47,9 @@ before changing the host, and measure every change.
 6. **Measure** before and after with the same load: application latency
    histogram (the `java-latency-measurement` skill), per-CPU interrupt deltas,
    run-queue latency and off-CPU time (the `linux-ebpf-io-network` skill), and
-   power/thermal behaviour.
+   power/thermal behaviour. Capture the read-only frequency and thermal
+   snapshot from the `profiling-readiness` skill so frequency changes are not
+   mistaken for code improvements.
 7. **Pin JVM threads deliberately** (see reference): hot threads onto isolated
    CPUs, everything else (GC, JIT, JFR, logging) onto housekeeping CPUs. Record
    final `ParallelGCThreads`, `ConcGCThreads`, `CICompilerCount`.

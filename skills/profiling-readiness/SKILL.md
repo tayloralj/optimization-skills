@@ -29,6 +29,11 @@ before choosing an attach or PMU workflow. Read its JSON output together with
 `java-performance-investigation`'s container reference; it is read-only and
 does not prove that a profiler can attach.
 
+For cross-host or before/after comparisons, also run
+`scripts/frequency-thermal-snapshot.py` and read
+`references/frequency-thermal.md`. Frequency and energy observations are
+context for a profile, not portable performance grades.
+
 ## Interpret the report
 
 - `READY_PERF_SOFTWARE_EVENT`: the bundled user-space software-event smoke test succeeded.
