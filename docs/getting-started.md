@@ -57,6 +57,10 @@ Name a skill with `/optimization-skills:java-gc-tuning ...` for the Claude
 plugin, `/java-gc-tuning ...` for standalone Claude skills, or
 `$java-gc-tuning ...` in Codex.
 
+When a profiling example uses a value such as `PID 12345`, that value is only a
+placeholder. Instruct the agent to discover the real JVM first; it must verify
+the selected process owner and start time before attaching.
+
 ## What the agent will and won't do
 
 It **will** read logs and `/proc`, run short read-only checks, start bounded

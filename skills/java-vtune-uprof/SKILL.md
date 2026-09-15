@@ -40,6 +40,12 @@ analysis terminology onto AMD PMUs or vice versa.
 5. Confirm whether the selected analysis supports launch or attach in this
    release. Set an explicit duration and private result directory, then capture
    JDK/JVM/workload metadata.
+   Any PID shown in examples, including `12345`, is a placeholder. Never attach
+   to it as a first step. Discover the real target on the current host (for
+   example with `pgrep -a java` or the project's service status), ask the
+   operator to identify the intended JVM when more than one candidate exists,
+   then verify its owner, executable, start time, and namespace immediately
+   before profiling. Prefer a self-owned launch for the first validation.
 6. Warm the JVM, collect a bounded steady-state interval, and preserve JIT,
    GC, safepoint, thread, and native symbol context. Prefer a replica or
    controlled load; obtain approval before attaching to production.
