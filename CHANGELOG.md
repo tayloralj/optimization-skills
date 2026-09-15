@@ -6,6 +6,8 @@ and `.claude-plugin/plugin.json`.
 
 ## Unreleased
 
+- Add a bounded JDK compatibility matrix runner for the vendor workload,
+  preserving per-mode logs and failing closed on failed or unavailable JDKs.
 - Extend the vendor workload fixture with synchronization and scheduler-wait
   modes, with explicit limits on contention and queueing interpretation.
 - Extend the offline capture kit with checksum-verified vendor profiler
