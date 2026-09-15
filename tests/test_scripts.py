@@ -282,7 +282,7 @@ def make_archive(path: Path, entries: dict, links: dict | None = None, top: str 
             tar.addfile(info)
 
 
-def minimal_bundle(tamper: bool = False) -> dict:
+def minimal_bundle(tamper: bool = False, vendor: bool = False) -> dict:
     import hashlib
     files = {
         "MANIFEST.txt": b"bundle_format=1\nbundle=jvmcap-h-1-20260101T000000Z\npid=1\nduration_s=10\nclk_tck=100\nstep.proc-start=ok\n",
@@ -295,6 +295,8 @@ def minimal_bundle(tamper: bool = False) -> dict:
         "proc-start/net_snmp": b"Udp: InDatagrams InErrors RcvbufErrors\nUdp: 10 0 0\n",
         "proc-end/net_snmp": b"Udp: InDatagrams InErrors RcvbufErrors\nUdp: 90 7 7\n",
     }
+    if vendor:
+        files["vendor/vtune-report.txt"] = b"VendorWorkload.chaseBatch\n"
     sums = "".join(f"{hashlib.sha256(v).hexdigest()}  ./{k}\n" for k, v in sorted(files.items()))
     files["SHA256SUMS"] = sums.encode()
     if tamper:
@@ -328,6 +330,17 @@ class AnalyzeBundleTest(unittest.TestCase):
             text = (Path(tmp) / "out" / "ANALYSIS.md").read_text()
         self.assertEqual(result.returncode, 6)
         self.assertIn("checksum mismatch proc-end/vmstat", text)
+
+    def test_vendor_artifacts_are_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = Path(tmp) / "b.tar.gz"
+            make_archive(archive, minimal_bundle(vendor=True))
+            result = self.analyze(archive, Path(tmp) / "out")
+            text = (Path(tmp) / "out" / "ANALYSIS.md").read_text()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Vendor profiler artifacts", text)
+        self.assertIn("vendor/vtune-report.txt", text)
+        self.assertIn("`java-vtune-uprof`", text)
 
     def test_expected_sha_mismatch(self):
         with tempfile.TemporaryDirectory() as tmp:

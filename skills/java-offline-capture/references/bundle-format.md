@@ -22,6 +22,7 @@ jvm/continuous.jfr      dump of an existing continuous recording (scrubbed)
 jvm/asprof-EVENT.jfr    async-profiler recording (optional)
 jvm/thread-dump-NN.txt  jcmd Thread.print -l (optional)
 logs/NN-<name>          GC log files named by the JVM's log configuration, newest first
+vendor/<artifact>       optional copied VTune, uProf, perf, or PCM file/directory
 ```
 
 ## Manifest keys
@@ -39,6 +40,7 @@ logs/NN-<name>          GC log files named by the JVM's log configuration, newes
 | `jfr_scrub.<file>` | `ok`, `skipped(--keep-command-line)`, `NOT_SCRUBBED(...)`, or `failed(...)` |
 | `content_bytes`, `size_warning` | Size before archiving |
 | `interrupted`, `target_alive_at_end` | Whether the run was cut short or the JVM exited |
+| `vendor_artifacts` | Number of operator-supplied artifacts copied under `vendor/` |
 
 ## Compatibility
 
