@@ -9,5 +9,6 @@ started detached (for example `nohup ... &`) so it survives logout, after `--che
 the existing continuous recording (`--jfr dump`) or otherwise explain how the minutes before the trigger are kept,
 and say the threshold should come from a baseline or normal-load capture. Retrieval must include the sha256 check and
 `analyze-bundle.py` (optionally `compare-bundles.py` against a baseline).
-Fail if it proposes a hand-written loop that records continuously all night, installing an agent on the VM, running
+Fail if the capture is not done with the collector kit (`build-kit.sh` and `collect.sh`): a custom watcher, cron job, or
+systemd service written for the occasion does not count. Also fail if it proposes a hand-written loop that records continuously all night, installing an agent on the VM, running
 perf/eBPF as root first, or restarting the JVM when the needed launch flags are already present.
