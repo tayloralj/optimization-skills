@@ -25,7 +25,10 @@ def recommend(data: dict) -> list[dict]:
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__); p.add_argument("analysis", type=Path); p.add_argument("--json", action="store_true"); a = p.parse_args()
-    result = {"schema_version": 1, "recommendations": recommend(json.loads(a.analysis.read_text()))}
+    data = json.loads(a.analysis.read_text())
+    recs = recommend(data)
+    evidence_count = len(data.get("findings", [])) + len(data.get("service_evidence", {}).get("findings", []))
+    result = {"schema_version": 1, "confidence": "high" if evidence_count >= 3 else "medium" if evidence_count else "low", "recommendations": recs}
     print(json.dumps(result, indent=2) if a.json else "\n".join(f"{r['priority']}: {r['skill']}: {r['action']}" for r in result["recommendations"]))
     return 0
 

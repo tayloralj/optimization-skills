@@ -14,6 +14,8 @@ Pass `--bundle DIR` when an offline capture has returned; the command adds the
 service evidence summary to the routing output.
 For a ranked follow-up from an analysis, pass `--analysis analysis.json` or
 run `scripts/recommendations.py analysis.json` directly.
+Use `scripts/evidence-report.py RESULT_DIR [--baseline BASELINE_ANALYSIS]` to
+merge analysis, service, perf, and vendor summaries and report confidence.
 Before any attach-oriented command, verify the discovered target with
 `scripts/target-guard.py --pid PID --user USER --start-ticks TICKS`; it rejects
 the example PID `12345`, non-Java executables, owner changes, and PID reuse.

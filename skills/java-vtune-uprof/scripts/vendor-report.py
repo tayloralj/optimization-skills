@@ -11,11 +11,13 @@ from pathlib import Path
 def parse(root: Path) -> dict:
     metrics = {}
     files = []
+    attribution = False
     for path in sorted(root.rglob("*")):
         if not path.is_file():
             continue
         files.append(str(path.relative_to(root)))
         text = path.read_text(errors="replace")[:2_000_000]
+        attribution = attribution or bool(re.search(r"(?i)(java|hotspot|jit|::)", text))
         for key, pattern in (("cycles", r"(?i)(?:cycles|cpu.?cycles)[^0-9]*([0-9][0-9,]*)"),
                              ("instructions", r"(?i)instructions[^0-9]*([0-9][0-9,]*)"),
                              ("samples", r"(?i)samples?[^0-9]*([0-9][0-9,]*)")):
@@ -24,7 +26,7 @@ def parse(root: Path) -> dict:
                 metrics[key] = int(match.group(1).replace(",", ""))
     if metrics.get("cycles") and metrics.get("instructions"):
         metrics["ipc"] = round(metrics["instructions"] / metrics["cycles"], 4)
-    return {"schema_version": 1, "files": files, "metrics": metrics, "attribution": any(re.search(r"(?i)(java|hotspot|jit|::)", f) for f in files)}
+    return {"schema_version": 1, "files": files, "metrics": metrics, "attribution": attribution or any(re.search(r"(?i)(java|hotspot|jit|::)", f) for f in files)}
 
 
 def main() -> int:

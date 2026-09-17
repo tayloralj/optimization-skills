@@ -15,6 +15,7 @@ READY = HERE / "profiling-readiness/scripts/check-profiling-readiness.sh"
 SERVICE = HERE / "java-offline-capture/scripts/service-evidence.py"
 RECOMMEND = HERE / "linux-jvm-debug/scripts/recommendations.py"
 GUARD = HERE / "linux-jvm-debug/scripts/target-guard.py"
+PERF_CAPTURE = HERE / "java-linux-perf/scripts/java-perf-capture.sh"
 
 
 def run(argv: list[str]) -> str:
@@ -32,8 +33,26 @@ def main() -> int:
     p.add_argument("--pid", type=int, help="real discovered Java PID to verify")
     p.add_argument("--user", help="expected owner for --pid")
     p.add_argument("--start-ticks", type=int, help="expected /proc starttime for --pid")
+    p.add_argument("--run", action="store_true", help="run a bounded launch capture; command follows --")
+    p.add_argument("--out", type=Path, help="private output directory for --run")
+    p.add_argument("--duration", type=int, default=30)
+    p.add_argument("--cpus", help="CPU list for --run, for example 0-7")
+    p.add_argument("command", nargs=argparse.REMAINDER)
     p.add_argument("--json", action="store_true")
     args = p.parse_args()
+    if args.run:
+        command = args.command[1:] if args.command and args.command[0] == "--" else args.command
+        if not args.out or not command:
+            p.error("--run requires --out DIR and a command after --")
+        capture = [str(PERF_CAPTURE), "--out", str(args.out), "--duration", str(args.duration)]
+        if args.cpus:
+            capture += ["--cpus", args.cpus]
+        capture += ["--"] + command
+        capture_output = subprocess.run(capture, text=True, check=False)
+        if capture_output.returncode:
+            return capture_output.returncode
+        print(f"capture={args.out}")
+        return 0
     if args.pid is not None:
         if not args.user or args.start_ticks is None:
             p.error("--pid requires --user and --start-ticks; attach is never inferred")

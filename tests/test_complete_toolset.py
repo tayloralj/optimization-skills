@@ -36,6 +36,17 @@ class CompleteToolsetTests(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("placeholder", proc.stderr)
 
+    def test_evidence_report_confidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "analysis.json").write_text(json.dumps({"findings": [{"severity": "warn", "text": "oom"}]}))
+            out = subprocess.check_output(["python3", str(ROOT / "skills/linux-jvm-debug/scripts/evidence-report.py"), str(root), "--json"], text=True)
+            self.assertEqual(json.loads(out)["confidence"], "high")
+
+    def test_offline_runbook_rejects_placeholder(self):
+        proc = subprocess.run(["python3", str(ROOT / "skills/java-offline-capture/scripts/offline-runbook.py"), "--pid", "12345"], capture_output=True, text=True)
+        self.assertNotEqual(proc.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
