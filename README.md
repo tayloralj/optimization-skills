@@ -54,6 +54,33 @@ Codex destination. For a previous legacy install, remove its owned entries with
 `CODEX_SKILLS_DIR="$HOME/.codex/skills" ./install.sh --codex --uninstall`, then
 install into the default location. Keep the checkout in place for symlink installs.
 
+### Update to the latest version
+
+**Claude Code plugin:** refresh the marketplace, then update the plugin:
+
+```bash
+claude plugin marketplace update optimization-skills
+claude plugin update optimization-skills@optimization-skills
+claude plugin list                     # confirm the new version
+```
+
+**`install.sh` installs (Codex or Claude):** pull the checkout, then re-run the
+installer with the options you used the first time. Linked skills already follow
+the checkout; the re-run links skills added since, and with `--copy` it
+replaces the copies it made earlier:
+
+```bash
+cd optimization-skills
+git pull
+cat VERSION
+./install.sh                 # or: ./install.sh --copy, --codex, --claude
+```
+
+Restart the agent after either route. The [changelog](CHANGELOG.md) lists what
+changed. Collector kits already handed to operators do not update themselves:
+rebuild with `build-kit.sh` and send the new kit. The analyser still reads
+bundles from older kits that use the same `bundle_format`.
+
 ## Use it
 
 Describe the problem in your own words. The agent can select a matching skill automatically:
@@ -82,7 +109,7 @@ routes to the rest.
 | Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
 | | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |
 | | `java-jmh-benchmarking` | Write and run microbenchmarks that model production |
-| | `java-offline-capture` | Collect evidence on prod/QA hosts that can't run an agent; analyse the bundle later |
+| | `java-offline-capture` | Collect evidence on prod/QA hosts that can't run an agent, on a schedule or trigger; analyse bundles, digests, or loose files later |
 | Profile | `java-async-profiler` | CPU, allocation, lock, and wall-clock profiles |
 | | `java-linux-perf` | Linux `perf` with working Java symbols |
 | | `java-hardware-counters` | CPU counter experiments (cache, branch, IPC) |

@@ -6,13 +6,20 @@ umask 077
 # Bounded JFR recording of a running JVM owned by the current user, via jcmd.
 # No root, no restart. The target JVM writes the file itself, so the output
 # directory must be visible and writable at the same path inside the target's
-# mount namespace (not the case for most containers).
+# mount namespace. From a different mount namespace (for example a Kubernetes
+# debug container sharing the pod's PID namespace) set JFR_TARGET_TMP to a
+# directory the JVM can write; the file is then read back through
+# /proc/PID/root and removed from the target.
 usage() {
   cat <<EOF
 Usage: ${0##*/} PID DURATION_SECONDS OUTPUT.jfr [SETTINGS]
   SETTINGS  default | profile (default: profile) | path to a .jfc file
 Environment: JFR_MAXSIZE (default 256M) bounds retained recording data, not exact file bytes.
   JCMD_TIMEOUT_SECONDS (default 10, maximum 60) bounds each diagnostic command.
+  JFR_DISABLE_EVENTS  comma-separated event names to switch off at the source
+                      (for example jdk.InitialEnvironmentVariable,jdk.ProcessStart).
+  JFR_TARGET_TMP      absolute directory inside the target's mount namespace, used
+                      only when the target runs in a different mount namespace.
 Example: install -d -m 700 ./jfr && ${0##*/} 1234 120 ./jfr/run1.jfr
 EOF
 }
@@ -30,6 +37,14 @@ run_jcmd() { timeout --kill-after=2s "${jcmd_timeout}s" jcmd "$@"; }
 [[ "$pid" =~ ^[1-9][0-9]*$ ]] || { printf 'PID must be a positive integer.\n' >&2; exit 2; }
 [[ "$duration" =~ ^[1-9][0-9]*$ ]] && (( duration <= 3600 )) || { printf 'DURATION must be 1-3600 seconds.\n' >&2; exit 2; }
 [[ "$maxsize" =~ ^[1-9][0-9]*[kKmMgG]?$ ]] || { printf 'JFR_MAXSIZE must look like 256M.\n' >&2; exit 2; }
+disable_events=${JFR_DISABLE_EVENTS:-}
+[[ -z "$disable_events" || "$disable_events" =~ ^[A-Za-z0-9_.]+(,[A-Za-z0-9_.]+)*$ ]] || {
+  printf 'JFR_DISABLE_EVENTS must be a comma-separated list of event names.\n' >&2; exit 2;
+}
+target_tmp=${JFR_TARGET_TMP:-}
+[[ -z "$target_tmp" || "$target_tmp" =~ ^/[A-Za-z0-9._/-]*$ && "$target_tmp" != *..* ]] || {
+  printf 'JFR_TARGET_TMP must be an absolute path without "..".\n' >&2; exit 2;
+}
 case "$settings" in
   default|profile) ;;
   *.jfc) [[ -f "$settings" && -r "$settings" ]] || { printf 'Settings file not readable: %s\n' "$settings" >&2; exit 2; }
@@ -52,12 +67,27 @@ start_time() { local raw rest; raw=$(<"$proc_root/$pid/stat") || return 1; rest=
 [[ -r "$proc_root/$pid/status" ]] || { printf 'Target PID is not visible.\n' >&2; exit 4; }
 [[ $(awk '/^Uid:/ {print $2; exit}' "$proc_root/$pid/status") == "$(id -u)" ]] || { printf 'Target must be owned by the current user.\n' >&2; exit 4; }
 [[ $(basename "$(readlink "$proc_root/$pid/exe" 2>/dev/null || true)") == java ]] || { printf 'Target is not a visible Java launcher.\n' >&2; exit 4; }
-[[ "$(readlink "$proc_root/$pid/ns/mnt" 2>/dev/null)" == "$(readlink /proc/self/ns/mnt 2>/dev/null)" ]] || {
-  printf 'Target runs in a different mount namespace; it cannot write %s. Record inside the container instead.\n' "$output" >&2; exit 4;
-}
 started=$(start_time) || exit 4
-
 name=skill-capture-$$
+jvm_file=$output
+target_side=
+if [[ "$(readlink "$proc_root/$pid/ns/mnt" 2>/dev/null)" != "$(readlink /proc/self/ns/mnt 2>/dev/null)" ]]; then
+  [[ -n "$target_tmp" ]] || {
+    printf 'Target runs in a different mount namespace; it cannot write %s. Record inside the container, or set JFR_TARGET_TMP (for example /tmp).\n' "$output" >&2; exit 4;
+  }
+  [[ -d "$proc_root/$pid/root$target_tmp" && -r "$proc_root/$pid/root$target_tmp" ]] || {
+    printf 'Cannot read %s through %s/%s/root (same user and ptrace access needed).\n' "$target_tmp" "$proc_root" "$pid" >&2; exit 4;
+  }
+  jvm_file=${target_tmp%/}/$name.jfr
+  target_side=$proc_root/$pid/root$jvm_file
+  [[ ! -e "$target_side" && ! -L "$target_side" ]] || { printf 'Target-side file %s already exists.\n' "$jvm_file" >&2; exit 4; }
+fi
+declare -a event_overrides=()
+if [[ -n "$disable_events" ]]; then
+  IFS=, read -ra disabled <<< "$disable_events"
+  for event in "${disabled[@]}"; do event_overrides+=("$event#enabled=false"); done
+fi
+
 run_jcmd "$pid" JFR.check >/dev/null 2>&1 || { printf 'jcmd cannot attach (attach disabled, different JDK, or namespace issue).\n' >&2; exit 4; }
 recording_started=0
 stop_recording() {
@@ -69,6 +99,7 @@ stop_recording() {
       printf 'WARNING: could not confirm recording stopped; inspect JFR.check name=%s on PID %s.\n' "$name" "$pid" >&2
     fi
   fi
+  [[ -z "$target_side" ]] || rm -f -- "$target_side"
 }
 trap 'exit 130' HUP INT TERM
 trap stop_recording EXIT
@@ -76,7 +107,7 @@ trap stop_recording EXIT
 [[ $(start_time) == "$started" ]] || { printf 'Target changed during preflight.\n' >&2; exit 5; }
 recording_started=1
 run_jcmd "$pid" JFR.start name="$name" settings="$settings" duration="${duration}s" \
-  maxsize="$maxsize" filename="$output" >"$output_dir/.jcmd-$$.log" 2>&1 || {
+  maxsize="$maxsize" filename="$jvm_file" ${event_overrides[@]+"${event_overrides[@]}"} >"$output_dir/.jcmd-$$.log" 2>&1 || {
   printf 'JFR.start failed: %s\n' "$(tr '\n' ' ' < "$output_dir/.jcmd-$$.log")" >&2; rm -f -- "$output_dir/.jcmd-$$.log"; exit 5;
 }
 rm -f -- "$output_dir/.jcmd-$$.log"
@@ -102,6 +133,10 @@ done
 (( finished )) || { printf 'Recording exceeded its completion deadline.\n' >&2; exit 5; }
 [[ $(start_time) == "$started" ]] || { printf 'Target changed during recording.\n' >&2; exit 5; }
 recording_started=0
+if [[ -n "$target_side" ]]; then
+  cp -- "$target_side" "$output" 2>/dev/null || { printf 'Cannot copy %s from the target.\n' "$jvm_file" >&2; exit 5; }
+  rm -f -- "$target_side"
+fi
 trap - EXIT HUP INT TERM
 [[ -s "$output" ]] || { printf 'Recording finished but %s was not written.\n' "$output" >&2; exit 5; }
 chmod 600 "$output"

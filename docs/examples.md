@@ -262,58 +262,94 @@ unreadable and how to fix that.
 On the analysis machine, `skills/java-offline-capture/scripts/build-kit.sh ./kits`:
 
 ```text
-kit=./kits/jvm-collector-0.3.0.tar.gz
-sha256=fef2f1591d29e56645c95fc354a71c2c47c8e83fb6f9d7be1fb5e8e002532fdc
-files=9
+kit=.../kits/jvm-collector-0.3.0.tar.gz
+sha256=2a49c14d1a434a9c98eb08a1eeaa7704446452d81d5ac3e48cbf01f18a6db194
+files=10
 ```
 
-On the target host, as the JVM's user, `bash collect.sh --pid 2770898 --duration 20 --thread-dumps 2 --cpus 4-5 --redact-hostname --yes`:
+On the target host, as the JVM's user, the collector waits for a CPU burst and
+then records 30 seconds:
+`bash collect.sh --pid 1243173 --trigger cpu:150 --duration 30 --thread-dumps 2 --digest --redact-hostname --out ./bundles --yes`
+(the target is the synthetic `tests/fixtures/CaptureTarget.java` with a
+128 MB heap):
 
 ```text
-[19:14:17] proc-start             ok
-[19:14:18] readiness              ok
-[19:14:18] jcmd-VM.version        ok
+Armed: cpu:150 (up to 86400 s).
+Starting: process CPU 207% >= 150% (after 5 s).
+Collecting into .../bundles/jvmcap-host-57eb5aed-1243173-20260916T230708Z
+[23:07:08] proc-start             ok
+[23:07:09] readiness              ok
+[23:07:09] jcmd-VM.version        ok
 ...
-[19:14:20] nmt-start              ok
-[19:14:26] thread-dump-1          ok
-[19:14:32] thread-dump-2          ok
-[19:14:41] jfr-new                ok
-[19:14:41] host-audit             ok
-[19:14:42] nmt-end                ok
-[19:14:42] gc-logs                copied=3 bytes=12266708
+[23:07:11] nmt-start              ok
+[23:07:21] thread-dump-1          ok
+[23:07:31] thread-dump-2          ok
+[23:07:41] samples                rows=6
+[23:07:41] jfr-new                ok
+[23:07:41] host-audit             ok
+[23:07:41] proc-end               ok
+[23:07:42] jcmd-heap-end          ok
+[23:07:42] nmt-end                ok
+[23:07:43] gc-logs                copied=1 bytes=18172100
+[23:07:45] digest                 bytes=12562
 
-bundle=.../jvmcap-host-57eb5aed-2770898-20260913T191417Z.tar.gz
-size_bytes=15210565
-sha256=2313618bf1d2439f42e88a2d89e14b7e04c8784814e283a4bc9c235598fb332a
+bundle=.../bundles/jvmcap-host-57eb5aed-1243173-20260916T230708Z.tar.gz
+size_bytes=11989258
+sha256=55728bf4dbbaa2aa4bd80f079d6f83095d3144d1c182b438f05fb7f9d2d7cdf5
+digest=.../bundles/jvmcap-host-57eb5aed-1243173-20260916T230708Z.digest.txt (text; paste or attach it if the bundle cannot be sent quickly)
 ```
 
-Back on the analysis machine, `analyze-bundle.py jvmcap-....tar.gz ./analysis --expect-sha256 2313618b...` writes `ANALYSIS.md`:
+Back on the analysis machine, `analyze-bundle.py jvmcap-....tar.gz ./analysis --expect-sha256 55728bf4...` writes `ANALYSIS.md` and `analysis.json`:
 
 ```text
 ## Findings
 
-- **warn**: GC pauses took 19.3% of wall time (high allocation or small heap)
-- **warn**: GC alarms: evacuation_failure: 28, humongous_allocation: 53
-- **info**: time-to-safepoint reached 13.7 ms (threads slow to stop)
+- **warn**: GC pauses took 16.0% of wall time (high allocation or small heap)
+- **info**: thread-dump-01.txt: 1 BLOCKED threads
+- **info**: thread-dump-02.txt: 1 BLOCKED threads
+- **info**: 2 thread(s) show the same busy or blocked stack in every dump
 
-## Suggested next skills
-
-- `java-gc-tuning`
+## Capture
+...
+- Started by `process CPU 207% >= 150%` after waiting 5 s
 
 ## Process
 
-- RSS 173 MiB → 204 MiB (+30 MiB over the window)
-- 25 threads; total CPU 178% of one core
+- RSS 121 MiB → 178 MiB (+56 MiB over the window)
+- Process CPU 229% of one core (all threads, including ones that exited)
+...
+| java (1243175) | 81.2 | 34.7 | 958 | 11 |
+| contender-1 (1243197) | 41.1 | 28.2 | 481 | 15 |
+| contender-0 (1243196) | 40.8 | 32.3 | 512 | 17 |
+| GC Thread#2 (1243208) | 8.3 | 17.4 | 262 | 1 |
 
-| Thread (tid) | CPU % | Run-queue delay ms | Involuntary switches | Last CPU |
-| java (2770900) | 78.7 | 12.9 | 733 | 3 |
-| GC Thread#0 (2770903) | 14.7 | 11.9 | 304 | 12 |
+## Hot threads and their stacks
+
+- **main** (tid 1243175, 81% CPU)
+  - `thread-dump-01.txt` RUNNABLE: `CaptureTarget.burn` ← `CaptureTarget.main`
+  - `thread-dump-02.txt` RUNNABLE: `CaptureTarget.burn` ← `CaptureTarget.main`
+  - Same top frames in every dump: this thread is likely stuck in, or looping through, that code.
+- **contender-1** (tid 1243197, 41% CPU)
+  - `thread-dump-01.txt` BLOCKED: `CaptureTarget.lambda$main$0` ← ...
+
+## Time series
+
+5 intervals of about 5.0 s (times are host uptime in seconds). Process CPU: min 226%, median 227%, max 243% of one core. RSS 145–191 MiB.
+
+| Interval (s) | Process CPU | Busiest thread | Host busy | Steal | iowait | CPU pressure | Throttled ms | GC pause ms (max) |
+| 15863.5–15868.6 | 243% | java (1243175) 81% | 15.2% | 0.0% | 0.2% | 0.3% | - | 805.7 (6.1) |
+| 15873.6–15878.6 | 228% | java (1243175) 82% | 13.2% | 0.0% | 0.2% | 0.3% | - | 780.7 (1.9) |
+...
 ```
 
-**Reading it:** the demo workload (a deliberately allocation-heavy program with
-a 128 MB heap) spent a fifth of its time in GC, and the GC threads rank
-right behind the application thread in CPU. The report also holds the JFR
-views (hot methods, allocation by site), NMT deltas, interrupt and vmstat
-deltas, and thread-dump state counts. In the bundle the JFR recording has zero
-environment-variable, system-property, command-line, and process events, and
-the real hostname appears nowhere.
+**Reading it:** the synthetic workload (an allocating main loop plus two threads
+fighting over one monitor, on a 128 MB heap) spent a sixth of its time in GC
+pauses, about 800 ms in every 5-second interval, while each pause stayed short.
+The hot-thread section ties the busiest OS threads to their Java frames, and the
+thread dumps show `contender-1` blocked on the monitor `contender-0` holds.
+The report continues with the GC window summary, JFR views, NMT deltas, and
+lock owners; `DIGEST.txt` carries a text version of the key tables. In the
+bundle the JFR recording has zero environment-variable, system-property,
+command-line, child-process, and process events, and the real hostname appears
+nowhere. With a healthy capture from the same host, `compare-bundles.py
+./analysis-baseline ./analysis` lists what changed.
