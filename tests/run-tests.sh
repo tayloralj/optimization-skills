@@ -232,6 +232,8 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
   [[ $(stat -c %a "$work/out/live.jfr" 2>/dev/null) == 600 ]] && ok "jfr recording is private" || fail "jfr recording is private"
   expect_rc "jfr report on live recording" 0 "$jfrrep" "$work/out/live.jfr" "$work/jfr-report" --focus latency
   [[ -s "$work/jfr-report/INDEX.txt" && -s "$work/jfr-report/01-gc-pauses.txt" ]] && ok "jfr report wrote views" || fail "jfr report wrote views" "$LAST_OUT"
+  expect_rc "jfr allocation stacks on live recording" 0 python3 "$repo/skills/java-flight-recorder/scripts/jfr-alloc-stacks.py" "$work/out/live.jfr" --thread '^main$' --top 3
+  expect_contains "jfr allocation stacks name the churn loop" "Churn" "$LAST_OUT"
 
   probe=$repo/skills/java-low-latency-patterns/scripts/AllocationProbe.java
   javac -d "$work/alloc" "$repo"/tests/fixtures/alloc/*.java 2>"$work/javac-alloc.log" \

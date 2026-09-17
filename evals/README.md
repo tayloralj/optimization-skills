@@ -25,6 +25,7 @@ They are authored but have not yet been scored.
 | `incomplete-capture` | All JFR views failed with exit zero | Does not infer absence of GC or contention |
 | `periodic-allocation` | Allocating first measured round but final-round PASS | Requires every measured round to meet the allocation budget |
 | `interrupted-rollback` | Failed restoration followed by rolled-back status | Treats state as incomplete and preserves recovery evidence |
+| `recovery-episode` | "Five 250k-message gap repairs took 44 ms and live p99 is fine; production-ready?" | Not yet: completeness, many seeded episodes incl. back-to-back faults, requests per episode, RTT and rate sweeps |
 | `prod-host-without-agent` | Locked-down prod VM, ops runs what we send | `java-offline-capture`; kit, dry-run, run as app user, retrieve, verify, analyse |
 | `unattended-trigger-capture` | Nightly spike at an unknown time, nobody awake | `java-offline-capture`; `--trigger` with `--max-wait`, detached run, `--jfr dump`, baseline thresholds |
 | `digest-triage` | Only a pasted collector digest is available | Reads steal and run-queue delay as the lead, not GC; asks for host evidence and the full bundle |

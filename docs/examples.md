@@ -193,6 +193,29 @@ Median Pause Time: 6.22 ms
 recording thresholds. Lower the thresholds before concluding there is no
 contention.
 
+## JFR allocation by stack
+
+`skills/java-flight-recorder/scripts/jfr-alloc-stacks.py client.jfr --top 4 --depth 4`
+
+```text
+jdk.ObjectAllocationSample: 144 samples, estimated 166.8 MB
+ 36.8%     61.3 MB  n=50   [main] java.util.HashMap$KeyIterator
+        HashMap$KeySet.iterator <- HashSet.iterator <- Util$2.iterator <- TransportReactor.dispatchReadyEvents
+ 14.4%     24.0 MB  n=8    [main] [I
+        EntryMap.<init> <- SplitConstantPool.map <- SplitConstantPool.tryFindClassOrInterface <- SplitConstantPool.classEntryForClassOrInterface
+ 14.2%     23.6 MB  n=21   [main] com.sequencer.client.SequenceTracker$GapResult
+        SequenceTracker$GapResult.none <- SequenceTracker.onSequence <- SequencerClient.handleSequenced <- SequencerClient$DefaultEgressFrameProcessor.onEgressFragment
+ 10.1%     16.8 MB  n=1    [main] [B
+        TcpRepairClient.<init> <- SequencerClient.addRepairEndpointInternal <- SequencerClient.addInitialRepairEndpoints <- SequencerClient.<init>
+```
+
+**Reading it:** a 40-second JDK 25 recording of a messaging client under load.
+The first and third rows allocate on every poll and every message on the hot
+thread (a selector's selected-key iterator, and a new "no gap" result object);
+they drove the only young GC in the run. The second and fourth rows are start-up
+work (lambda bootstrap, one 16 MB receive buffer) and are not worth fixing.
+`allocation-by-site` alone shows the same methods without telling these apart.
+
 ## Native memory comparison
 
 Two snapshots 15 seconds apart of a steady JVM started with
@@ -232,6 +255,33 @@ example compared a JFR baseline with an unprofiled candidate and has been remove
 operation. Compare response and service distributions to expose queueing.
 Within-run blocks show episodic behavior but do not replace independent runs.
 The report labels percentiles with fewer than 100 tail samples as indicative.
+
+### Recovery episodes
+
+`skills/java-latency-measurement/scripts/latency-report.py --episodes --expected 957 gap-episodes.csv`
+
+```text
+episode mode: response = end - fault observable (intended), service = end - detection (actual), queue = detection delay
+response_time: n=957 p50=216.692us p90=418.963us p99=2.643ms p99.9=4.549ms p99.99=4.549ms max=4.549ms
+note: fewer than 100 tail samples; indicative only: p90, p99, p99.9, p99.99
+service_time : n=957 p50=194.979us p90=373.255us p99=2.582ms p99.9=4.455ms p99.99=4.455ms max=4.455ms
+queue_delay  : n=957 p50=19.847us p90=46.299us p99=91.865us p99.9=935.625us p99.99=935.625us max=935.625us
+  group 1: n=348 p50=202.947us p90=312.443us p99=487.723us p99.9=1.132ms p99.99=1.132ms max=1.132ms
+  group 10000: n=21 p50=2.643ms p90=3.334ms p99=4.549ms p99.9=4.549ms p99.99=4.549ms max=4.549ms
+```
+
+**Reading it:** 957 UDP gap repairs over TCP, three runs merged, grouped by gap
+size (middle groups trimmed). Detection delay (`queue_delay`) is tens of
+microseconds; the p99 comes from the 10,000-message gaps, not from a slow path
+for small ones. With `--expected 1000` the same file prints
+`INVALID: only 957 of 1000 operations completed` and exits 5. Before this client
+was fixed, all 18 runs of the same probe stopped delivering part-way through while
+the live-message histogram still looked normal; the completeness count is what
+exposed it.
+
+To add round-trip time on loopback without root, put
+`java skills/java-latency-measurement/scripts/TcpDelayProxy.java --target 127.0.0.1:PORT --delay-ms 0.5`
+between client and server. Its first line is `listening 127.0.0.1:NNNNN ...`.
 
 ## Allocation probe
 

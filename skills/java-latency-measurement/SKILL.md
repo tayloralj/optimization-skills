@@ -1,6 +1,6 @@
 ---
 name: java-latency-measurement
-description: Measure Java latency correctly - open-loop load, coordinated omission, HdrHistogram, percentiles and sample counts, and host jitter. Use before trusting a latency number, when designing a latency test, or when comparing tail latency between builds or hosts.
+description: Measure Java latency correctly - open-loop load, coordinated omission, HdrHistogram, percentiles and sample counts, recovery episodes, and host jitter. Use before trusting a latency number, when designing a latency or recovery (gap fill, replay, reconnect) test, or when comparing tail latency between builds or hosts.
 ---
 
 # Java Latency Measurement
@@ -15,6 +15,9 @@ measurement validity before any tuning skill uses the result.
    sustainable throughput is found by stepping fixed rates until the SLO
    fails. Closed-loop "send next when previous returns" runs understate tail
    latency (coordinated omission) and are only valid for batch throughput.
+   Recovery work (gap fill, replay, reconnect, catch-up) is a third model:
+   a live open-loop feed plus a seeded fault schedule, measured per episode.
+   Read `references/recovery-episodes.md` before designing that test.
 2. **Timestamp correctly.** Record, per operation, `intended_start`,
    `actual_start`, and `end` from one monotonic clock (`System.nanoTime` within
    a process). Response time = end − intended start. Across hosts use
@@ -26,6 +29,9 @@ measurement validity before any tuning skill uses the result.
 4. **Check the generator.** Pin and isolate it from the system under test,
    confirm achieved send rate equals intended rate, and watch its own
    latency (a saturated generator produces a fake plateau).
+   **Check completeness too**: count operations the system under test
+   finished against those the generator sent. A system that silently stops
+   delivering leaves a healthy-looking histogram of the survivors.
 5. **Baseline the platform.** Run `scripts/JitterMeter.java` on the intended
    hot CPU (`--mode spin`) and for blocking threads (`--mode sleep`) to learn
    the host's noise floor before attributing latency to the application.
@@ -34,7 +40,10 @@ measurement validity before any tuning skill uses the result.
    response/service ratio (coordinated omission indicator), rate checks, and
    per-block p99 spread for stability. Input timestamps must be integer nanoseconds
    with intended start <= actual start <= end. Invalid rows fail the report;
-   percentiles with fewer than 100 tail observations are labelled indicative. Read `references/methodology.md` for
+   percentiles with fewer than 100 tail observations are labelled indicative.
+   Pass `--expected N` so an incomplete run fails (exit 5) instead of
+   reporting survivors; use `--episodes` and a fourth `group` column for
+   recovery episodes grouped by fault size. Read `references/methodology.md` for
    sample-size and comparison rules.
 7. **Correlate spikes** with JVM and OS timelines: GC/safepoint logs (the
    `java-gc-tuning` skill), JFR events, interrupts and run-queue delay (the
@@ -47,6 +56,12 @@ measurement validity before any tuning skill uses the result.
 
 - JMH `SampleTime` mode is closed-loop per thread; do not present it as a
   service latency distribution.
+- A run where fewer operations completed than were sent is invalid, however
+  good its percentiles look.
+- Loopback hides round-trip-sensitive behaviour. When a protocol does request
+  and response work, repeat the test with added RTT:
+  `java scripts/TcpDelayProxy.java --target HOST:PORT --delay-ms 0.5` adds
+  0.5 ms each way without root (delay only; measure the achieved RTT).
 - A percentile needs enough samples: p99.99 needs far more than 10,000
   operations, and a single run's max is an anecdote, not a statistic.
 - Warmup (JIT, caches, page faults) must be excluded explicitly and reported;

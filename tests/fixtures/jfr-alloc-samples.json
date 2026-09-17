@@ -1,0 +1,1800 @@
+{
+ "recording": {
+  "events": [
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:17.830529851+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/EntryMap"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 77,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "map"
+        },
+        "lineNumber": 182,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "tryFindClassOrInterface"
+        },
+        "lineNumber": 403,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntryForClassOrInterface"
+        },
+        "lineNumber": 438,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntry"
+        },
+        "lineNumber": 514,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/lang/invoke/InnerClassLambdaMetafactory"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 155,
+        "type": "Interpreted"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[I"
+     },
+     "weight": 19867264
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:17.889938701+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/EntryMap"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 77,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "map"
+        },
+        "lineNumber": 182,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "tryFindClassOrInterface"
+        },
+        "lineNumber": 403,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntryForClassOrInterface"
+        },
+        "lineNumber": 438,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntry"
+        },
+        "lineNumber": 514,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/lang/invoke/InnerClassLambdaMetafactory"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 155,
+        "type": "Interpreted"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[I"
+     },
+     "weight": 520008
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:17.936841671+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/EntryMap"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 77,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "map"
+        },
+        "lineNumber": 182,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "tryFindClassOrInterface"
+        },
+        "lineNumber": 403,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntryForClassOrInterface"
+        },
+        "lineNumber": 438,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntry"
+        },
+        "lineNumber": 514,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/lang/invoke/InnerClassLambdaMetafactory"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 155,
+        "type": "Interpreted"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[I"
+     },
+     "weight": 540040
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:17.968284901+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/EntryMap"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 77,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "map"
+        },
+        "lineNumber": 182,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "tryFindClassOrInterface"
+        },
+        "lineNumber": 403,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntryForClassOrInterface"
+        },
+        "lineNumber": 438,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntry"
+        },
+        "lineNumber": 514,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/lang/invoke/InvokerBytecodeGenerator"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 136,
+        "type": "Interpreted"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[I"
+     },
+     "weight": 357864
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:20.956129369+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/EntryMap"
+         },
+         "name": "<init>"
+        },
+        "lineNumber": 77,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "map"
+        },
+        "lineNumber": 182,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "tryFindClassOrInterface"
+        },
+        "lineNumber": 403,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntryForClassOrInterface"
+        },
+        "lineNumber": 438,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "jdk/internal/classfile/impl/SplitConstantPool"
+         },
+         "name": "classEntry"
+        },
+        "lineNumber": 514,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/lang/classfile/ClassFile"
+         },
+         "name": "build"
+        },
+        "lineNumber": 558,
+        "type": "Interpreted"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[I"
+     },
+     "weight": 502584
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:22.405984882+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashMap$KeySet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 992,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashSet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 183,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "sun/nio/ch/Util$2"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 368,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/TransportReactor"
+         },
+         "name": "dispatchReadyEvents"
+        },
+        "lineNumber": 73,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "pollReadiness"
+        },
+        "lineNumber": 158,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "poll"
+        },
+        "lineNumber": 79,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "java/util/HashMap$KeyIterator"
+     },
+     "weight": 694000
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:23.017532252+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker$GapResult"
+         },
+         "name": "none"
+        },
+        "lineNumber": 45,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker"
+         },
+         "name": "onSequence"
+        },
+        "lineNumber": 23,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 545,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "com/sequencer/client/SequenceTracker$GapResult"
+     },
+     "weight": 1571120
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:23.764434037+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker$GapResult"
+         },
+         "name": "none"
+        },
+        "lineNumber": 45,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker"
+         },
+         "name": "onSequence"
+        },
+        "lineNumber": 23,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 545,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "com/sequencer/client/SequenceTracker$GapResult"
+     },
+     "weight": 1047400
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:24.134630711+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker$GapResult"
+         },
+         "name": "none"
+        },
+        "lineNumber": 45,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker"
+         },
+         "name": "onSequence"
+        },
+        "lineNumber": 23,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 545,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "com/sequencer/client/SequenceTracker$GapResult"
+     },
+     "weight": 1047416
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:24.461349826+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashMap$KeySet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 992,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashSet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 183,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "sun/nio/ch/Util$2"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 368,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/TransportReactor"
+         },
+         "name": "dispatchReadyEvents"
+        },
+        "lineNumber": 73,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "pollReadiness"
+        },
+        "lineNumber": 158,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "poll"
+        },
+        "lineNumber": 74,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "java/util/HashMap$KeyIterator"
+     },
+     "weight": 821112
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:24.784340627+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker$GapResult"
+         },
+         "name": "none"
+        },
+        "lineNumber": 45,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker"
+         },
+         "name": "onSequence"
+        },
+        "lineNumber": 23,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 545,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "com/sequencer/client/SequenceTracker$GapResult"
+     },
+     "weight": 821192
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:25.572781848+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashMap$KeySet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 992,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashSet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 183,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "sun/nio/ch/Util$2"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 368,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/TransportReactor"
+         },
+         "name": "dispatchReadyEvents"
+        },
+        "lineNumber": 73,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "pollReadiness"
+        },
+        "lineNumber": 158,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "poll"
+        },
+        "lineNumber": 74,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "java/util/HashMap$KeyIterator"
+     },
+     "weight": 1047400
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:26.089486278+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashMap$KeySet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 992,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashSet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 183,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "sun/nio/ch/Util$2"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 368,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/TransportReactor"
+         },
+         "name": "dispatchReadyEvents"
+        },
+        "lineNumber": 73,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "pollReadiness"
+        },
+        "lineNumber": 158,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "poll"
+        },
+        "lineNumber": 74,
+        "type": "JIT compiled"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "java/util/HashMap$KeyIterator"
+     },
+     "weight": 1344720
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:26.851139715+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashMap$KeySet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 992,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashSet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 183,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "sun/nio/ch/Util$2"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 368,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/TransportReactor"
+         },
+         "name": "dispatchReadyEvents"
+        },
+        "lineNumber": 73,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "pollReadiness"
+        },
+        "lineNumber": 158,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "poll"
+        },
+        "lineNumber": 74,
+        "type": "JIT compiled"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "java/util/HashMap$KeyIterator"
+     },
+     "weight": 1047392
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:27.236486924+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashMap$KeySet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 992,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "java/util/HashSet"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 183,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "sun/nio/ch/Util$2"
+         },
+         "name": "iterator"
+        },
+        "lineNumber": 368,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/TransportReactor"
+         },
+         "name": "dispatchReadyEvents"
+        },
+        "lineNumber": 73,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "pollReadiness"
+        },
+        "lineNumber": 158,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/transport/SharedTransportReactor"
+         },
+         "name": "poll"
+        },
+        "lineNumber": 79,
+        "type": "JIT compiled"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "java/util/HashMap$KeyIterator"
+     },
+     "weight": 1047400
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:27.953192414+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker$GapResult"
+         },
+         "name": "none"
+        },
+        "lineNumber": 45,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker"
+         },
+         "name": "onSequence"
+        },
+        "lineNumber": 23,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 545,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "com/sequencer/client/SequenceTracker$GapResult"
+     },
+     "weight": 1047416
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:29.094490315+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker$GapResult"
+         },
+         "name": "none"
+        },
+        "lineNumber": 45,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequenceTracker"
+         },
+         "name": "onSequence"
+        },
+        "lineNumber": 23,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 545,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "com/sequencer/client/SequenceTracker$GapResult"
+     },
+     "weight": 1047336
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:30.624305945+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "bufferLiveEgress"
+        },
+        "lineNumber": 428,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultGapRecoveryStateMachine"
+         },
+         "name": "maybeBufferLiveDuringRepair"
+        },
+        "lineNumber": 2176,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 541,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[B"
+     },
+     "weight": 1047168
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:42.984877712+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "bufferLiveEgress"
+        },
+        "lineNumber": 428,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultGapRecoveryStateMachine"
+         },
+         "name": "maybeBufferLiveDuringRepair"
+        },
+        "lineNumber": 2176,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 541,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[B"
+     },
+     "weight": 1047064
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:47.298437460+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "bufferLiveEgress"
+        },
+        "lineNumber": 428,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultGapRecoveryStateMachine"
+         },
+         "name": "maybeBufferLiveDuringRepair"
+        },
+        "lineNumber": 2176,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 541,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[B"
+     },
+     "weight": 2094608
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:47.348897712+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "bufferLiveEgress"
+        },
+        "lineNumber": 428,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultGapRecoveryStateMachine"
+         },
+         "name": "maybeBufferLiveDuringRepair"
+        },
+        "lineNumber": 2176,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 541,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[B"
+     },
+     "weight": 523640
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:47.399240+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "bufferLiveEgress"
+        },
+        "lineNumber": 433,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultGapRecoveryStateMachine"
+         },
+         "name": "maybeBufferLiveDuringRepair"
+        },
+        "lineNumber": 2176,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 541,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "com/sequencer/client/SequencerClient$BufferedEgress"
+     },
+     "weight": 523712
+    }
+   },
+   {
+    "type": "jdk.ObjectAllocationSample",
+    "values": {
+     "startTime": "2026-09-17T00:03:47.500140685+01:00",
+     "eventThread": {
+      "javaName": "main"
+     },
+     "stackTrace": {
+      "truncated": false,
+      "frames": [
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "bufferLiveEgress"
+        },
+        "lineNumber": 428,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultGapRecoveryStateMachine"
+         },
+         "name": "maybeBufferLiveDuringRepair"
+        },
+        "lineNumber": 2176,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "handleSequenced"
+        },
+        "lineNumber": 541,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient$DefaultEgressFrameProcessor"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 2074,
+        "type": "JIT compiled"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com/sequencer/client/SequencerClient"
+         },
+         "name": "onEgressFragment"
+        },
+        "lineNumber": 504,
+        "type": "Inlined"
+       },
+       {
+        "method": {
+         "type": {
+          "name": "com.sequencer.client.SequencerClient$$Lambda/0x000000000f12d000"
+         },
+         "name": "onFragment"
+        },
+        "lineNumber": -1,
+        "type": "Inlined"
+       }
+      ]
+     },
+     "objectClass": {
+      "name": "[B"
+     },
+     "weight": 1047296
+    }
+   }
+  ]
+ }
+}

@@ -19,6 +19,7 @@ GC = REPO / "skills/java-gc-tuning/scripts/gc-log-summary.py"
 JIT = REPO / "skills/java-jit-codegen/scripts/jit-log-summary.py"
 NMT = REPO / "skills/java-native-memory/scripts/nmt-compare.py"
 LAT = REPO / "skills/java-latency-measurement/scripts/latency-report.py"
+ALLOC = REPO / "skills/java-flight-recorder/scripts/jfr-alloc-stacks.py"
 VALIDATOR = REPO / "scripts/validate_skills.py"
 PLAN = REPO / "skills/linux-low-latency-tuning/scripts/make-lab-plan.py"
 
@@ -168,12 +169,132 @@ class LatencyReportTest(unittest.TestCase):
         self.assertLess(report["baseline"]["co_ratio_p99"], 1.5)
         self.assertIn("episodic stall", text)
 
+    def test_episode_groups_and_completeness_gate(self):
+        # Synthetic recovery episodes: fault observable at i, detected 20 us later,
+        # recovered after a size-dependent repair time.
+        rows = ["intended_start_ns,actual_start_ns,end_ns,group"]
+        for i in range(300):
+            size = (1, 10, 1000)[i % 3]
+            start = i * 1_000_000_000
+            rows.append(f"{start},{start + 20_000},{start + 20_000 + size * 1_000},{size}")
+        with tempfile.NamedTemporaryFile("w", suffix=".csv") as handle:
+            handle.write("\n".join(rows) + "\n")
+            handle.flush()
+            report = json.loads(run(LAT, handle.name, "--episodes", "--expected", 300, "--json").stdout)
+            text = run(LAT, handle.name, "--episodes").stdout
+            short = run(LAT, handle.name, "--episodes", "--expected", 400, check=False)
+        cand = report["candidate"]
+        self.assertTrue(report["valid"])
+        self.assertNotIn("intended_rate_per_s", cand)
+        self.assertEqual(list(cand["groups"]), ["1", "10", "1000"])
+        self.assertEqual(cand["groups"]["1000"]["p50"], 1_020_000)
+        self.assertEqual(cand["queue_delay_ns"]["max"], 20_000)
+        self.assertIn("episode mode", text)
+        self.assertIn("group 1000", text)
+        self.assertEqual(short.returncode, 5)
+        self.assertIn("INVALID: only 300 of 400", short.stdout)
+
+    def test_rejects_partial_group_labels(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".csv") as handle:
+            handle.write("intended_start_ns,actual_start_ns,end_ns,group\n1,2,3,a\n4,5,6\n")
+            handle.flush()
+            result = run(LAT, handle.name, check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("group label missing", result.stderr)
+        with tempfile.NamedTemporaryFile("w", suffix=".csv") as handle:
+            handle.write("1,2,3,a\n")
+            handle.flush()
+            headerless = run(LAT, handle.name, check=False)
+        self.assertNotEqual(headerless.returncode, 0)
+        self.assertIn("need the header", headerless.stderr)
+
     def test_single_column(self):
         with tempfile.NamedTemporaryFile("w", suffix=".csv") as handle:
             handle.write("latency_ns\n" + "\n".join(str(1000 + i) for i in range(1000)) + "\n")
             handle.flush()
             out = run(LAT, handle.name).stdout
         self.assertIn("cannot reveal coordinated omission", out)
+
+
+class JfrAllocStacksTest(unittest.TestCase):
+    # Trimmed real `jfr print --json` output (JDK 25) from a sequencer client probe:
+    # only the fields the script reads are kept.
+    FIXTURE = FIXTURES / "jfr-alloc-samples.json"
+
+    def test_groups_by_thread_and_stack(self):
+        report = run_json(ALLOC, self.FIXTURE, "--depth", "3")
+        self.assertEqual(report["events"], 23)
+        rows = {tuple(r["stack"]): r for r in report["rows"]}
+        tracker = rows[("SequenceTracker$GapResult.none", "SequenceTracker.onSequence",
+                        "SequencerClient.handleSequenced")]
+        self.assertEqual(tracker["thread"], "main")
+        self.assertEqual(tracker["samples"], 6)
+        self.assertEqual(tracker["top_class"], "com.sequencer.client.SequenceTracker$GapResult")
+        self.assertAlmostEqual(sum(r["share"] for r in report["rows"]), 1.0, places=6)
+        text = run(ALLOC, self.FIXTURE, "--depth", "1").stdout
+        self.assertIn("HashMap$KeySet.iterator", text)
+
+    def test_thread_filter_and_bad_arguments(self):
+        none = run(ALLOC, self.FIXTURE, "--thread", "^no-such-thread$", check=False)
+        self.assertEqual(none.returncode, 3)
+        self.assertIn("no jdk.ObjectAllocationSample samples", none.stderr)
+        bad = run(ALLOC, self.FIXTURE, "--thread", "(", check=False)
+        self.assertEqual(bad.returncode, 2)
+        with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:
+            handle.write('{"not": "jfr"}')
+            handle.flush()
+            wrong = run(ALLOC, handle.name, check=False)
+        self.assertNotEqual(wrong.returncode, 0)
+
+
+@unittest.skipUnless(shutil.which("java"), "java not installed")
+class TcpDelayProxyTest(unittest.TestCase):
+    PROXY = REPO / "skills/java-latency-measurement/scripts/TcpDelayProxy.java"
+
+    def test_adds_round_trip_delay(self):
+        import socket
+        import threading
+        import time
+        server = socket.create_server(("127.0.0.1", 0))
+        port = server.getsockname()[1]
+
+        def echo():
+            conn, _ = server.accept()
+            with conn:
+                while data := conn.recv(4096):
+                    conn.sendall(data)
+
+        threading.Thread(target=echo, daemon=True).start()
+        proc = subprocess.Popen(["java", str(self.PROXY), "--target", f"127.0.0.1:{port}",
+                                 "--delay-ms", "5", "--duration", "30"],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            first = proc.stdout.readline()
+            self.assertTrue(first.startswith("listening 127.0.0.1:"), first)
+            proxy_port = int(first.split()[1].rsplit(":", 1)[1])
+            with socket.create_connection(("127.0.0.1", proxy_port)) as sock:
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                rtts = []
+                for _ in range(5):
+                    started = time.monotonic()
+                    sock.sendall(b"ping")
+                    self.assertEqual(sock.recv(16), b"ping")
+                    rtts.append(time.monotonic() - started)
+            self.assertGreaterEqual(min(rtts), 0.0095)
+            self.assertLess(max(rtts), 1.0)
+        finally:
+            proc.kill()
+            proc.communicate()
+            server.close()
+
+    def test_refuses_non_loopback_and_missing_target(self):
+        missing = subprocess.run(["java", str(self.PROXY), "--delay-ms", "1"], capture_output=True, text=True)
+        self.assertEqual(missing.returncode, 2)
+        self.assertIn("--target", missing.stderr)
+        exposed = subprocess.run(["java", str(self.PROXY), "--target", "127.0.0.1:1", "--delay-ms", "1",
+                                  "--listen", "0.0.0.0:0"], capture_output=True, text=True)
+        self.assertEqual(exposed.returncode, 2)
+        self.assertIn("non-loopback", exposed.stderr)
 
 
 class MakeLabPlanTest(unittest.TestCase):

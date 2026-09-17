@@ -9,6 +9,7 @@
 | Batch completion | How long does fixed work take? | Run to completion | Wall time, CPU time, variance |
 | Startup / warmup | How fast to first useful work / steady state? | Repeated cold starts | Time to first request, time to p99 stability |
 | Footprint | How much memory/CPU at steady state? | Representative load | RSS, heap after GC, native categories, CPU |
+| Recovery episodes | Does recovery from faults (loss, disconnect, restart) finish, and what does it cost live traffic? | Open-loop live feed plus a seeded fault schedule, including back-to-back faults; sweep rate and RTT | Stalled episodes, requests per episode, detection and repair time per fault size, live latency during episodes |
 
 A closed-loop "as fast as possible" run is neither a latency test nor a
 sustainable-throughput test: its latencies hide queueing (coordinated omission)
@@ -49,6 +50,8 @@ a GC and safepoint log summariser.
 | No perf/eBPF/root access at all | `java-flight-recorder` | What do a `profile` recording's latency, CPU, and memory views show? |
 | Garbage or contention on a latency-critical hot path | `java-low-latency-patterns` | Which allocation or shared write does the evidence point to, and which pattern removes it? |
 | Periodic stalls in containers | `java-performance-investigation` (`references/containers.md`) | Is the CFS quota throttling the JVM? |
+| Client stops delivering or falls behind after message loss | `java-latency-measurement` (its recovery-episodes reference) | Does every episode complete? Count delivered versus sent before reading any percentile |
+| Recovery slow, or repair traffic grows with rate or RTT | `java-latency-measurement` (its recovery-episodes reference) | How many requests or round trips does one episode take, and does it change with RTT? |
 | Micro-optimisation proposal | `java-jmh-benchmarking`, `java-performance-patterns` | Does a production-faithful benchmark show it, and does the service agree? |
 
 ## USE-style checklist for the host
