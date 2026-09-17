@@ -37,6 +37,9 @@ returned evidence here. The agent never needs a shell on the target.
    release checksum; never download it on the target) when the host is
    JRE-only or CPU profiles are wanted; it also provides JVM attach without
    `jcmd`. Loading it into a production JVM needs the owner's approval.
+   If you cannot run commands here, give the user the build command and carry
+   on: write the complete runbook with `KIT` and `KIT_SHA256` placeholders
+   rather than stopping to wait for the build.
 4. **Hand the operator a runbook**: the kit and its sha256, `collect.sh --check
    --pid PID` first, then the exact `--dry-run` and real commands from
    `references/capture-plans.md` (as the application user), and how to send
