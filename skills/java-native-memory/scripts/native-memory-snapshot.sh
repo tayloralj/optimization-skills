@@ -9,6 +9,7 @@ umask 077
 # nmt-compare.py.
 usage() {
   printf 'Usage: %s PID NEW_OUTPUT_DIR\n' "${0##*/}" >&2
+  printf 'Environment: JCMD_TIMEOUT_SECONDS (default 10, maximum 60) bounds each jcmd call.\n' >&2
   printf 'Example: %s 1234 ./nm-$(date -u +%%Y%%m%%dT%%H%%M%%SZ)\n' "${0##*/}" >&2
 }
 if [[ ${1:-} == -h || ${1:-} == --help ]]; then usage; exit 0; fi
@@ -20,6 +21,11 @@ output_dir=$2
   printf 'NEW_OUTPUT_DIR must not already exist.\n' >&2; exit 2;
 }
 command -v jcmd >/dev/null 2>&1 || { printf 'jcmd not found; use the JDK matching the target.\n' >&2; exit 3; }
+jcmd_timeout=${JCMD_TIMEOUT_SECONDS:-10}
+[[ "$jcmd_timeout" =~ ^[1-9][0-9]*$ ]] && (( jcmd_timeout <= 60 )) || { printf 'JCMD_TIMEOUT_SECONDS must be 1-60.\n' >&2; exit 2; }
+command -v timeout >/dev/null 2>&1 || { printf 'GNU timeout is required.\n' >&2; exit 3; }
+jcmd_bin=$(command -v jcmd)
+jcmd() { timeout --kill-after=2s "${jcmd_timeout}s" "$jcmd_bin" "$@"; }
 
 proc_root=${PROC_ROOT:-/proc}
 target_start_time() {

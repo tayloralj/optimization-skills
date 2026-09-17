@@ -26,6 +26,8 @@ They are authored but have not yet been scored.
 | `periodic-allocation` | Allocating first measured round but final-round PASS | Requires every measured round to meet the allocation budget |
 | `interrupted-rollback` | Failed restoration followed by rolled-back status | Treats state as incomplete and preserves recovery evidence |
 | `prod-host-without-agent` | Locked-down prod VM, ops runs what we send | `java-offline-capture`; kit, dry-run, run as app user, retrieve, verify, analyse |
+| `unattended-trigger-capture` | Nightly spike at an unknown time, nobody awake | `java-offline-capture`; `--trigger` with `--max-wait`, detached run, `--jfr dump`, baseline thresholds |
+| `digest-triage` | Only a pasted collector digest is available | Reads steal and run-queue delay as the lead, not GC; asks for host evidence and the full bundle |
 | `not-java-python-code` | Reverse a linked list in Python | **No** skill from this plugin loads |
 | `not-java-frontend-bundle` | Slow React bundle | **No** skill from this plugin loads; front-end advice |
 
