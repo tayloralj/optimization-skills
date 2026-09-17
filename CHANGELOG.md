@@ -6,6 +6,19 @@ and `.claude-plugin/plugin.json`.
 
 ## [0.3.0] - unreleased
 
+- Add recovery-episode guidance (gap fill, replay, reconnect, catch-up): seeded fault
+  schedules with back-to-back faults, detection versus repair timing, requests per
+  episode, and RTT and rate sweeps. Route stalled or slow recovery to it from triage.
+- Require completeness (operations finished versus offered) in latency work and the
+  evidence log; `latency-report.py --expected N` exits 5 on a shortfall.
+- `latency-report.py --episodes` skips fixed-rate checks, and an optional fourth
+  `group` column reports percentiles per group.
+- Add `TcpDelayProxy.java` to add round-trip time on loopback without root.
+- Add `jfr-alloc-stacks.py` to group JFR allocation samples by thread and call stack.
+- Add work amplification (requests, round trips, retries per operation) to the
+  investigation's first broad observation, and a `reproduce` field to the evidence log.
+- Add shared "no result" constants and `Selector.select(Consumer)` to the allocation-free patterns.
+- Add the `recovery-episode` eval case.
 - Harden compatibility matrix private output, path checks, timeout validation, and JVM metadata parsing.
 - Add a bounded JDK compatibility matrix runner for the vendor workload,
   preserving per-mode logs and failing closed on failed or unavailable JDKs.

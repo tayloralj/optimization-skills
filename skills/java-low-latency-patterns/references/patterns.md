@@ -19,6 +19,8 @@ async-profiler `alloc`), young GCs during steady state.
 | `Optional`, streams on the hot path | Plain branches and loops |
 | Exceptions for control flow | Return codes; if unavoidable, a preallocated exception with `writableStackTrace=false` |
 | `ByteBuffer.allocate` / `wrap` per message | One buffer per thread or connection, reset with `clear()` |
+| A new "no result" record or object per call (`return new Result(false, ...)`) | A shared immutable constant for the common outcome |
+| NIO `Selector.selectedKeys()` iteration (an iterator per poll and a set node per ready key) | `selector.select(Consumer, timeout)` / `selectNow(Consumer)` (JDK 11+), collecting keys into a reused array if dispatch must stay separate from the poll |
 
 Escape analysis can remove some allocations after C2 compiles and inlines the
 code, but it is fragile; verify with the probe instead of relying on it.

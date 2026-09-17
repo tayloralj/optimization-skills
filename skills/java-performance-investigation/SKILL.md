@@ -16,8 +16,8 @@ the decision that evidence will support.
    ack below 200 µs at 50k msg/s on the lab host"). If none exists, agree one
    before measuring. Record the current value and how it was measured.
 2. **Classify the workload** using `references/triage.md`: fixed-rate latency,
-   maximum sustainable throughput, batch completion, startup/warmup, or memory
-   footprint. Different classes need different experiments; never derive one
+   maximum sustainable throughput, batch completion, startup/warmup, memory
+   footprint, or recovery episodes (gap fill, replay, reconnect, catch-up). Different classes need different experiments; never derive one
    from another.
 3. **Readiness.** Run the `profiling-readiness` skill. Its report decides which
    evidence paths (perf, JFR, async-profiler, eBPF) are actually available.
@@ -26,7 +26,12 @@ the decision that evidence will support.
    - on-CPU application work vs GC vs JIT compilation vs safepoints;
    - off-CPU waiting: locks, I/O, network, scheduler run-queue delay;
    - OS/hardware interference: interrupts, frequency, migrations, throttling;
-   - memory: heap occupancy/allocation rate vs native RSS growth.
+   - memory: heap occupancy/allocation rate vs native RSS growth;
+   - work amplification: requests, round trips, syscalls, or retries per
+     logical operation. Count them; a protocol that repeats work is invisible
+     to CPU and GC profiles.
+   - completeness: operations finished versus operations offered. A stalled
+     system can produce good-looking latency for the operations that did finish.
    Launch-time JFR with unified GC and safepoint logging covers most of this on
    JDK 21 and 25 without host privileges.
 5. **Route** with the symptom map in `references/triage.md`. For services in

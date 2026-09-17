@@ -34,6 +34,11 @@ when nothing else is allowed, and a good first look even when everything is.
 5. **Interpret** with the event map in the reference: pauses (GC, safepoints,
    VM operations), waiting (monitors, parks, sockets, files), CPU (execution
    and CPU-time samples), allocation, deoptimization, and container throttling.
+   `allocation-by-site` names only the allocating method. To see which thread
+   and call path allocate, run
+   `scripts/jfr-alloc-stacks.py run1.jfr --thread '^main$' --depth 5`; it
+   separates per-message garbage on a hot thread from start-up or background
+   allocation in the same method.
 6. **Go deeper or hand off**: GC details to the `java-gc-tuning` skill, JIT to
    `java-jit-codegen`, off-heap to `java-native-memory`, kernel waiting to
    `linux-ebpf-io-network`, and verified latency numbers to
