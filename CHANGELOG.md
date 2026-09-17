@@ -4,7 +4,7 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
-## [0.3.0] - unreleased
+## [0.3.0] - 2026-09-17
 
 - Add a top-level Linux JVM debug workflow with ranked symptom hints and
   server-side journal, systemd, and coredump routing.
