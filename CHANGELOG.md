@@ -6,19 +6,36 @@ and `.claude-plugin/plugin.json`.
 
 ## [0.3.0] - unreleased
 
-- Add recovery-episode guidance (gap fill, replay, reconnect, catch-up): seeded fault
-  schedules with back-to-back faults, detection versus repair timing, requests per
-  episode, and RTT and rate sweeps. Route stalled or slow recovery to it from triage.
-- Require completeness (operations finished versus offered) in latency work and the
-  evidence log; `latency-report.py --expected N` exits 5 on a shortfall.
-- `latency-report.py --episodes` skips fixed-rate checks, and an optional fourth
-  `group` column reports percentiles per group.
-- Add `TcpDelayProxy.java` to add round-trip time on loopback without root.
-- Add `jfr-alloc-stacks.py` to group JFR allocation samples by thread and call stack.
-- Add work amplification (requests, round trips, retries per operation) to the
-  investigation's first broad observation, and a `reproduce` field to the evidence log.
-- Add shared "no result" constants and `Selector.select(Consumer)` to the allocation-free patterns.
-- Add the `recovery-episode` eval case.
+- Fix the offline collector's host audit, which failed on every run without
+  `--cpus`, and the audit's own error message for that case.
+- Keep child-process command lines (`jdk.ProcessStart`) out of offline JFR
+  recordings: sensitive events are now switched off when recording starts and
+  scrubbed again afterwards; JRE-only hosts without a `jfr` tool get
+  source-disabled recordings and collapsed async-profiler stacks.
+- Bound every JVM diagnostic command in the offline collector and the NMT
+  snapshot helper; a JVM that does not answer is recorded as unresponsive and
+  the capture continues with thread states and kernel wait channels.
+- Offline collector: unattended starts (`--start-at`, `--trigger cpu|rss|gcpause|file`,
+  `--max-wait`), several JVMs per run, `--check` preflight, a `--list` that
+  shows JVMs owned by other users, per-interval sampling, process, cgroup, and
+  thread-state counters, optional JSON thread dumps and class histograms, GC
+  log discovery from the command line, a text `--digest`, `--split-mb` parts,
+  vendor artifacts counted against the size budget, and capture from
+  Kubernetes debug containers in another mount namespace.
+- `build-kit.sh`: optional checksum-pinned async-profiler (also used for JVM
+  attach on JRE-only runtimes) and a single-file self-extracting kit for
+  console-only hosts; the GC summariser now ships in the kit.
+- `analyze-bundle.py`: loose-file directories and extracted bundles as input,
+  `analysis.json` and `--json`, hot threads joined to stacks, busiest-interval
+  time series with GC pauses on the same clock, host steal, iowait, disks,
+  softirqs, memory, cgroup throttling and OOM events, flame graphs via
+  `jfrconv`, lock owners, deadlocks, stuck and virtual threads, class
+  histogram growth, `hs_err` crash logs, JVM-start-based GC windows without
+  `jcmd`, rejection of unknown bundle formats and truncated archives.
+- New `compare-bundles.py` compares a baseline and an incident analysis,
+  including a differential flame graph when `jfrconv` is available.
+- Document how to update the plugin and `install.sh` installs.
+- Add `unattended-trigger-capture` and `digest-triage` eval cases.
 - Harden compatibility matrix private output, path checks, timeout validation, and JVM metadata parsing.
 - Add a bounded JDK compatibility matrix runner for the vendor workload,
   preserving per-mode logs and failing closed on failed or unavailable JDKs.

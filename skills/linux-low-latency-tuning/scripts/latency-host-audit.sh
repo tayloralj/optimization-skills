@@ -32,7 +32,7 @@ done
 [[ -z "$hot_list" || "$hot_list" =~ ^[0-9]+(-[0-9]+)?(,[0-9]+(-[0-9]+)?)*$ ]] || { printf 'Invalid --cpus list.\n' >&2; exit 2; }
 [[ -z "$pid" || "$pid" =~ ^[1-9][0-9]*$ ]] || { printf 'Invalid --pid.\n' >&2; exit 2; }
 [[ "$sample" =~ ^[0-9]+$ ]] && (( sample <= 60 )) || { printf 'Invalid --sample-seconds.\n' >&2; exit 2; }
-(( sample == 0 )) || [[ -n "$hot_list" ]] || { printf '--sample-seconds requires --cpus.\n' >&2; exit 2; }
+(( sample == 0 )) || [[ -n "$hot_list" ]] || { printf '%s\n' '--sample-seconds requires --cpus.' >&2; exit 2; }
 
 root=${HOST_ROOT:-}
 sys=$root/sys

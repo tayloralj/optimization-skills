@@ -40,6 +40,12 @@ cd optimization-skills && ./install.sh
 
 Restart the agent afterwards.
 
+To update later, run `claude plugin marketplace update optimization-skills`
+and `claude plugin update optimization-skills@optimization-skills` for the
+plugin, or `git pull` and re-run `./install.sh` (with the same options) in the
+checkout. Restart the agent, then rebuild any offline collector kits you hand
+out. See [Update to the latest version](../README.md#update-to-the-latest-version).
+
 ## Your first conversation
 
 Ask in your own words. Good first prompts:
@@ -105,12 +111,26 @@ may not have a shell there at all. Ask for a capture kit instead:
 > `orders`) to capture the 18:00 latency spike. I'll send the bundle back."
 
 The **`java-offline-capture`** skill builds `jvm-collector-VERSION.tar.gz` and
-writes step-by-step instructions for the operator: verify, `--dry-run`, run as
-the application user, and copy the bundle back. The collector needs only bash
-on the host. It is read-only apart from attaching to that one JVM, and it
-strips environment variables and command lines from recordings. When the
-bundle comes back, the agent verifies it and produces `ANALYSIS.md` with
-findings, then carries on with the usual skills.
+writes step-by-step instructions for the operator: verify, `--check`,
+`--dry-run`, run as the application user, and copy the bundle back. The
+collector needs only bash and coreutils on the host. It is read-only apart
+from attaching to that one JVM, and it keeps environment variables and command
+lines out of recordings.
+
+Nobody has to be awake at 18:00: the collector can wait for a time
+(`--start-at 17:55`) or a condition (`--trigger cpu:350`, `gcpause:200`,
+`rss:4000`, or a flag file) and capture then. It also copes with awkward
+hosts: JRE-only runtimes (bundle async-profiler into the kit), distroless
+Kubernetes pods (run it from a debug container), hung JVMs (diagnostics time
+out and `/proc` evidence is still collected), and channels that only take
+small files or text (`--split-mb`, `--digest`, or a single-file kit pasted
+into a console).
+
+When the bundle comes back, the agent verifies it and produces `ANALYSIS.md`
+with findings, hot threads matched to their stacks, and a time series of the
+busiest moments, then carries on with the usual skills. It can also analyse a
+folder of files you already have (JFR recordings, GC logs, jstack output,
+`hs_err` crash logs), and compare an incident capture with a healthy baseline.
 
 ## See it end to end
 

@@ -27,11 +27,12 @@ and [Claude plugins](https://code.claude.com/docs/en/plugins).
 
 | Helper | Scope and identity | Time and storage controls |
 | --- | --- | --- |
-| `jfr-capture.sh` | Same-user Java PID, start time, mount namespace; private directory | Recording duration up to 1 hour; each jcmd bounded to 10 seconds by default plus 2-second kill grace; retained JFR data capped, not an exact file-size limit; failed cleanup reported |
+| `jfr-capture.sh` | Same-user Java PID, start time, mount namespace (another namespace only with `JFR_TARGET_TMP`, reading back through `/proc/PID/root`); private directory | Recording duration up to 1 hour; each jcmd bounded to 10 seconds by default plus 2-second kill grace; retained JFR data capped, not an exact file-size limit; optional events disabled at the source; failed cleanup reported |
 | async-profiler `capture.sh` | Same-user Java PID and start time; private output | Profiler duration up to 1 hour; stack-storage memory limit is not a file-size limit; no independent attach deadline |
 | `rotating-jfr.sh` | Uses async-profiler capture checks | Retained-file count/bytes, free-space reserve, monitored per-capture budget; not a filesystem quota |
 | `bpf-capture.sh` | Operator-run PID-scoped or explicitly system-wide; does not enforce same-user Java identity | Duration argument or timeout up to 600 seconds; no byte ceiling or universal forced-kill deadline |
-| `native-memory-snapshot.sh` | Same-user Java PID and start time; private output | Multiple diagnostics; no global wall-time or byte ceiling |
+| `native-memory-snapshot.sh` | Same-user Java PID and start time; private output | Multiple diagnostics, each jcmd bounded to 10 seconds by default; no global wall-time or byte ceiling |
+| Offline `collect.sh` | Same-user Java PID and start time, rechecked through the window; other mount namespaces through `/proc/PID/root`; private output | Wait up to `--max-wait` (7 days maximum) writing nothing; window 10 seconds to 1 hour; each JVM command bounded by `JCMD_TIMEOUT_SECONDS` (30 by default, 60 maximum), and an unresponsive JVM skips further JVM commands; JFR, GC log, and vendor-artifact budgets inside `--max-mb` plus a free-space check; asprof and thread-dump output are counted only after collection (over-budget bundles are flagged, not truncated) |
 | Manual perf/vendor commands | Agent/operator must verify scope and identity | Budgets are instructions, not enforced by these skills |
 
 Read-only describes host-configuration policy: profiling still attaches to a
