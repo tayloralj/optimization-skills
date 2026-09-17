@@ -290,9 +290,11 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
     && ok "capture target compiles" || fail "capture target compiles" "$(cat "$work/javac.log")"
   (cd "$work" && exec java -XX:NativeMemoryTracking=summary -Xmx128m \
      "-Xlog:gc*,safepoint:file=$work/capgc.log:time,uptime,level,tags" \
-     -XX:StartFlightRecording=name=continuous,settings=default,maxage=5m -cp "$work/classes" CaptureTarget 180 >/dev/null 2>&1) &
+     -XX:StartFlightRecording=name=continuous,settings=default,maxage=5m -cp "$work/classes" CaptureTarget 900 >/dev/null 2>&1) &
   jvm=$!
   for _ in $(seq 1 50); do jcmd "$jvm" VM.version >/dev/null 2>&1 && break; sleep 0.2; done
+  mkdir -p "$work/loose/sub"
+  jcmd "$jvm" Thread.print -l > "$work/loose/jstack.txt" 2>&1   # taken now: later steps may outlast slow runners
   expect_rc "collect target check" 0 bash "$collect" --check --pid "$jvm"
   expect_contains "target check sees continuous JFR" "check.continuous-jfr=running" "$LAST_OUT"
   expect_rc "collect requires --yes when not interactive" 2 bash -c "bash '$collect' --pid \$1 --duration 10 --out '$work/caps' < /dev/null" _ "$jvm"
@@ -433,9 +435,7 @@ if [[ ${LIVE_JDK_TESTS:-1} == 1 ]] && command -v java >/dev/null && command -v j
   fi
 
   # Loose files handed over without the kit.
-  mkdir -p "$work/loose/sub"
   cp "$work/capgc.log" "$work/loose/sub/gc.log"
-  jcmd "$jvm" Thread.print -l > "$work/loose/jstack.txt" 2>&1
   printf '#\n# A fatal error has been detected by the Java Runtime Environment:\n#\n#  SIGSEGV (0xb) at pc=0x1, pid=1, tid=2\n#\n# JRE version: synthetic\n# Problematic frame:\n# J 42 c2 Foo.bar()V\n#\n' > "$work/loose/hs_err_pid1.log"
   expect_rc "analyze loose files" 0 python3 "$analyze" "$work/loose" "$work/analysis-loose"
   loose_md=$(cat "$work/analysis-loose/ANALYSIS.md" 2>/dev/null)
