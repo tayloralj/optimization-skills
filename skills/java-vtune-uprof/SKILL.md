@@ -70,6 +70,17 @@ For repeatable JDK coverage, run `scripts/compatibility-matrix.py` and read
 `references/compatibility-matrix.md`; a verified fixture run does not certify
 vendor-profiler or PMU support.
 
+For a single preflight that does not invent vendor flags, run
+`scripts/vendor-readiness.py [--json]`. It reports the detected CPU vendor,
+kernel, PMU event sources, perf policy, and installed VTune/uProf/PCM binaries;
+use the selected tool's own help before launching a capture.
+
+For a bounded operator-approved vendor command, use
+`scripts/vendor-capture.sh --tool NAME --out DIR --duration SEC -- COMMAND...`.
+The wrapper records environment and tool version, enforces a wall-clock bound,
+keeps output private, and preserves the vendor's own exit status without
+guessing release-specific analysis flags.
+
 For socket/channel bandwidth or other system counters, use the
 `java-hardware-counters` skill. Intel PCM and AMD `AMDuProfPcm` are different
 tools; neither supplies Java method attribution by itself.

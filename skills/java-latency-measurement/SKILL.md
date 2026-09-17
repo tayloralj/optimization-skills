@@ -52,6 +52,11 @@ measurement validity before any tuning skill uses the result.
    duration, warmup excluded, repetitions, host and JVM details, and the
    spread across runs. Keep throughput and latency claims separate.
 
+For repeated recovery commands, use `scripts/recovery-compare.py --out DIR
+--reps N --timeout SEC -- COMMAND`. It preserves each run, requires a `DONE
+delivered=N/N` completion line by default, and exits nonzero for incomplete or
+timed-out episodes.
+
 ## Guardrails
 
 - JMH `SampleTime` mode is closed-loop per thread; do not present it as a
