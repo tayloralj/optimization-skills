@@ -4,6 +4,13 @@ Fill in `PID`, `APPUSER`, host names, and paths. Always have the operator run
 `--check --pid PID` and then `--dry-run` first; the printed plan is what will
 happen. `VERSION` below is the kit version printed by `build-kit.sh`.
 
+For a systemd service that is restarting or has been OOM-killed, include
+`--systemd-unit UNIT --journal-since '15 minutes ago' --coredump`. The kit
+captures bounded unit properties, recent journal lines, and target coredump
+metadata when the operator's account can read them; failed permission checks
+remain visible in the manifest. These options never restart or modify the
+service.
+
 | Situation | Plan |
 | --- | --- |
 | Latency spikes or jitter | A |
