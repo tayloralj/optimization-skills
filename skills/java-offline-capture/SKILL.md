@@ -71,6 +71,8 @@ returned evidence here. The agent never needs a shell on the target.
    supported too. For optional service evidence, run
    `scripts/service-evidence.py BUNDLE [--json]` to turn systemd, journal, and
    coredump files into explicit restart, OOM, and crash findings.
+   Use `scripts/offline-runbook.py --pid PID` to generate the operator's
+   checked dry-run and capture commands without requiring SSH or agent access.
    classified by content and gets the same treatment, without integrity
    checks. `--vendor-artifact` results are listed and checksum-verified, not
    parsed.
