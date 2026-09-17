@@ -105,6 +105,7 @@ routes to the rest.
 | Area | Skill | Helps you |
 | --- | --- | --- |
 | Start | `java-performance-investigation` | Turn a symptom into a goal, workload type, and plan |
+| | `linux-jvm-debug` | Route a Linux JVM symptom to ranked debug hints and online/offline evidence |
 | | `profiling-readiness` | Find out what this host lets you measure (read-only) |
 | Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
 | | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |

@@ -48,6 +48,9 @@ What to collect:
   --asprof EVENT          also run async-profiler (cpu|ctimer|wall|alloc|lock), bundled or installed
   --vendor-artifact PATH  copy an existing VTune/uProf/perf/PCM result into vendor/ (repeatable)
   --readiness-smoke-test  let the readiness check run its short perf/JFR self-tests
+  --systemd-unit UNIT     also capture read-only unit properties and recent journal lines
+  --journal-since VALUE   journal window for --systemd-unit (default: 15 minutes ago)
+  --coredump              also capture coredumpctl metadata for the target PID
 
 Privacy, limits, and transfer:
   --max-mb MB             size budget for bundle contents, 16-4096 (default 512)
@@ -70,6 +73,7 @@ duration=120; jfr_mode=new; jfr_settings=profile; thread_dumps=0; gc_logs=auto
 cpus=; asprof_event=; readiness_smoke=0; max_mb=512; redact_host=0; keep_cmdline=0
 out_parent=./jvmcap-bundles; dry_run=0; assume_yes=0; list=0; check=0
 start_at=; max_wait=86400; sample_interval=5; json_dumps=0; histogram=0; digest=0; split_mb=0
+systemd_unit=; journal_since='15 minutes ago'; coredump=0
 declare -a pids=() extra_gc_logs=() vendor_artifacts=() triggers=()
 while (( $# )); do
   case "$1" in
@@ -92,6 +96,9 @@ while (( $# )); do
     --cpus) cpus=${2:-}; shift ;;
     --asprof) asprof_event=${2:-}; shift ;;
     --readiness-smoke-test) readiness_smoke=1 ;;
+    --systemd-unit) systemd_unit=${2:-}; shift ;;
+    --journal-since) journal_since=${2:-}; shift ;;
+    --coredump) coredump=1 ;;
     --max-mb) max_mb=${2:-}; shift ;;
     --redact-hostname) redact_host=1 ;;
     --keep-command-line) keep_cmdline=1 ;;
@@ -200,6 +207,8 @@ pid=${pids[0]:-}
 [[ "$split_mb" =~ ^[0-9]+$ ]] && (( split_mb <= 4096 )) || die "--split-mb must be 1-4096."
 [[ -z "$start_at" || "$start_at" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]] || die "--start-at must be HH:MM (24-hour, local time)."
 [[ "$max_wait" =~ ^[0-9]+$ ]] && (( max_wait >= 60 && max_wait <= 604800 )) || die "--max-wait must be 60-604800."
+[[ -z "$systemd_unit" || "$systemd_unit" =~ ^[A-Za-z0-9_.@:-]+$ ]] || die "--systemd-unit must be a systemd unit name."
+[[ -n "$journal_since" && "$journal_since" != *$'\n'* && ${#journal_since} -le 120 ]] || die "--journal-since must be a short single-line value."
 for t in ${triggers[@]+"${triggers[@]}"}; do
   [[ "$t" =~ ^(cpu|rss|gcpause):[1-9][0-9]{0,6}$ || "$t" =~ ^file:/[^[:cntrl:]]*$ ]] ||
     die "--trigger must be cpu:PCT, rss:MB, gcpause:MS, or file:/ABSOLUTE/PATH (got '$t')."
@@ -384,6 +393,8 @@ printf '  threads     %s thread dump(s)%s%s\n' "$thread_dumps" "$( (( json_dumps
 printf '  sampling    %s\n' "$( (( sample_interval )) && printf 'every %s s' "$sample_interval" || printf off)"
 printf '  asprof      %s\n' "${asprof_event:-no}$([[ -n "$asprof_event" && -z "$asprof_bin" ]] && printf ' -> SKIPPED: async-profiler not available%s' "${asprof_note:+ ($asprof_note)}")"
 printf '  host        read-only readiness report and jitter audit%s; /proc and cgroup counters at start and end\n' "${cpus:+ (cpus $cpus)}"
+printf '  service     %s%s\n' "${systemd_unit:-none}" "${systemd_unit:+ (journal since $journal_since)}"
+printf '  crash       %s\n' "$( (( coredump )) && printf 'coredumpctl metadata for target PID' || printf none)"
 printf '  privacy     %s; hostname %s\n' "$( (( keep_cmdline )) && printf 'command lines KEPT' || printf 'env vars, properties, command lines, child and other processes removed from JFR')" "$( (( redact_host )) && printf 'redacted' || printf 'kept')"
 printf '  output      %s/jvmcap-%s-%s-<UTC time>.tar.gz (budget %s MB)%s%s\n' "$out_parent" "${host_label//[^A-Za-z0-9._-]/_}" "$pid" "$max_mb" \
   "$( (( digest )) && printf ' + .digest.txt')" "$( (( split_mb )) && printf ', split into %s MB parts' "$split_mb")"
@@ -533,6 +544,7 @@ fetch_jvm_file() { # bundle path: move a file the JVM wrote in its namespace int
   printf 'start_at=%s\ntriggers=%s\ntrigger_fired=%s\nwaited_s=%s\n' "${start_at:-none}" "${triggers[*]:-none}" "${trigger_fired:-immediate}" "$waited_s"
   printf 'jfr_mode=%s\njfr_settings=%s\nthread_dumps=%s\njson_thread_dumps=%s\nclass_histogram=%s\n' "$jfr_mode" "$jfr_settings" "$thread_dumps" "$json_dumps" "$histogram"
   printf 'gc_logs=%s\nasprof_event=%s\nsample_interval_s=%s\n' "$gc_logs" "${asprof_event:-none}" "$sample_interval"
+  printf 'systemd_unit=%s\njournal_since=%s\ncoredump=%s\n' "${systemd_unit:-none}" "$journal_since" "$coredump"
   printf 'max_mb=%s\nredact_hostname=%s\nkeep_command_line=%s\ndigest=%s\nsplit_mb=%s\n' "$max_mb" "$redact_host" "$keep_cmdline" "$digest" "$split_mb"
   printf 'vendor_artifacts=%s\n' "${#vendor_artifacts[@]}"
   printf 'jcmd=%s\njcmd_source=%s\njcmd_timeout_s=%s\njfr_tool=%s\n' "${jcmd_bin:-missing}" "$jcmd_source" "$jcmd_timeout" "${jfr_bin:-missing}"
@@ -667,6 +679,25 @@ printf 'Collecting into %s\n' "$bundle"
 
 # Context before the window
 snapshot_proc "$bundle/proc-start"; step_status proc-start ok
+if [[ -n "$systemd_unit" ]]; then
+  if command -v systemctl >/dev/null 2>&1; then
+    run_step systemd-show "$bundle/host/systemd-unit.txt" timeout --kill-after=5s 10s systemctl show "$systemd_unit" --no-pager
+  else
+    step_status systemd-show "skipped(systemctl unavailable)"
+  fi
+  if command -v journalctl >/dev/null 2>&1; then
+    run_step systemd-journal "$bundle/host/systemd-journal.txt" timeout --kill-after=5s 15s journalctl -u "$systemd_unit" --since "$journal_since" --no-pager
+  else
+    step_status systemd-journal "skipped(journalctl unavailable)"
+  fi
+fi
+if (( coredump )); then
+  if command -v coredumpctl >/dev/null 2>&1; then
+    run_step coredumpctl "$bundle/host/coredumpctl.txt" timeout --kill-after=5s 15s coredumpctl info "$pid" --no-pager
+  else
+    step_status coredumpctl "skipped(coredumpctl unavailable)"
+  fi
+fi
 if (( readiness_smoke )); then
   run_step readiness "$bundle/host/readiness.txt" bash "$kit_dir/lib/check-profiling-readiness.sh"
 else

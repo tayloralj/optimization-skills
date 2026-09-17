@@ -20,7 +20,10 @@ returned evidence here. The agent never needs a shell on the target.
    (`--start-at`, `--trigger`), several JVMs, JRE-only runtime, Kubernetes
    (including distroless images through a debug container), and restricted
    transfer channels. Keep the window short enough to be safe and long enough
-   to include the problem.
+   to include the problem. For service restarts, OOM kills, or crashes, add
+   `--systemd-unit UNIT` (optionally `--journal-since VALUE`) and `--coredump`;
+   these are bounded, read-only best-effort captures and may require journal
+   or coredump access.
 3. **Build the kit** on this machine:
 
    ```bash

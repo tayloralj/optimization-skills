@@ -11,6 +11,9 @@ cover missing tools, JFR-versus-PMU evidence, shared counter scope, cross-vendor
 event misuse, and guest permissions versus PMU exposure.
 They are authored but have not yet been scored.
 
+`linux-debug-routing` covers top-level symptom routing to readiness, ranked
+hints, and offline systemd/journal/coredump evidence.
+
 | Case | Request | Expect |
 | --- | --- | --- |
 | `gc-log-triage` | GC log excerpt with a 912 ms full GC | `java-gc-tuning`; names the full GC and evacuation failure; evidence before flags |
@@ -63,6 +66,14 @@ Claude scored ablation or a no-plugin baseline from a single Codex answer.
 Agent evals send prompts and loaded skills to the configured external service.
 Obtain any required authorization, cap paid runs, and keep publishing disabled.
 Installation and format checks are not behavioral evals.
+
+## Linux debug routing validation, 2026-09-17
+
+Claude Code 2.1.272 ran `linux-debug-routing` once with and once without the
+plugin. Both arms scored 1.00 with three PASS judge votes; the skill-fired
+indicator confirmed one `linux-jvm-debug` invocation. The reported delta was
+0.00 at a total cost of $0.26, so this verifies routing behavior but does not
+show an ablation improvement. Publishing was disabled.
 
 ## Status
 

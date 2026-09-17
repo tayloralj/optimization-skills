@@ -53,6 +53,10 @@ Triggers: cpu:PCT (process CPU, 100 = one core), rss:MB, gcpause:MS (needs a
 GC log), file:/PATH (create the file to start). --max-wait (default 86400 s)
 limits the wait. Check ~/jvmcap/collect.log for the result.
 
+For a service restart, OOM, or crash, add `--systemd-unit UNIT`
+`--journal-since '15 minutes ago'` and `--coredump`. These capture bounded,
+read-only unit, journal, and coredump metadata when the operator can read it.
+
 Several JVMs
 ------------
 Repeat --pid: bash collect.sh --pid 111 --pid 222 --duration 120 --yes

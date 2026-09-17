@@ -6,6 +6,10 @@ and `.claude-plugin/plugin.json`.
 
 ## [0.3.0] - unreleased
 
+- Add a top-level Linux JVM debug workflow with ranked symptom hints and
+  server-side journal, systemd, and coredump routing.
+- Extend offline capture with bounded optional systemd, journal, and coredump
+  evidence for restart, OOM, and crash investigations.
 - Fix the offline collector's host audit, which failed on every run without
   `--cpus`, and the audit's own error message for that case.
 - Keep child-process command lines (`jdk.ProcessStart`) out of offline JFR
