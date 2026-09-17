@@ -31,6 +31,11 @@ class CompleteToolsetTests(unittest.TestCase):
         self.assertEqual(data["hints"]["hints"][0]["skill"], "java-latency-measurement")
         self.assertIn("status=", data["readiness"])
 
+    def test_target_guard_rejects_example_pid(self):
+        proc = subprocess.run(["python3", str(ROOT / "skills/linux-jvm-debug/scripts/target-guard.py"), "--pid", "12345", "--user", "ajt", "--start-ticks", "1"], capture_output=True, text=True)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("placeholder", proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

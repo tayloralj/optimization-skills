@@ -485,6 +485,26 @@ def section_vendor(r: Report, bundle: Path) -> None:
     r.next_skills.add("java-vtune-uprof")
 
 
+def section_service_evidence(r: Report, bundle: Path) -> None:
+    """Parse optional service files into the same findings/JSON output."""
+    try:
+        from service_evidence import analyse
+    except ImportError:
+        return
+    result = analyse(bundle)
+    if not any(result["files"].values()):
+        return
+    r.md += ["## Service evidence", "", "Optional systemd, journal, and coredump evidence was parsed locally.", ""]
+    for finding in result["findings"]:
+        r.md.append(f"- **{finding['severity']}** `{finding['kind']}`: {finding['detail']}")
+        skill = {"oom": "java-native-memory", "crash": "java-offline-capture", "restart": "java-offline-capture"}.get(finding["kind"])
+        if skill:
+            r.next_skills.add(skill)
+        r.find(finding["severity"], finding["detail"], skill or "java-performance-investigation")
+    r.data["service_evidence"] = result
+    r.md.append("")
+
+
 def thread_deltas(bundle: Path, clk_tck: int, elapsed: float) -> list[dict]:
     start = {row["tid"]: row for row in load_tsv(bundle / "proc-start/threads.tsv")}
     out = []
@@ -1287,6 +1307,7 @@ def main(argv: list[str]) -> int:
     section_capture(r, bundle, manifest, archive_sha, bool(args.expect_sha256), problems, elapsed, loose)
     section_crashes(r, bundle)
     section_vendor(r, bundle)
+    section_service_evidence(r, bundle)
     if not loose:
         section_process(r, bundle, clk_tck, elapsed, dumps)
         section_timeseries(r, bundle, clk_tck, pauses)

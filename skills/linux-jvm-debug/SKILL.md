@@ -12,6 +12,11 @@ it does not attach to a process or change a host by itself.
 For a single guided report, run `scripts/debug.py --symptom TEXT [--json]`.
 Pass `--bundle DIR` when an offline capture has returned; the command adds the
 service evidence summary to the routing output.
+For a ranked follow-up from an analysis, pass `--analysis analysis.json` or
+run `scripts/recommendations.py analysis.json` directly.
+Before any attach-oriented command, verify the discovered target with
+`scripts/target-guard.py --pid PID --user USER --start-ticks TICKS`; it rejects
+the example PID `12345`, non-Java executables, owner changes, and PID reuse.
 
 1. State the symptom, affected JVM, time window, offered load, and the result
    that would confirm the suspected cause. Treat any PID in an example,

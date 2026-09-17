@@ -81,6 +81,10 @@ The wrapper records environment and tool version, enforces a wall-clock bound,
 keeps output private, and preserves the vendor's own exit status without
 guessing release-specific analysis flags.
 
+After export, run `scripts/vendor-report.py RESULT_DIR [--json]` to extract
+portable cycles, instructions, samples, IPC, and attribution indicators. Keep
+the native result alongside this summary; missing metrics remain unknown.
+
 For socket/channel bandwidth or other system counters, use the
 `java-hardware-counters` skill. Intel PCM and AMD `AMDuProfPcm` are different
 tools; neither supplies Java method attribution by itself.

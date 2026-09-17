@@ -13,6 +13,8 @@ HERE = Path(__file__).resolve().parents[2]
 HINTS = HERE / "linux-jvm-debug/scripts/debug-hints.py"
 READY = HERE / "profiling-readiness/scripts/check-profiling-readiness.sh"
 SERVICE = HERE / "java-offline-capture/scripts/service-evidence.py"
+RECOMMEND = HERE / "linux-jvm-debug/scripts/recommendations.py"
+GUARD = HERE / "linux-jvm-debug/scripts/target-guard.py"
 
 
 def run(argv: list[str]) -> str:
@@ -26,13 +28,27 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--symptom", required=True)
     p.add_argument("--bundle", type=Path)
+    p.add_argument("--analysis", type=Path, help="analysis.json to turn into ranked next actions")
+    p.add_argument("--pid", type=int, help="real discovered Java PID to verify")
+    p.add_argument("--user", help="expected owner for --pid")
+    p.add_argument("--start-ticks", type=int, help="expected /proc starttime for --pid")
     p.add_argument("--json", action="store_true")
     args = p.parse_args()
+    if args.pid is not None:
+        if not args.user or args.start_ticks is None:
+            p.error("--pid requires --user and --start-ticks; attach is never inferred")
+        result_guard = run([sys.executable, str(GUARD), "--pid", str(args.pid), "--user", args.user, "--start-ticks", str(args.start_ticks)])
+    else:
+        result_guard = None
     hints = run([sys.executable, str(HINTS), "--symptom", args.symptom, "--json"])
     readiness = run([str(READY), "--no-smoke-test"])
     result = {"schema_version": 1, "symptom": args.symptom, "hints": json.loads(hints), "readiness": readiness}
+    if result_guard:
+        result["target_verification"] = result_guard
     if args.bundle:
         result["service_evidence"] = json.loads(run([sys.executable, str(SERVICE), str(args.bundle), "--json"]))
+    if args.analysis:
+        result["recommendations"] = json.loads(run([sys.executable, str(RECOMMEND), str(args.analysis), "--json"]))["recommendations"]
     if args.json:
         print(json.dumps(result, sort_keys=True))
     else:
@@ -43,6 +59,8 @@ def main() -> int:
         if args.bundle:
             for finding in result["service_evidence"]["findings"]:
                 print(f"- service {finding['severity']}: {finding['detail']}")
+        for recommendation in result.get("recommendations", []):
+            print(f"- next ({recommendation['priority']}): {recommendation['skill']}: {recommendation['action']}")
     return 0
 
 
