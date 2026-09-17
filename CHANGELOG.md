@@ -6,6 +6,8 @@ and `.claude-plugin/plugin.json`.
 
 ## [0.3.0] - 2026-09-17
 
+- Add a guided debug CLI, service-evidence summariser, portable Intel/AMD
+  readiness report, bounded perf capture, and repeated recovery comparison.
 - Add a top-level Linux JVM debug workflow with ranked symptom hints and
   server-side journal, systemd, and coredump routing.
 - Extend offline capture with bounded optional systemd, journal, and coredump

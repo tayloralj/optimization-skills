@@ -9,6 +9,10 @@ Start here when a Linux JVM is slow, stuck, restarting, consuming CPU or
 memory, or showing latency spikes. This skill produces a decision-ready plan;
 it does not attach to a process or change a host by itself.
 
+For a single guided report, run `scripts/debug.py --symptom TEXT [--json]`.
+Pass `--bundle DIR` when an offline capture has returned; the command adds the
+service evidence summary to the routing output.
+
 1. State the symptom, affected JVM, time window, offered load, and the result
    that would confirm the suspected cause. Treat any PID in an example,
    including `12345`, as a placeholder; discover and verify the real target.

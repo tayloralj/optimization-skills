@@ -53,6 +53,12 @@ For startup or finite batch work, wrapping `java -jar ...` can be valid because
 startup is part of that metric. Do not use that form as a steady-state service
 example.
 
+For a guided bounded launch, use `scripts/java-perf-capture.sh --out DIR
+--duration SEC [--cpus LIST] [--record] -- java-command...`. It records host,
+JDK-independent workload output, perf policy, portable user counters, and an
+optional call-graph recording in a private directory; a nonzero workload or
+perf exit is a failed capture.
+
 ## c2c and Java objects
 
 `perf c2c` can identify cache-line contention, but a reported address/offset is

@@ -68,6 +68,9 @@ returned evidence here. The agent never needs a shell on the target.
    growth, lock owners, deadlocks, stuck threads, virtual threads, and
    `hs_err` crash logs. A directory of loose files (JFR, GC logs, jstack
    output, JSON thread dumps, histograms, collapsed stacks, `hs_err`) is
+   supported too. For optional service evidence, run
+   `scripts/service-evidence.py BUNDLE [--json]` to turn systemd, journal, and
+   coredump files into explicit restart, OOM, and crash findings.
    classified by content and gets the same treatment, without integrity
    checks. `--vendor-artifact` results are listed and checksum-verified, not
    parsed.
