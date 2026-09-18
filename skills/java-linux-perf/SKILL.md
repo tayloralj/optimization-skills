@@ -59,6 +59,15 @@ JDK-independent workload output, perf policy, portable user counters, and an
 optional call-graph recording in a private directory; a nonzero workload or
 perf exit is a failed capture.
 
+Both modes use `scripts/bounded-capture.py`: duration is a hard deadline for
+the launched process group, with a short termination grace; timeout is an
+incomplete capture. `--max-mb` defaults to 256. Each child file has an OS size
+limit and total output is monitored every 50 ms. This is not a filesystem
+quota: rapid multi-file writes can overshoot. Interrupts retain partial output
+and `manifest.json`. No attach target is killed. Do not launch daemonizing
+workloads that escape the owned process group. Place all profiler artifacts
+inside the output directory. Review `stdout.txt` and `stderr.txt` on failure.
+
 ## c2c and Java objects
 
 `perf c2c` can identify cache-line contention, but a reported address/offset is

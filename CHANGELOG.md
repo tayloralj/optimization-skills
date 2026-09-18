@@ -4,7 +4,13 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
-## [0.3.0] - 2026-09-17
+## [0.3.0] - 2026-09-18
+
+- Preserve interrupted captures and enforce launch deadlines, per-file limits
+  and monitored aggregate storage budgets for perf and vendor wrappers.
+- Install guided-debug and vendor-capture script dependencies in subset installs.
+- Trace recommendations to observations, explain uncertainty and verification,
+  and remove confidence claims based on warning counts or severity.
 
 - Add structured service-evidence parsing, vendor result summaries, ranked
   recommendations, target identity guards, and guided bounded capture runners.
@@ -156,5 +162,5 @@ Initial Codex skill collection: profiling readiness, async-profiler, JMH, Linux
 perf, performance patterns, VTune/uProf, hardware counters, cache efficiency,
 NUMA and affinity.
 
-[0.3.0]: https://github.com/tayloralj/optimization-skills/compare/v0.2.0...HEAD
+[0.3.0]: https://github.com/tayloralj/optimization-skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/tayloralj/optimization-skills/releases/tag/v0.2.0

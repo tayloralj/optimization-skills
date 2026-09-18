@@ -5,6 +5,8 @@ description: Turn a Linux Java symptom into a safe debug plan with ranked hints,
 
 # Linux JVM Debug
 
+Script dependencies are declared in `requires.txt` and installed automatically.
+
 Start here when a Linux JVM is slow, stuck, restarting, consuming CPU or
 memory, or showing latency spikes. This skill produces a decision-ready plan;
 it does not attach to a process or change a host by itself.
@@ -16,6 +18,13 @@ For a ranked follow-up from an analysis, pass `--analysis analysis.json` or
 run `scripts/recommendations.py analysis.json` directly.
 Use `scripts/evidence-report.py RESULT_DIR [--baseline BASELINE_ANALYSIS]` to
 merge analysis, service, perf, and vendor summaries and report confidence.
+
+Recommendations cite JSON source paths and observations, include uncertainty,
+and specify a verification experiment. Confidence is `unverified`: neither
+warning severity nor finding count demonstrates causality. A supplied baseline
+is labelled `not_compared` until metric units, workload, scope and time windows
+are verified. Claude and Codex should show the leading action, its evidence,
+uncertainty and verification step; do not turn routing hints into diagnoses.
 Before any attach-oriented command, verify the discovered target with
 `scripts/target-guard.py --pid PID --user USER --start-ticks TICKS`; it rejects
 the example PID `12345`, non-Java executables, owner changes, and PID reuse.

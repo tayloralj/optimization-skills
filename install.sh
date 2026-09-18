@@ -71,6 +71,10 @@ if (( ${#requested[@]} )); then
       [[ -f "$req" ]] || continue
       while read -r dep; do
         [[ -n "$dep" && "$dep" != \#* ]] || continue
+        [[ "$dep" =~ ^[a-z0-9-]+$ && -f "$repo_root/skills/$dep/SKILL.md" ]] || {
+          printf 'Invalid or missing dependency %s required by %s\n' "$dep" "$name" >&2
+          exit 2
+        }
         if [[ " ${skills[*]} " != *" $dep "* ]]; then
           skills+=("$dep"); changed=1
           printf 'adding %s (required by %s)\n' "$dep" "$name"

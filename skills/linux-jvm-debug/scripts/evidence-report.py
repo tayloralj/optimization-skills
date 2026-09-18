@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
+from recommendations import recommend
 from pathlib import Path
 
 
@@ -26,16 +26,22 @@ def main() -> int:
             result[name] = load(path); result["sources"].append(filename)
     if a.baseline:
         base = load(a.baseline)
-        result["baseline"] = {"findings": len(base.get("findings", [])), "next_skills": base.get("next_skills", [])}
+        result["baseline"] = {"findings": len(base.get("findings", [])), "next_skills": base.get("next_skills", []),
+                              "comparison_status": "not_compared",
+                              "reason": "Metric scope, units, workload and measurement windows must be verified before computing changes."}
     findings = analysis.get("findings", [])
-    result["confidence"] = "high" if findings and all(f.get("severity") == "warn" for f in findings) else "medium" if findings else "low"
+    result["confidence"] = "unverified"
+    result["recommendations"] = recommend(analysis)
+    result["limitations"] = ['Imported findings and counters are not independently validated or time-correlated.']
     if a.json:
         print(json.dumps(result, indent=2, sort_keys=True))
     else:
         print(f"confidence={result['confidence']} findings={len(findings)} sources={','.join(result['sources']) or 'analysis'}")
         for finding in findings:
             print(f"{finding.get('severity','info')}: {finding.get('text','')}")
-    return 0
+        for rec in result['recommendations']:
+            print(f"Next: {rec['action']}\nEvidence: {rec['evidence']}\nUncertainty: {rec['uncertainty']}\nVerify: {rec['verification']}")
+    return 0 if analysis or result['sources'] else 3
 
 
 if __name__ == "__main__":

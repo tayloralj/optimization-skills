@@ -5,6 +5,8 @@ description: Profile Java with Intel VTune or AMD uProf, choosing the right tool
 
 # Java VTune and uProf
 
+Script dependencies are declared in `requires.txt` and installed automatically.
+
 Choose the tool from the actual CPU and installed software. Do not force Intel
 analysis terminology onto AMD PMUs or vice versa.
 
@@ -77,9 +79,17 @@ use the selected tool's own help before launching a capture.
 
 For a bounded operator-approved vendor command, use
 `scripts/vendor-capture.sh --tool NAME --out DIR --duration SEC -- COMMAND...`.
-The wrapper records environment and tool version, enforces a wall-clock bound,
+The wrapper records environment and command, enforces a wall-clock bound,
 keeps output private, and preserves the vendor's own exit status without
 guessing release-specific analysis flags.
+
+The wrapper uses the `java-linux-perf` skill's shared supervisor. Duration is
+1..3600 seconds, `--max-mb` defaults to 256, and interrupted results remain
+available with a nonzero exit and `manifest.json`. Point the installed tool's
+output option inside DIR; `CAPTURE_OUTPUT_DIR` is also set for child commands.
+Aggregate size is monitored, not a filesystem quota. Do not run daemonizing
+collectors or configure artifacts outside DIR. Verify flags with installed
+help before launching; this wrapper does not validate arbitrary vendor flags.
 
 After export, run `scripts/vendor-report.py RESULT_DIR [--json]` to extract
 portable cycles, instructions, samples, IPC, and attribution indicators. Keep

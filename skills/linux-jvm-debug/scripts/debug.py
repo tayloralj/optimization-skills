@@ -80,6 +80,7 @@ def main() -> int:
                 print(f"- service {finding['severity']}: {finding['detail']}")
         for recommendation in result.get("recommendations", []):
             print(f"- next ({recommendation['priority']}): {recommendation['skill']}: {recommendation['action']}")
+            print(f"  Evidence: {recommendation['evidence']}\n  Uncertainty: {recommendation['uncertainty']}\n  Verify: {recommendation['verification']}")
     return 0
 
 
