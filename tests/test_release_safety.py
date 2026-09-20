@@ -59,12 +59,19 @@ class ReleaseSafety(unittest.TestCase):
             self.assertFalse((root / 'capture').exists())
 
     def test_subset_copy_runs_outside_checkout(self):
+        self.check_subset_copy('linux-jvm-debug')
+
+    def test_entry_point_subset_copy_runs_outside_checkout(self):
+        self.check_subset_copy('java-performance-investigation')
+
+    def check_subset_copy(self, entry):
         with tempfile.TemporaryDirectory() as tmp:
             env = dict(os.environ, CODEX_SKILLS_DIR=tmp + '/codex', CLAUDE_CONFIG_DIR=tmp + '/claude')
-            subprocess.run([str(ROOT / 'install.sh'), '--copy', 'linux-jvm-debug', 'java-vtune-uprof'],
+            subprocess.run([str(ROOT / 'install.sh'), '--copy', entry, 'java-vtune-uprof'],
                            env=env, cwd=tmp, check=True, capture_output=True)
             for target in (Path(tmp) / 'codex', Path(tmp) / 'claude/skills'):
-                for required in ('java-offline-capture', 'java-linux-perf', 'profiling-readiness'):
+                for required in (entry, 'linux-jvm-debug',
+                                 'java-offline-capture', 'java-linux-perf', 'profiling-readiness'):
                     self.assertTrue((target / required / 'SKILL.md').is_file())
                 result = subprocess.run([sys.executable, str(target / 'linux-jvm-debug/scripts/debug.py'),
                                          '--symptom', 'latency', '--json'], cwd=tmp, capture_output=True, text=True)

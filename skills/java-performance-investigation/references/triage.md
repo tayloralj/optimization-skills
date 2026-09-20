@@ -42,6 +42,8 @@ a GC and safepoint log summariser.
 | Slow warmup / startup | `java-jit-codegen` | Class loading/linking vs interpretation vs compilation queue? |
 | RSS grows while heap is flat; container OOM kill | `java-native-memory` | Which NMT category or non-NMT mapping grows? |
 | Heap after GC grows | `java-gc-tuning` (retention section) | What retains it? Heap histogram/dump under approval |
+| Crash, restart, or exited JVM | `java-offline-capture` | What do the service journal, OOM records, and JVM crash files establish about the failure window? |
+| Hung or unresponsive JVM | `java-offline-capture`, then `java-async-profiler` if attach works | What do bounded thread dumps and host wait states show without requiring a responsive JVM? |
 | Lock contention, many threads blocked | `java-async-profiler` (lock, wall) | Which monitor, what hold time, at what load? |
 | fsync/journal/disk latency, page faults | `linux-ebpf-io-network` | Which syscalls or block I/O dominate tail latency? |
 | Network latency, UDP loss, retransmits | `linux-ebpf-io-network` | Drops, buffer overflow, interrupt coalescing, or application backlog? |

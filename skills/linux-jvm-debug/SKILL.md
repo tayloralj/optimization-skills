@@ -1,15 +1,17 @@
 ---
 name: linux-jvm-debug
-description: Turn a Linux Java symptom into a safe debug plan with ranked hints, readiness checks, and an online or offline evidence path. Use when a server-side JVM needs diagnosis and the next tool is unclear.
+description: Supporting Linux JVM tools for ranked hints, target identity checks, and evidence reports. Use after investigation routing when a guided debug report or capture helper is needed.
 ---
 
 # Linux JVM Debug
 
 Script dependencies are declared in `requires.txt` and installed automatically.
 
-Start here when a Linux JVM is slow, stuck, restarting, consuming CPU or
-memory, or showing latency spikes. This skill produces a decision-ready plan;
-it does not attach to a process or change a host by itself.
+The `java-performance-investigation` skill owns initial symptom triage and the
+online/offline decision. Use these helpers within that investigation. Existing
+explicit invocations and script paths remain supported: if given only an
+unexplained symptom, follow that entry workflow, then use the relevant helper
+here. Do not send an investigation already in progress back through triage.
 
 For a single guided report, run `scripts/debug.py --symptom TEXT [--json]`.
 Pass `--bundle DIR` when an offline capture has returned; the command adds the
@@ -29,22 +31,20 @@ Before any attach-oriented command, verify the discovered target with
 `scripts/target-guard.py --pid PID --user USER --start-ticks TICKS`; it rejects
 the example PID `12345`, non-Java executables, owner changes, and PID reuse.
 
-1. State the symptom, affected JVM, time window, offered load, and the result
-   that would confirm the suspected cause. Treat any PID in an example,
-   including `12345`, as a placeholder; discover and verify the real target.
-2. Run `scripts/debug-hints.py --symptom TEXT` to get ranked evidence paths and
-   read `references/server-debug.md` for the matching Linux commands.
-3. Run the `profiling-readiness` skill before selecting perf, eBPF, or an
-   attach profiler. Prefer launch-time JFR when permissions or namespaces
-   block attachment.
-4. If an agent cannot run on the target, use the `java-offline-capture` skill.
-   Build a kit locally, have the operator run its check and dry-run as the JVM
-   user, then analyse the returned bundle or digest. Include optional systemd,
-   journal, and crash evidence when the symptom involves restarts or OOMs.
-5. Follow the selected specialist skill, one hypothesis at a time. Preserve
-   raw output, timestamps, identity checks, and a healthy comparison capture.
-6. End with a confirmed or inconclusive diagnosis, next evidence, and rollback;
-   never call a missing tool or failed capture proof that the issue is absent.
+## Helper selection
+
+- `scripts/debug-hints.py --symptom TEXT` produces routing hints without a host
+  check. Read `references/server-debug.md` for service and crash evidence commands.
+- `scripts/debug.py` combines those hints with local readiness. Run it on the
+  affected host; its readiness output describes the machine executing it, even
+  when `--bundle` refers to evidence collected elsewhere. Use the offline
+  capture skill's analyser for returned bundles when the target is inaccessible.
+- Capture is opt-in: `scripts/debug.py --symptom TEXT --run --out DIR -- COMMAND`
+  launches a bounded perf capture through the `java-linux-perf` skill's helper.
+  Follow that skill's readiness, command validation, and approval requirements
+  before using it; the default report does not launch or attach to a JVM.
+- Use the recommendation and evidence-report helpers above to explain findings,
+  uncertainty, and the next verification step. Preserve raw output and timestamps.
 
 The hints are routing advice, not thresholds or automatic tuning. Read-only
 collection remains the default; production attach and root-only diagnostics

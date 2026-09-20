@@ -48,7 +48,14 @@ out. See [Update to the latest version](../README.md#update-to-the-latest-versio
 
 ## Your first conversation
 
-Ask in your own words. Good first prompts:
+Ask in your own words. For an unexplained symptom, start with
+`java-performance-investigation`: it identifies the affected service and time
+window, chooses online or offline evidence, and selects the next specialist.
+You do not need to choose between two triage skills; `linux-jvm-debug` supplies
+supporting helpers within this workflow. A specific profiler request or supplied
+artifact can go directly to its specialist.
+
+Good first prompts:
 
 | You say | What happens |
 | --- | --- |
