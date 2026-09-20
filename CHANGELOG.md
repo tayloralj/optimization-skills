@@ -4,6 +4,14 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
+## [Unreleased]
+
+- Unify unexplained JVM symptom triage under `java-performance-investigation`,
+  including hangs, crashes, and offline incidents. Keep `linux-jvm-debug` as a
+  supporting toolkit with compatible script paths and install its helpers with
+  the entry skill.
+- Fix plain-text guided debug reports failing when formatting routing evidence.
+
 ## [0.3.0] - 2026-09-18
 
 - Preserve interrupted captures and enforce launch deadlines, per-file limits

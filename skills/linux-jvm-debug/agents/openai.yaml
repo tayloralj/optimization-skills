@@ -1,4 +1,4 @@
 interface:
   display_name: "Linux JVM Debug"
-  short_description: "Route Linux JVM symptoms to safe debug evidence"
-  default_prompt: "Use $linux-jvm-debug to turn this Linux JVM symptom into a safe evidence plan."
+  short_description: "Supporting JVM debug reports and target checks"
+  default_prompt: "Use $linux-jvm-debug to produce a supporting debug report for this JVM investigation."

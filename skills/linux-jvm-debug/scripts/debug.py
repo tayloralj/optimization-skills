@@ -73,7 +73,7 @@ def main() -> int:
     else:
         print(f"Symptom: {args.symptom}")
         for item in result["hints"]["hints"]:
-            print(f"- {item['skill']}: {item['reason']}")
+            print(f"- {item['skill']}: {item['evidence']}")
         print("Readiness: " + next((line for line in readiness.splitlines() if line.startswith("status=")), readiness))
         if args.bundle:
             for finding in result["service_evidence"]["findings"]:

@@ -36,6 +36,14 @@ class CompleteToolsetTests(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("placeholder", proc.stderr)
 
+    def test_debug_cli_plain_text_reports_evidence(self):
+        out = subprocess.check_output([
+            "python3", str(ROOT / "skills/linux-jvm-debug/scripts/debug.py"),
+            "--symptom", "high CPU and p99 latency"], text=True)
+        self.assertIn("java-latency-measurement: measurement validity, JFR and host jitter", out)
+        self.assertIn("java-flight-recorder: JFR CPU, GC, JIT and safepoint context", out)
+        self.assertIn("Readiness: status=", out)
+
     def test_evidence_report_confidence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

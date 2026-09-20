@@ -1,4 +1,4 @@
 interface:
   display_name: "Java Performance Investigation"
-  short_description: "Triage a JVM performance symptom into a plan"
-  default_prompt: "Use $java-performance-investigation to classify this Java performance problem and route it to the right skill."
+  short_description: "Start a Java investigation and choose an evidence path"
+  default_prompt: "Use $java-performance-investigation to investigate this Linux Java symptom, choose online or offline evidence, and route to the right specialist."

@@ -99,13 +99,16 @@ ask, what the agent will and won't do, the no-root path, and a glossary.
 
 ## What's included
 
-Start with **`java-performance-investigation`** if you don't know the cause; it
-routes to the rest.
+Start with **`java-performance-investigation`** for any unexplained Java symptom,
+including slowness, hangs, crashes, and OOMs. It chooses online or offline evidence
+and routes to a specialist. If you already know the tool or have an artifact to
+analyse, go directly to that specialist. `linux-jvm-debug` provides supporting
+helpers; its existing commands remain available.
 
 | Area | Skill | Helps you |
 | --- | --- | --- |
-| Start | `java-performance-investigation` | Turn a symptom into a goal, workload type, and plan |
-| | `linux-jvm-debug` | Route a Linux JVM symptom to ranked debug hints and online/offline evidence |
+| Start | `java-performance-investigation` | Define the problem, choose online/offline evidence, and route to a specialist |
+| Support | `linux-jvm-debug` | Generate debug reports, check target identity, and summarize evidence |
 | | `profiling-readiness` | Find out what this host lets you measure (read-only) |
 | Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
 | | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |

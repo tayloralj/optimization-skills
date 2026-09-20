@@ -11,8 +11,14 @@ cover missing tools, JFR-versus-PMU evidence, shared counter scope, cross-vendor
 event misuse, and guest permissions versus PMU exposure.
 They are authored but have not yet been scored.
 
-`linux-debug-routing` covers top-level symptom routing to readiness, ranked
-hints, and offline systemd/journal/coredump evidence.
+`linux-debug-routing` covers the unified `java-performance-investigation` entry
+point, target readiness, and offline systemd/journal/coredump evidence. Its
+prompt no longer names a workflow, so discovery must follow the symptom.
+The revised case was scored on 2026-09-20; the 2026-09-17 result below applies
+to the earlier Linux debug entry point.
+`investigation-routing` adds an online hang with no SLO, checking that the
+unified entry point can gather incident evidence without a restart or a second
+triage interview. See the unified-entry results below.
 
 | Case | Request | Expect |
 | --- | --- | --- |
@@ -66,6 +72,45 @@ Claude scored ablation or a no-plugin baseline from a single Codex answer.
 Agent evals send prompts and loaded skills to the configured external service.
 Obtain any required authorization, cap paid runs, and keep publishing disabled.
 Installation and format checks are not behavioral evals.
+
+## Unified entry-point validation, 2026-09-20
+
+With user approval for private-plugin transfer and paid evaluation, Claude Code
+2.1.275 ran the two routing cases against the uncommitted unified-entry worktree:
+
+```bash
+timeout --kill-after=10s 1200s claude plugin eval . --trust-plugin \
+  --case '*routing' --runs 3 --max-cost-usd 5 --no-publish
+```
+
+The default with/without ablation produced 12 runs. Exit status was 0,
+`partial=false`, duration 593 seconds, and total reported cost $1.2223562.
+Publishing was disabled. No explicit model override was supplied; the aggregate
+report does not record the resolved model, so these results do not establish
+cross-model behavior.
+
+| Case | Plugin answer passes | Baseline answer passes | Score delta | Unified entry skill detected |
+| --- | --- | --- | --- | --- |
+| `investigation-routing` | 3/3 | 1/3 | +0.67 | 3/3 plugin runs |
+| `linux-debug-routing` | 3/3 | 3/3 | 0.00 | 1/3 plugin runs |
+
+The skill-fired indicator is not included in the answer score. Two offline
+answers passed without a detected `java-performance-investigation` call, so
+consistent automatic entry-point selection remains unverified. The saved
+answers describe the offline-capture workflow, but do not prove which skills
+were loaded: the evaluator cleaned up the temporary JSONL traces referenced
+by the report. Preserve traces on a future run if investigating selection.
+
+Manual inspection also found an offline answer passing `BUNDLE.tar.gz` directly
+to `service-evidence.py`, which expects an extracted bundle directory. Thus the
+scored passes are not verification that every suggested command works. The two
+failed hang baselines omit explicit target identity checks and bounded JVM
+command timeouts; this is manual inspection of the retained answers, not a
+recorded judge rationale (only judge votes were retained).
+
+These are small, scenario-specific results, not completion of the full release
+suite or proof of general improvement. Raw local evidence (gitignored):
+`evals/results/2026-09-20T22-39-52-118Z/aggregate-result.json` and `report.html`.
 
 ## Linux debug routing validation, 2026-09-17
 
