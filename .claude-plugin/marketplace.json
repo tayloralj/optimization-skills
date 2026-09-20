@@ -9,7 +9,7 @@
     {
       "name": "optimization-skills",
       "description": "Find and fix Java performance problems on Linux, low-latency first.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "source": "./",
       "category": "development",
       "homepage": "https://github.com/tayloralj/optimization-skills"
