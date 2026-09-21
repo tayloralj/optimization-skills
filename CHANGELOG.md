@@ -4,6 +4,13 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
+## [0.3.2] - 2026-09-21
+
+- Keep bounded JFR captures polling through documented `STARTING`, `STOPPING`,
+  `STOPPED`, and `CLOSED` lifecycle states instead of failing during normal
+  duration-triggered finalization; unknown responses now include their raw
+  status for diagnosis.
+
 ## [0.3.1] - 2026-09-21
 
 - Unify unexplained JVM symptom triage under `java-performance-investigation`,

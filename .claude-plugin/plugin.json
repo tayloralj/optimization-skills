@@ -1,6 +1,6 @@
 {
   "name": "optimization-skills",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Find and fix Java performance problems on Linux: triage, JFR, profiling, GC, JIT, native memory, latency measurement, low-latency coding patterns, host jitter tuning, and eBPF I/O and network analysis.",
   "author": {
     "name": "tayloralj"

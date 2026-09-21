@@ -147,6 +147,45 @@ exit 0
         self.assertIn('JFR.stop name=skill-capture-', (self.root / 'jcmd.log').read_text())
         self.assertIn('could not confirm recording stopped', result.stderr)
 
+    def test_jfr_capture_accepts_transitional_recording_states(self):
+        proc = self.root / 'proc/123'
+        (proc / 'ns').mkdir(parents=True)
+        (proc / 'status').write_text(f'Uid:\t{os.getuid()}\t{os.getuid()}\t{os.getuid()}\t{os.getuid()}\n')
+        (proc / 'stat').write_text('123 (java) S ' + ' '.join(['0'] * 18 + ['42']) + '\n')
+        (proc / 'exe').symlink_to('/synthetic/java')
+        (proc / 'ns/mnt').symlink_to(os.readlink('/proc/self/ns/mnt'))
+        self.env.update(PROC_ROOT=str(self.root / 'proc'), REVIEW_JCMD_STATE=str(self.root / 'jcmd-state'),
+                        REVIEW_JCMD_NAME=str(self.root / 'jcmd-name'))
+        self.script('jcmd', """#!/usr/bin/env bash
+if [[ $2 == JFR.start ]]; then
+  for arg in "$@"; do
+    case "$arg" in filename=*) printf 'synthetic-jfr' > "${arg#filename=}" ;; esac
+    case "$arg" in name=*) printf '%s' "${arg#name=}" > "$REVIEW_JCMD_NAME" ;; esac
+  done
+  exit 0
+fi
+if [[ $2 == JFR.check && $# == 2 ]]; then exit 0; fi
+if [[ $2 == JFR.check && $# == 3 ]]; then
+  name=$(cat "$REVIEW_JCMD_NAME")
+  n=0
+  [[ -f "$REVIEW_JCMD_STATE" ]] && n=$(cat "$REVIEW_JCMD_STATE")
+  n=$((n + 1)); printf '%s' "$n" > "$REVIEW_JCMD_STATE"
+  case "$n" in
+    1) echo "Recording 1: name=$name (stopping)" ;;
+    2) echo "Recording 1: name=$name (stopped)" ;;
+    *) echo "Could not find $name." ;;
+  esac
+  exit 0
+fi
+exit 0
+""")
+        out = self.root / 'private'
+        out.mkdir(mode=0o700)
+        result = self.run_tool('skills/java-flight-recorder/scripts/jfr-capture.sh', '123', '1', out / 'out.jfr')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((out / 'out.jfr').is_file())
+        self.assertEqual((out / 'out.jfr').stat().st_mode & 0o777, 0o600)
+
     def test_install_lifecycle_from_unrelated_directory(self):
         self.env.update(CODEX_SKILLS_DIR=str(self.root / 'codex/skills'),
                         CLAUDE_CONFIG_DIR=str(self.root / 'claude'))

@@ -118,7 +118,10 @@ finished=0
 while (( SECONDS < deadline )); do
   sleep 1
   [[ $(start_time 2>/dev/null) == "$started" ]] || { printf 'Target exited during recording.\n' >&2; exit 5; }
-  # A finished recording disappears ("Could not find NAME"), so match the state line, not just the name.
+  # A finished recording normally disappears ("Could not find NAME"), but JFR
+  # can briefly report STARTING, STOPPING, STOPPED, or CLOSED while the
+  # duration-triggered recording is being finalized. Keep polling within the
+  # hard deadline instead of treating those valid lifecycle states as failure.
   check_output=$(run_jcmd "$pid" JFR.check name="$name" 2>&1) || {
     printf 'JFR.check failed or timed out; recording completion is unverified.\n' >&2; exit 5;
   }
@@ -126,8 +129,8 @@ while (( SECONDS < deadline )); do
     finished=1
     break
   fi
-  grep -Eq "name=$name .*\((running|delayed|new)\)" <<< "$check_output" || {
-    printf 'Unrecognised JFR.check response; recording completion is unverified.\n' >&2; exit 5;
+  grep -Eiq "name=$name .*\((starting|running|stopping|stopped|closed|delayed|new)\)" <<< "$check_output" || {
+    printf 'Unrecognised JFR.check response for %s: %s\n' "$name" "$(tr '\n' ' ' <<< "$check_output")" >&2; exit 5;
   }
 done
 (( finished )) || { printf 'Recording exceeded its completion deadline.\n' >&2; exit 5; }
