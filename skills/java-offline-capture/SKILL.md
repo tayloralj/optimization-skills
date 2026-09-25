@@ -69,13 +69,14 @@ returned evidence here. The agent never needs a shell on the target.
    `hs_err` crash logs. A directory of loose files (JFR, GC logs, jstack
    output, JSON thread dumps, histograms, collapsed stacks, `hs_err`) is
    supported too. For optional service evidence, run
-   `scripts/service-evidence.py BUNDLE [--json]` to turn systemd, journal, and
-   coredump files into explicit restart, OOM, and crash findings.
+   `scripts/service-evidence.py EXTRACTED_BUNDLE_DIR [--json]` to turn systemd,
+   journal, and coredump files into explicit restart, OOM, and crash findings.
+   `analyze-bundle.py` prints that directory as `bundle_dir`; it also includes
+   these findings in `ANALYSIS.md`, so a separate parser run is optional.
    Use `scripts/offline-runbook.py --pid PID` to generate the operator's
    checked dry-run and capture commands without requiring SSH or agent access.
-   classified by content and gets the same treatment, without integrity
-   checks. `--vendor-artifact` results are listed and checksum-verified, not
-   parsed.
+   Loose files are classified by content, without integrity checks.
+   `--vendor-artifact` results are listed and checksum-verified, not parsed.
    If only the text digest (`NAME.digest.txt`) came back, read it directly: it
    holds thread CPU, host CPU, pressure, busiest intervals, audit findings, the
    GC window summary, and JFR views rendered on the host.

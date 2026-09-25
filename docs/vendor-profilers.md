@@ -8,7 +8,9 @@ verified and completed a bounded Java hotspots launch on the local Ryzen 9
 completed during release hardening; see the release validation record. This is not
 a release-level vendor-support claim.
 
-See [release validation](release-validation.md) for the latest checks and open gates.
+See the historical [0.3.0 release validation](release-validation.md) for the
+AMD and Intel checks at that time, and [behavioral evaluations](../evals/README.md)
+for the current scoring gaps.
 
 ## What to use
 

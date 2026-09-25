@@ -41,10 +41,14 @@ def analyse(root: Path) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("bundle", type=Path)
+    parser.add_argument("bundle", type=Path, help="extracted bundle directory, not a .tar.gz archive")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
+    if not args.bundle.is_dir():
+        parser.error("expected an extracted bundle directory; run analyze-bundle.py on the archive first")
     result = analyse(args.bundle)
+    if not any(result["files"].values()):
+        parser.error("no readable systemd, journal, or coredump evidence in this directory")
     if args.json:
         print(json.dumps(result, sort_keys=True))
     else:

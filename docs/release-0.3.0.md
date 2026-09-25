@@ -42,7 +42,8 @@ workload to verify capture mechanics, not Java symbol or vendor validation.
 ## Known limitations carried into this tag
 
 - The offline analyser's service-evidence import remains defective; the
-  standalone service parser is available. Automatic integration is unverified.
+  standalone service parser is available. Automatic integration was unverified
+  at release time; it was fixed after v0.3.2 (see the [changelog](../CHANGELOG.md)).
 - Vendor text parsing remains heuristic and must not establish method
   attribution or reliable IPC. Preserve and inspect native vendor results.
 - Recovery comparison does not yet validate every completion line or ordering
