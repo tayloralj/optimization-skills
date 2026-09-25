@@ -39,6 +39,7 @@ triage interview. See the unified-entry results below.
 | `unattended-trigger-capture` | Nightly spike at an unknown time, nobody awake | `java-offline-capture`; `--trigger` with `--max-wait`, detached run, `--jfr dump`, baseline thresholds |
 | `digest-triage` | Only a pasted collector digest is available | Reads steal and run-queue delay as the lead, not GC; asks for host evidence and the full bundle |
 | `native-unknown-frames` | Stripped `-O2` C++ binary, perf shows `[unknown]` frames | `cpp-build-readiness`; symbols by build-id, frame pointers vs DWARF unwinding, no restart |
+| `native-latency-routing` | C++ handler with p99.9 spikes, no restart | `cpp-performance-investigation`; measurement validity, build and host readiness, on- vs off-CPU; no JVM causes |
 | `not-java-python-code` | Reverse a linked list in Python | **No** skill from this plugin loads |
 | `not-java-frontend-bundle` | Slow React bundle | **No** skill from this plugin loads; front-end advice |
 

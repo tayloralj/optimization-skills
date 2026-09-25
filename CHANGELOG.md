@@ -9,6 +9,9 @@ and `.claude-plugin/plugin.json`.
 - Add `cpp-build-readiness`, the first native C/C++ skill: a read-only check
   of symbols, debuginfo, build-id, frame pointers, unwind tables, recorded
   GCC switches, allocator, and JVM presence for a binary or running process.
+- Add `cpp-performance-investigation`, a separate entry point for native
+  C/C++ symptoms and JNI code implicated by a Java investigation, with
+  bounded perf, `/proc`, and core-file triage and routing to shared Linux skills.
 
 ## [0.3.2] - 2026-09-21
 

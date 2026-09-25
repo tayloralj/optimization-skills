@@ -22,7 +22,7 @@ thing, and proves the result.
 - No profiling experience or root access needed to start.
 
 Not for macOS or Windows hosts, or front-end performance. Native C and C++ support
-(GNU/Linux toolchain) is starting with `cpp-build-readiness`.
+(GNU/Linux toolchain) starts at `cpp-performance-investigation`.
 
 ## Install
 
@@ -111,7 +111,8 @@ helpers; its existing commands remain available.
 | Start | `java-performance-investigation` | Define the problem, choose online/offline evidence, and route to a specialist |
 | Support | `linux-jvm-debug` | Generate debug reports, check target identity, and summarize evidence |
 | | `profiling-readiness` | Find out what this host lets you measure (read-only) |
-| Native | `cpp-build-readiness` | Check a C/C++ binary or process (including JNI code) gives usable stacks |
+| Native | `cpp-performance-investigation` | Start a C/C++ (GNU/Linux) investigation and route it to evidence |
+| | `cpp-build-readiness` | Check a C/C++ binary or process (including JNI code) gives usable stacks |
 | Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
 | | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |
 | | `java-jmh-benchmarking` | Write and run microbenchmarks that model production |

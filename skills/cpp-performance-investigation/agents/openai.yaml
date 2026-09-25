@@ -1,0 +1,4 @@
+interface:
+  display_name: "C/C++ Performance Investigation"
+  short_description: "Start a native C/C++ investigation and route it"
+  default_prompt: "Use $cpp-performance-investigation to investigate this native C or C++ symptom on Linux and route to the right evidence."
