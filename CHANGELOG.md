@@ -4,6 +4,12 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
+## Unreleased
+
+- Add `cpp-build-readiness`, the first native C/C++ skill: a read-only check
+  of symbols, debuginfo, build-id, frame pointers, unwind tables, recorded
+  GCC switches, allocator, and JVM presence for a binary or running process.
+
 ## [0.3.2] - 2026-09-21
 
 - Keep bounded JFR captures polling through documented `STARTING`, `STOPPING`,

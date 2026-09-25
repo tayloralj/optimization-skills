@@ -47,6 +47,9 @@ install.sh                       personal install for Codex and/or Claude
   edited. Label synthetic fixtures as synthetic.
 - Java helpers are single-file programs runnable with the JDK source launcher
   (`java Tool.java`), with no dependencies.
+- Native (C/C++) skills target the GNU/Linux toolchain (GCC, binutils, gdb,
+  glibc) and use a `cpp-` prefix. Test fixtures are small sources compiled at
+  test time; tests skip when the compiler or binutils are missing.
 
 ## Script conventions
 
@@ -64,7 +67,9 @@ install.sh                       personal install for Codex and/or Claude
   reading `/proc` or `/sys` so tests can use fake trees.
 - Never invent tool flags or JVM options: check them against the installed tool
   (`--help`, `java -XX:+PrintFlagsFinal -version`, `jfr metadata`, `jcmd PID help`)
-  and state JDK version differences (21 vs 25) explicitly.
+  and state JDK version differences (21 vs 25) explicitly. For native tools,
+  check `gcc --help=common`, `gcc --help=target`, `readelf --help`, and
+  `perf <cmd> --help`, and name the versions checked.
 
 ## Before committing
 

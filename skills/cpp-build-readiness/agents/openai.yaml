@@ -1,0 +1,4 @@
+interface:
+  display_name: "C/C++ Build Readiness"
+  short_description: "Check native binaries give usable profiler stacks"
+  default_prompt: "Use $cpp-build-readiness to check whether this native binary or process will give usable profiler stacks."

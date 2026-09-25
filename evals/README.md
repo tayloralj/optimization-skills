@@ -38,6 +38,7 @@ triage interview. See the unified-entry results below.
 | `prod-host-without-agent` | Locked-down prod VM, ops runs what we send | `java-offline-capture`; kit, dry-run, run as app user, retrieve, verify, analyse |
 | `unattended-trigger-capture` | Nightly spike at an unknown time, nobody awake | `java-offline-capture`; `--trigger` with `--max-wait`, detached run, `--jfr dump`, baseline thresholds |
 | `digest-triage` | Only a pasted collector digest is available | Reads steal and run-queue delay as the lead, not GC; asks for host evidence and the full bundle |
+| `native-unknown-frames` | Stripped `-O2` C++ binary, perf shows `[unknown]` frames | `cpp-build-readiness`; symbols by build-id, frame pointers vs DWARF unwinding, no restart |
 | `not-java-python-code` | Reverse a linked list in Python | **No** skill from this plugin loads |
 | `not-java-frontend-bundle` | Slow React bundle | **No** skill from this plugin loads; front-end advice |
 
