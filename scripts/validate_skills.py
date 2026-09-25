@@ -195,6 +195,15 @@ def validate_plugin(repo: Path, names: list[str], report: Report) -> None:
     version_file = repo / "VERSION"
     if version_file.is_file() and version_file.read_text(encoding="utf-8").strip() != plugin.get("version"):
         report.error("VERSION", "must match .claude-plugin/plugin.json version")
+    codex_path = repo / ".codex-plugin" / "plugin.json"
+    if codex_path.is_file():
+        try:
+            codex = json.loads(codex_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.error(".codex-plugin", f"cannot read plugin.json: {exc}")
+        else:
+            if (codex.get("name"), codex.get("version")) != (plugin.get("name"), plugin.get("version")):
+                report.error(".codex-plugin", "plugin.json name and version must match .claude-plugin/plugin.json")
 
     for link_dir in AGENT_LINK_DIRS:
         base = repo / link_dir

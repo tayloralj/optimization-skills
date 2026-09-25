@@ -1,0 +1,26 @@
+{
+  "name": "optimization-skills",
+  "version": "0.3.2",
+  "description": "Find and fix Java performance problems on Linux: triage, JFR, profiling, GC, JIT, native memory, latency measurement, low-latency coding patterns, host jitter tuning, and eBPF I/O and network analysis.",
+  "author": {
+    "name": "tayloralj"
+  },
+  "homepage": "https://github.com/tayloralj/optimization-skills",
+  "repository": "https://github.com/tayloralj/optimization-skills",
+  "license": "MIT",
+  "keywords": ["java", "jvm", "performance", "linux", "profiling", "low-latency", "gc", "jit", "jfr", "jmh", "ebpf"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Optimization Skills",
+    "shortDescription": "Find and fix Java performance problems on Linux",
+    "longDescription": "Skills and small read-only tools for Java performance work on Linux: check what the host can measure, collect bounded evidence with JFR, perf, async-profiler, or eBPF, and route GC, JIT, native-memory, latency, and host-jitter problems to a specialist workflow.",
+    "developerName": "tayloralj",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Why is my Java service's p99 latency spiking?",
+      "Check what this host lets me profile.",
+      "Our JVM's RSS keeps growing; where do I start?"
+    ]
+  }
+}
