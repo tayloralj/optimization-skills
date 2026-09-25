@@ -12,7 +12,8 @@ skills/<name>/scripts/*         executable helpers; paths are relative to the sk
 skills/<name>/agents/openai.yaml Codex UI metadata (ignored by Claude)
 skills/<name>/assets/            files shipped elsewhere (e.g. the offline collector kit)
 skills/<name>/requires.txt       other skills whose scripts this skill uses (install.sh follows it)
-.claude-plugin/                  Claude Code plugin + marketplace manifests
+.claude-plugin/                  Claude Code plugin + marketplace manifests (Codex reads the marketplace too)
+.codex-plugin/plugin.json        Codex plugin manifest (UI metadata; version kept in sync)
 .claude/skills/, .agents/skills/ symlinks to skills/ for in-repo discovery
 scripts/validate_skills.py       bundled validator (both agents' rules, doc links)
 tests/                           script tests and real JDK fixtures
@@ -47,6 +48,9 @@ install.sh                       personal install for Codex and/or Claude
   edited. Label synthetic fixtures as synthetic.
 - Java helpers are single-file programs runnable with the JDK source launcher
   (`java Tool.java`), with no dependencies.
+- Native (C/C++) skills target the GNU/Linux toolchain (GCC, binutils, gdb,
+  glibc) and use a `cpp-` prefix. Test fixtures are small sources compiled at
+  test time; tests skip when the compiler or binutils are missing.
 
 ## Script conventions
 
@@ -64,7 +68,9 @@ install.sh                       personal install for Codex and/or Claude
   reading `/proc` or `/sys` so tests can use fake trees.
 - Never invent tool flags or JVM options: check them against the installed tool
   (`--help`, `java -XX:+PrintFlagsFinal -version`, `jfr metadata`, `jcmd PID help`)
-  and state JDK version differences (21 vs 25) explicitly.
+  and state JDK version differences (21 vs 25) explicitly. For native tools,
+  check `gcc --help=common`, `gcc --help=target`, `readelf --help`, and
+  `perf <cmd> --help`, and name the versions checked.
 
 ## Before committing
 
@@ -75,6 +81,6 @@ shellcheck --severity=warning skills/*/scripts/*.sh skills/*/assets/*/*.sh scrip
 claude plugin eval . --case <changed-skill-case> --runs 3 --max-cost-usd 5   # when a skill's behaviour changes
 ```
 
-Bump `VERSION`, `.claude-plugin/plugin.json`, and the marketplace entry
-together when releasing, move the CHANGELOG section from "unreleased" to a
-dated version, and tag `vX.Y.Z` on `main`.
+Bump `VERSION`, `.claude-plugin/plugin.json`, the marketplace entry, and
+`.codex-plugin/plugin.json` together when releasing, move the CHANGELOG
+section from "unreleased" to a dated version, and tag `vX.Y.Z` on `main`.

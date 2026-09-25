@@ -32,6 +32,16 @@ else
   printf 'skipped (Codex validator or PyYAML not installed)\n'
 fi
 
+codex_plugin_validator=${CODEX_HOME:-${HOME:-/nonexistent}/.codex}/skills/.system/plugin-creator/scripts/validate_plugin.py
+printf '== codex validate_plugin\n'
+if [[ -f "$codex_plugin_validator" ]]; then
+  python3 "$codex_plugin_validator" "$repo_root" || status=1
+elif (( strict )); then
+  printf 'Codex plugin validator not found: %s\n' "$codex_plugin_validator" >&2; status=1
+else
+  printf 'skipped (Codex plugin validator not installed)\n'
+fi
+
 printf '== claude plugin validate\n'
 if command -v claude >/dev/null 2>&1; then
   for target in "$repo_root" "$repo_root/.claude-plugin/plugin.json" "$repo_root/skills"; do

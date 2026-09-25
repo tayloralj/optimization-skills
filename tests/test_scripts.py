@@ -542,9 +542,12 @@ class ValidatorTest(unittest.TestCase):
             repo = self.copy_repo(tmp)
             os.remove(repo / ".claude/skills/java-jit-codegen")
             (repo / "VERSION").write_text("9.9.9\n")
+            codex = repo / ".codex-plugin/plugin.json"
+            codex.write_text(codex.read_text().replace('"version": "', '"version": "9.', 1))
             result = run(VALIDATOR, repo, check=False)
         self.assertIn(".claude/skills: java-jit-codegen must be a symlink", result.stdout)
         self.assertIn("VERSION: must match", result.stdout)
+        self.assertIn(".codex-plugin: plugin.json name and version must match", result.stdout)
 
 
 if __name__ == "__main__":

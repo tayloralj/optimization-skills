@@ -21,7 +21,8 @@ thing, and proves the result.
   applies to ordinary services too.
 - No profiling experience or root access needed to start.
 
-Not for macOS or Windows hosts, non-JVM code, or front-end performance.
+Not for macOS or Windows hosts, or front-end performance. Native C and C++ support
+(GNU/Linux toolchain) starts at `cpp-performance-investigation`.
 
 ## Install
 
@@ -34,7 +35,18 @@ claude plugin marketplace add git@github.com:tayloralj/optimization-skills.git
 claude plugin install optimization-skills@optimization-skills
 ```
 
-**Codex, or Claude Code without plugins:**
+**Codex** (plugin; tested with Codex CLI 0.156):
+
+```bash
+codex plugin marketplace add git@github.com:tayloralj/optimization-skills.git
+codex plugin add optimization-skills@optimization-skills
+```
+
+Codex reads the same marketplace as Claude Code. If you previously ran
+`./install.sh --codex`, run `./install.sh --codex --uninstall` from that
+checkout first; otherwise Codex lists each skill twice.
+
+**Codex or Claude Code without plugins** (also for installing a subset):
 
 ```bash
 git clone git@github.com:tayloralj/optimization-skills.git
@@ -62,6 +74,14 @@ install into the default location. Keep the checkout in place for symlink instal
 claude plugin marketplace update optimization-skills
 claude plugin update optimization-skills@optimization-skills
 claude plugin list                     # confirm the new version
+```
+
+**Codex plugin:** refresh the marketplace snapshot, then reinstall:
+
+```bash
+codex plugin marketplace upgrade optimization-skills
+codex plugin add optimization-skills@optimization-skills
+codex plugin list                      # confirm the new version
 ```
 
 **`install.sh` installs (Codex or Claude):** pull the checkout, then re-run the
@@ -110,6 +130,8 @@ helpers; its existing commands remain available.
 | Start | `java-performance-investigation` | Define the problem, choose online/offline evidence, and route to a specialist |
 | Support | `linux-jvm-debug` | Generate debug reports, check target identity, and summarize evidence |
 | | `profiling-readiness` | Find out what this host lets you measure (read-only) |
+| Native | `cpp-performance-investigation` | Start a C/C++ (GNU/Linux) investigation and route it to evidence |
+| | `cpp-build-readiness` | Check a C/C++ binary or process (including JNI code) gives usable stacks |
 | Measure | `java-latency-measurement` | Get latency numbers that are real: open-loop load, percentiles, jitter meter |
 | | `java-flight-recorder` | Record and read JFR evidence with no root or extra tools |
 | | `java-jmh-benchmarking` | Write and run microbenchmarks that model production |
