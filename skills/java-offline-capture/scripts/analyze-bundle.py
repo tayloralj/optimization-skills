@@ -487,11 +487,17 @@ def section_vendor(r: Report, bundle: Path) -> None:
 
 def section_service_evidence(r: Report, bundle: Path) -> None:
     """Parse optional service files into the same findings/JSON output."""
-    try:
-        from service_evidence import analyse
-    except ImportError:
-        return
-    result = analyse(bundle)
+    import importlib.util
+
+    parser_file = Path(__file__).with_name("service-evidence.py")
+    if not parser_file.is_file():
+        raise RuntimeError(f"missing service evidence parser: {parser_file}")
+    spec = importlib.util.spec_from_file_location("service_evidence", parser_file)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load service evidence parser: {parser_file}")
+    parser_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(parser_module)
+    result = parser_module.analyse(bundle)
     if not any(result["files"].values()):
         return
     r.md += ["## Service evidence", "", "Optional systemd, journal, and coredump evidence was parsed locally.", ""]

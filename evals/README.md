@@ -4,6 +4,9 @@ Script tests prove the tools work. These evals check the part tests cannot:
 whether an agent **picks the right skill** for a realistic request and **gives a
 better answer because of it**.
 
+The full behavioral coverage goal remains open after the v0.3.0–v0.3.2 tags;
+the historical notes below describe what was known at each checkpoint.
+
 ## Cases
 
 Vendor cases `vendor-perf-blocked`, `vendor-uncore-scope`, and `vendor-vm-no-pmu`
@@ -121,6 +124,14 @@ indicator confirmed one `linux-jvm-debug` invocation. The reported delta was
 show an ablation improvement. Publishing was disabled.
 
 ## Status
+
+- On 2026-09-22, a focused `*routing` retry with Claude Code 2.1.280
+  produced no valid score inside the restricted sandbox: the first child
+  reported missing prompt input and the grader API could not resolve the
+  destination (`EAI_AGAIN`). The run was stopped. Automatic approval review
+  rejected an outside-sandbox retry because the private plugin text and
+  derived answers would be sent to Anthropic's API without explicit approval
+  for that transfer. The revised command-validity graders remain unscored.
 
 - Vendor behavioral evaluation attempt on 2026-09-15 was unscored: the
   trusted-plugin run started, but the child reported missing prompt input and

@@ -1,8 +1,12 @@
-# 0.3.0 release validation
+# Historical 0.3.0 pre-release validation
+
+This document records the 2026-09-15 pre-release worktree. `v0.3.0` was
+subsequently tagged, and `v0.3.2` is the current tag. For current behavioral
+coverage, see [evals/README.md](../evals/README.md).
 
 Validation performed on 2026-09-15 against main `6d548cd` plus the release
-hardening changes in this PR. Version files already agree on 0.3.0; tagging
-and publication remain pending the behavioral evaluation gate.
+hardening changes in that PR. Version files already agreed on 0.3.0; tagging
+and publication were pending at this checkpoint.
 
 ## Repository checks
 
@@ -62,4 +66,6 @@ prior execution error recurred; this does not isolate their original cause.
 The private local report is in
 `evals/results/2026-09-15T17-58-04-560Z/`. This one-case result does not complete
 the full behavioral suite or establish an improvement over baseline.
-v0.3.0 remains untagged pending the remaining release gate.
+At this checkpoint, v0.3.0 was untagged and the broader behavioral evaluation
+was incomplete. The tag was published later; the evaluation gap is tracked in
+[evals/README.md](../evals/README.md).

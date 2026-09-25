@@ -4,6 +4,17 @@ All notable changes to this project. Versions follow
 [semantic versioning](https://semver.org/); the plugin version lives in `VERSION`
 and `.claude-plugin/plugin.json`.
 
+## Unreleased
+
+- Reject archive paths or empty directories in the standalone service-evidence
+  parser, and include target preflight in the generated offline runbook.
+- Include systemd, journal, and coredump findings in the main bundle analysis;
+  the parser's hyphenated filename previously prevented its import.
+- Tighten offline routing eval graders to reject invalid bundle-analysis
+  commands and clarify the extracted-bundle path in the capture skill.
+- Refresh compatibility notes so historical 0.3.0 validation is not presented
+  as an open release gate.
+
 ## [0.3.2] - 2026-09-21
 
 - Keep bounded JFR captures polling through documented `STARTING`, `STOPPING`,

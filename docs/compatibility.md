@@ -52,7 +52,9 @@ agent CLI versions, command, result, and limitations. Require:
    unavailable tool, or account limit is **unverified**, never a passing eval.
 
 See [behavioral evaluations](../evals/README.md) for cases and current results.
-The review fixes are not a new release; versions remain unchanged until release.
+The current tag is `v0.3.2`. Repository checks, live attachment checks, and
+agent behavior remain distinct claims; the routing cases have limited scored
+results and the full behavioral suite has not yet been scored.
 
 ## Local review-fix run, 2026-09-13
 
@@ -81,7 +83,12 @@ agent sandbox against temporary test-owned JVMs after sandbox attachment failed.
 These are correctness checks, not new performance measurements. Claude behavioral
 evaluation remains unverified; see the evaluation status linked above.
 
-## Release hardening evidence
+## Release history and hardening evidence
 
-See [release validation](release-validation.md) for the current full JDK suites,
-ShellCheck result, AMD CPI/IBS evidence, Intel VM blockers, and evaluation gate.
+See the [v0.3.0 release record](release-0.3.0.md) and the historical
+[release hardening record](release-validation.md) for JDK suites, ShellCheck,
+AMD CPI/IBS evidence, Intel VM blockers, and the evaluation limits at that
+time. The [changelog](../CHANGELOG.md) records the later v0.3.1 routing and
+v0.3.2 JFR finalization fixes. See [behavioral evaluations](../evals/README.md)
+for the most recent agent results; the historical records are not a statement
+that a released tag is still pending.

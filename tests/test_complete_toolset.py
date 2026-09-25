@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import subprocess
@@ -5,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from test_scripts import make_archive, minimal_bundle
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -54,6 +56,44 @@ class CompleteToolsetTests(unittest.TestCase):
     def test_offline_runbook_rejects_placeholder(self):
         proc = subprocess.run(["python3", str(ROOT / "skills/java-offline-capture/scripts/offline-runbook.py"), "--pid", "12345"], capture_output=True, text=True)
         self.assertNotEqual(proc.returncode, 0)
+
+    def test_offline_runbook_checks_target_before_capture(self):
+        out = subprocess.check_output(["python3", str(ROOT / "skills/java-offline-capture/scripts/offline-runbook.py"), "--pid", "234", "--unit", "app.service"], text=True)
+        self.assertIn("./collect.sh --check --pid 234", out)
+        self.assertIn("--systemd-unit app.service --coredump --dry-run", out)
+        self.assertIn("--systemd-unit app.service --coredump --yes", out)
+
+    def test_service_evidence_rejects_archive_and_missing_evidence(self):
+        script = ROOT / "skills/java-offline-capture/scripts/service-evidence.py"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            archive = root / "bundle.tar.gz"
+            archive.write_bytes(b"not an archive")
+            for path in (archive, root):
+                proc = subprocess.run(["python3", str(script), str(path), "--json"], capture_output=True, text=True)
+                self.assertNotEqual(proc.returncode, 0)
+                self.assertFalse(proc.stdout)
+
+    def test_bundle_analysis_includes_service_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            files = minimal_bundle()
+            files["host/systemd-unit.txt"] = b"ActiveState=failed\nResult=signal\n"
+            files["host/systemd-journal.txt"] = b"Killed process 42 (java) OOM\n"
+            files["SHA256SUMS"] = "".join(
+                f"{hashlib.sha256(data).hexdigest()}  ./{name}\n"
+                for name, data in sorted(files.items()) if name != "SHA256SUMS"
+            ).encode()
+            archive = root / "bundle.tar.gz"
+            make_archive(archive, files)
+            output = root / "analysis"
+            proc = subprocess.run(["python3", str(ROOT / "skills/java-offline-capture/scripts/analyze-bundle.py"), str(archive), str(output)], capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            data = json.loads((output / "analysis.json").read_text())
+            self.assertIn("service_evidence", data)
+            kinds = {finding["kind"] for finding in data["service_evidence"]["findings"]}
+            self.assertTrue({"service-state", "service-result", "oom"} <= kinds)
+            self.assertIn("## Service evidence", (output / "ANALYSIS.md").read_text())
 
 
 if __name__ == "__main__":
