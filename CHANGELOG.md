@@ -12,6 +12,9 @@ and `.claude-plugin/plugin.json`.
 - Add `cpp-performance-investigation`, a separate entry point for native
   C/C++ symptoms and JNI code implicated by a Java investigation, with
   bounded perf, `/proc`, and core-file triage and routing to shared Linux skills.
+- Support Codex plugin installs: Codex reads the existing marketplace, and a new
+  `.codex-plugin/plugin.json` supplies its UI metadata. The README covers
+  Codex plugin install and update.
 
 ## [0.3.2] - 2026-09-21
 

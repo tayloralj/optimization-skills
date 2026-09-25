@@ -35,7 +35,18 @@ claude plugin marketplace add git@github.com:tayloralj/optimization-skills.git
 claude plugin install optimization-skills@optimization-skills
 ```
 
-**Codex, or Claude Code without plugins:**
+**Codex** (plugin; tested with Codex CLI 0.156):
+
+```bash
+codex plugin marketplace add git@github.com:tayloralj/optimization-skills.git
+codex plugin add optimization-skills@optimization-skills
+```
+
+Codex reads the same marketplace as Claude Code. If you previously ran
+`./install.sh --codex`, run `./install.sh --codex --uninstall` from that
+checkout first; otherwise Codex lists each skill twice.
+
+**Codex or Claude Code without plugins** (also for installing a subset):
 
 ```bash
 git clone git@github.com:tayloralj/optimization-skills.git
@@ -63,6 +74,14 @@ install into the default location. Keep the checkout in place for symlink instal
 claude plugin marketplace update optimization-skills
 claude plugin update optimization-skills@optimization-skills
 claude plugin list                     # confirm the new version
+```
+
+**Codex plugin:** refresh the marketplace snapshot, then reinstall:
+
+```bash
+codex plugin marketplace upgrade optimization-skills
+codex plugin add optimization-skills@optimization-skills
+codex plugin list                      # confirm the new version
 ```
 
 **`install.sh` installs (Codex or Claude):** pull the checkout, then re-run the
